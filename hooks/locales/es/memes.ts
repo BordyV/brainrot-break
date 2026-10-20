@@ -1,0 +1,12 @@
+import type { Locale } from '../../i18n'
+
+export const MEMES: Locale['videos'] = {
+  dvd: { name: 'logo de DVD', captions: ['VA a dar en la esquina', 'espera...', 'POV: 2005, el salón, el reproductor de DVD', 'la esquina. LA ESQUINA.'], sounds: ['zumbido de tele CRT', 'sonido original - dvd.corner', 'menú de DVD en bucle'] },
+  nyan: { name: 'Nyan Cat', captions: ['10 horas de esto, por favor', '¿quién se acuerda?', 'nyan nyan nyan nyan', 'este meme es inmortal'], sounds: ['Nyan Cat (original)', 'nyan nyan (acelerado)', 'chiptune de 2011'] },
+  creatures: { name: 'desfile de criaturas absurdas', captions: ['un tiburón con zapatillas. obviamente.', '¿quién sale ahora?', 'mi cerebro a las 3 de la mañana', 'ponle nombre a esta criatura en los comentarios'], sounds: ['narrador dramático (sonido original)', 'sonido original - brainrot.parade', 'marcha de circo'] },
+  splitrunner: { name: 'runner a pantalla partida', captions: ['un vídeo no era suficiente', 'arena arriba, parkour abajo', 'mi capacidad de atención be like', 'mira los dos. no puedes.'], sounds: ['crujido de arena (ASMR)', 'sonido original - split.screen', 'bucle de phonk'] },
+  spincat: { name: 'gato que gira', captions: ['más rápido... MÁS RÁPIDO...', 'no para', 'comportamiento de gato naranja', 'y luego se quedó mirando'], sounds: ['canción del gato que gira (acelerada)', 'sonido original - spin.cat', 'zumbido del tocadiscos'] },
+  ratdance: { name: 'baile de la rata', captions: ['tiene movimientos', 'la rata está a tope', 'yo cuando llega el drop', 'apréndete este baile'], sounds: ['beat del baile de la rata (acelerado)', 'sonido original - rat.dance', 'remix eurodance'] },
+  bongocat: { name: 'bongo cat', captions: ['tap tap tap tap', 'el solo de batería que nadie pidió', 'yo tecleando durante una reunión', 'patas de furia'], sounds: ['golpes de bongó (sonido original)', 'sonido original - bongo.paws', 'cualquier canción, pero con bongós'] },
+  backrooms: { name: 'los backrooms', captions: ['te has salido de la realidad', 'el zumbido nunca para', 'no se acaba nunca', '¿acaban de parpadear las luces?'], sounds: ['zumbido de fluorescentes (sonido original)', 'sonido original - level.zero', 'ambiente liminal'] },
+}

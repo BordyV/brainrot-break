@@ -1,0 +1,19 @@
+import type { Locale } from '../../i18n'
+
+export const FOOD: Locale['videos'] = {
+  pancakes: { name: 'pancake al volo', captions: ['il lancio è tutto', 'obiettivo pila', 'aspetta lo sciroppo', 'rituale della domenica mattina'], sounds: ['sfrigolio (ASMR)', 'suono originale - pancake.flip', 'brunch jazz'] },
+  ramen: { name: 'ramen sollevato', captions: ['il sollevamento dei noodle', 'vapore, uovo, brodo, perfezione', 'risucchialo con convinzione', 'il ramen a mezzanotte ha un altro sapore'], sounds: ['risucchio (ASMR)', 'suono originale - ramen.lift', 'lofi di Tokyo'] },
+  pizza: { name: 'condimenti della pizza', captions: ['pomodoro, mozzarella, salame, ripeti', 'il filo di formaggio alla fine', 'ananas? no.', 'pizza del venerdì sera'], sounds: ['That’s Amore (8 bit)', 'suono originale - pizza.spin', 'cucina italiana'] },
+  popcorn: { name: 'popcorn', captions: ['aspetta il coperchio', 'pop... pop... POPOPOPOP', 'è traboccato di nuovo', 'preparando la serata film'], sounds: ['scoppiettio (ASMR)', 'suono originale - pop.pop.pop', 'intro del cinema'] },
+  sushi: { name: 'nastro del sushi', captions: ['conta i piattini', 'sempre quello al salmone', 'la pila continua a crescere', 'terapia del nastro trasportatore'], sounds: ['atmosfera del ristorante (suono originale)', 'suono originale - kaiten.sushi', 'city pop'] },
+  burger: { name: 'torre di hamburger', captions: ['quanto può salire?', 'il traballio...', 'panino sopra = crolla', 'nessuno riesce a mangiarlo'], sounds: ['plof plof (suono originale)', 'suono originale - burger.tower', 'tamburi di suspense'] },
+  cake: { name: 'glassare la torta', captions: ['ruvida → liscia', 'il segreto è il piatto girevole', 'zuccherini alla fine', 'la parte preferita del pasticcere'], sounds: ['spatola che liscia (ASMR)', 'suono originale - cake.spin', 'piano dolce'] },
+  egg: { name: 'uovo al tegamino', captions: ['i bordi croccanti non si discutono', 'rompi, sfrigola, perfetto', 'il tremolio del tuorlo', 'colazione in 20 secondi'], sounds: ['sfrigolio (ASMR)', 'suono originale - sunny.side', 'radio del mattino'] },
+  boba: { name: 'bubble tea', captions: ['prima le perle, sempre', 'la cannuccia infilzata', 'guarda le perle che salgono', 'andiamo a prendere un boba?'], sounds: ['risucchio con la cannuccia (ASMR)', 'suono originale - boba.time', 'pop kawaii'] },
+  fruitboard: { name: 'fette di frutta', captions: ['fragola, kiwi, arancia, limone', 'fette perfette ogni volta', 'zac zac zac', 'meal prep, ma carino'], sounds: ['taglio (ASMR)', 'suono originale - knife.skills', 'beat da cucina'] },
+  glaze: { name: 'glassatura delle ciambelle', captions: ['la cascata di glassa', 'le ciambelle di fabbrica hanno un altro fascino', 'zuccherini all’uscita', 'potrei guardarlo per sempre'], sounds: ['ronzio di fabbrica (suono originale)', 'suono originale - glaze.waterfall', 'synth dolce'] },
+  smashburger: { name: 'smash burger', captions: ['SMASH', 'quella crosticina...', 'il formaggio che si scioglie alla fine', 'stagione della piastra'], sounds: ['sfrigolio forte (ASMR)', 'suono originale - smash.it', 'riff di chitarra rock'] },
+  cottoncandy: { name: 'zucchero filato', captions: ['lo zucchero diventa una nuvola', 'ricordi del luna park', 'rosa o azzurro?', 'continua a crescere'], sounds: ['ronzio della macchina (suono originale)', 'suono originale - cotton.cloud', 'organetto del luna park'] },
+  icecream: { name: 'torre di gelato', captions: ['ancora una pallina...', 'la pendenza è reale', 'quante prima che cada?', 'l’estate in una foto'], sounds: ['furgoncino dei gelati (suono originale)', 'suono originale - scoop.tower', 'pop estivo'] },
+  watermelon: { name: 'elastici sull’anguria', captions: ['quanti elastici per farla scoppiare?', 'commenta la tua previsione', 'sta tremando...', 'scoppia!!!'], sounds: ['tensione (suono originale)', 'suono originale - band.pop', 'bum al rallentatore'] },
+}

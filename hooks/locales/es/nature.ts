@@ -1,0 +1,18 @@
+import type { Locale } from '../../i18n'
+
+export const NATURE: Locale['videos'] = {
+  aurore: { name: 'aurora boreal', captions: ['esta noche las luces bailan', 'Laponia, 2 de la mañana', 'el reflejo en el lago...', 'vale la pena el viaje'], sounds: ['ambiente nórdico', 'sonido original - aurora.norway', 'pad de sintetizador'] },
+  sunset: { name: 'atardecer en el mar', captions: ['espera a las estrellas', 'hora dorada sobre el mar', 'el último rayo de sol', 'el verano nunca se acaba'], sounds: ['olas (sonido original)', 'lofi de verano', 'gaviotas y guitarra'] },
+  thunderstorm: { name: 'tormenta', captions: ['espera al relámpago', 'el tiempo perfecto para dormir', 'cuenta los segundos tras el destello', 'el espectáculo de luces de la naturaleza'], sounds: ['trueno y lluvia (ASMR)', 'sonido original - storm.chaser', 'lluvia para dormir'] },
+  tornado: { name: 'tornado', captions: ['va directo al granero...', 'la valla no sobrevivió', 'los cazatormentas be like', 'la naturaleza a toda potencia'], sounds: ['sirena y viento (sonido original)', 'sonido original - twister.cam', 'cuerdas dramáticas'] },
+  surfer: { name: 'surfista', captions: ['surfeando la hora dorada', 'arriba y abajo de la ola', 'atentos al revolcón', 'terapia de playa'], sounds: ['olas (sonido original)', 'sonido original - golden.wave', 'surf rock'] },
+  volcano: { name: 'volcán', captions: ['primero retumba...', 'luego los ríos de lava', 'a distancia segura, por favor', 'la tierra está viva'], sounds: ['rugido profundo (sonido original)', 'sonido original - lava.flow', 'tambores épicos'] },
+  waterfall: { name: 'cascada', captions: ['encuentra el arcoíris en la neblina', 'ruido blanco, pero de verdad', 'energía de cascada escondida', 'quédate aquí un minuto'], sounds: ['cascada (ASMR)', 'sonido original - falls.daily', 'pájaros del bosque'] },
+  seasons: { name: 'árbol de las cuatro estaciones', captions: ['un año entero en 40 segundos', '¿qué estación eres?', 'flor, verde, oro, nieve', 'el tiempo vuela'], sounds: ['Vivaldi - Las cuatro estaciones (lofi)', 'sonido original - one.tree', 'piano a lo largo del año'] },
+  bloom: { name: 'flores abriéndose', captions: ['una semana de crecimiento en 20 segundos', 'mira cómo se abren', 'día, noche, flor', 'la primavera está cargando'], sounds: ['arpa suave (sonido original)', 'sonido original - bloom.lapse', 'mañana de primavera'] },
+  forestfire: { name: 'incendio forestal', captions: ['fuego, luego lluvia, luego verde otra vez', 'mira cómo vuelven los brotes', 'la naturaleza siempre se reconstruye', 'el ciclo del bosque'], sounds: ['crepitar y luego lluvia (sonido original)', 'sonido original - forest.cycle', 'piano esperanzador'] },
+  geyser: { name: 'géiser', captions: ['los turistas esperaron 90 minutos para esto', 'burbujea... burbujea...', 'BUM', 'puntual como siempre'], sounds: ['fuuush (sonido original)', 'sonido original - old.faithful', 'exclamación del público'] },
+  leaves: { name: 'hojas cayendo', captions: ['el otoño se ha unido al chat', 'el montón crece...', 'y luego el viento', 'tiempo de jersey'], sounds: ['hojas crujiendo (ASMR)', 'sonido original - autumn.vibes', 'jazz otoñal'] },
+  mushrooms: { name: 'setas tras la lluvia', captions: ['lluvia, y luego setas por todas partes', 'time-lapse cottagecore', 'el caracol va a su rollo', 'magia del suelo del bosque'], sounds: ['lluvia en el bosque (ASMR)', 'sonido original - forest.floor', 'flauta de hadas'] },
+  reef: { name: 'arrecife de coral', captions: ['encuentra al pez payaso', 'el banco que pasa', 'una ciudad entera bajo el agua', 'salvad los arrecifes'], sounds: ['calma submarina (sonido original)', 'sonido original - reef.life', 'ambiente oceánico'] },
+}

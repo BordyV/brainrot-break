@@ -1,0 +1,21 @@
+import type { Locale } from '../../i18n'
+
+export const MACHINES: Locale['videos'] = {
+  claw: { name: 'Greifautomat', captions: ['der ist manipuliert... oder?', 'der Griff hat gehalten!!', 'natürlich rausgerutscht', 'noch ein Versuch'], sounds: ['Spielhallen-Jingle (Originalton)', 'Originalton - claw.queen', 'Kawaii-Pop'] },
+  vending: { name: 'Snackautomat', captions: ['fällt er oder bleibt er hängen?', 'die Schüttel-Technik', 'hängen geblieben. Klassiker.', 'Snackzeit'], sounds: ['Spiralsurren (Originalton)', 'Originalton - snack.drop', 'Fahrstuhlmusik'] },
+  assembly: { name: 'Fließband', captions: ['Räder, Karosserie, Lack, fertig', 'die Roboter hören nie auf', 'jedes Auto in einer neuen Farbe', 'Werksführung'], sounds: ['Fabrikklappern (Originalton)', 'Originalton - how.its.made', 'Industrie-Beat'] },
+  bottling: { name: 'Abfüllanlage', captions: ['füllen, verschließen, etikettieren', 'jedes Mal perfekt gefüllt', 'das Klirren der Flaschen', 'Fabrik-ASMR'], sounds: ['Flaschenklirren (ASMR)', 'Originalton - bottle.line', 'Förderband-Rhythmus'] },
+  rube: { name: 'Rube-Goldberg-Maschine', captions: ['das alles, um einen Ballon platzen zu lassen', 'Kugel, Dominosteine, Wippe, PLOPP', 'hat beim ersten Mal geklappt (nein)', 'Überengineering vom Feinsten'], sounds: ['klack klack plopp (Originalton)', 'Originalton - chain.reaction', 'Mission-Impossible-Thema'] },
+  coinpusher: { name: 'Münzschieber', captions: ['die Kante ist SO nah', 'dann fällt alles', 'noch eine Münze...', 'Arcade-Spannung pur'], sounds: ['herabfallende Münzen (ASMR)', 'Originalton - coin.edge', 'Spielhallen-Atmosphäre'] },
+  gumball: { name: 'Kaugummiautomat', captions: ['welche Farbe wird es?', 'die Spirale ist alles', 'Kindheit in einer Drehung', 'kurbeln, rollen, fallen'], sounds: ['Kurbeln und Rollen (ASMR)', 'Originalton - gumball.spin', 'Süßwarenladen-Melodie'] },
+  lasercut: { name: 'Laserschneider', captions: ['Stern, Herz, Zahnrad', 'das Herausdrücken am Ende', 'Präzision, die man sieht', 'Fab-Lab-Freitag'], sounds: ['Lasersummen (Originalton)', 'Originalton - laser.maker', 'Maker-Beats'] },
+  printer3d: { name: '3D-Drucker', captions: ['Schicht für Schicht', 'schau auf die Prozente', 'Stunden Druck in Sekunden', 'es hat tatsächlich geklappt'], sounds: ['Schrittmotoren (ASMR)', 'Originalton - layer.by.layer', 'Synth-Arpeggio'] },
+  colorsorter: { name: 'Farbsortierer', captions: ['rot, blau, gelb, Kick!', 'das Timing ist perfekt', 'Automatisierung ist wunderschön', 'welcher Behälter ist zuerst voll?'], sounds: ['pneumatische Stöße (Originalton)', 'Originalton - sort.bot', 'Fabrik-Techno'] },
+  crayons: { name: 'Wachsmalstiftfabrik', captions: ['gießen, kühlen, auswerfen, einwickeln', 'jede Charge eine neue Farbe', 'so werden Wachsmalstifte gemacht', 'der Auswurfmoment'], sounds: ['Fabrikbrummen (Originalton)', 'Originalton - crayon.factory', 'Doku-Erzähler'] },
+  chipper: { name: 'Häcksler', captions: ['Äste rein, Späne raus', 'der Haufen wächst immer weiter', 'Gartenarbeit als Therapie', 'er frisst alles'], sounds: ['Häcksler-Brüllen (Originalton)', 'Originalton - chip.it', 'schwere Maschinen'] },
+  shredder: { name: 'Aktenvernichter', captions: ['meine To-do-Liste wird geschreddert', 'Beweise? welche Beweise', 'die fallenden Streifen...', 'Büro-ASMR'], sounds: ['Aktenvernichter (ASMR)', 'Originalton - shred.it', 'Büro-Lo-Fi'] },
+  gacha: { name: 'Gacha-Automat', captions: ['was ist drin?', 'SELTEN!!!', 'noch ein Zug', 'Kapselspielzeug-Sucht'], sounds: ['Knopfdrehen und Plopp (Originalton)', 'Originalton - gacha.pull', 'J-Pop-Jingle'] },
+  robotarm: { name: 'Roboterarm', captions: ['greifen, schwenken, stapeln', 'nie müde, nie zu spät', 'der Stapel ist perfekt', 'Automatisierung macht brrr'], sounds: ['Servosurren (Originalton)', 'Originalton - robot.arm', 'Roboter-Beat'] },
+  pinart: { name: 'Nagelbild', captions: ['Hand, Herz, Gesicht', 'das Schreibtischspielzeug, das jeder hatte', 'durchdrücken, zurückziehen', 'seltsam befriedigend'], sounds: ['gleitende Stifte (ASMR)', 'Originalton - pin.press', 'ruhiges Lo-Fi'] },
+  warehouse: { name: 'Lagerroboter', captions: ['die Regale kommen zu dir', 'deine Bestellung, von Robotern gepickt', 'sie stoßen nie zusammen (fast)', 'Logistik ist faszinierend'], sounds: ['Roboter-Pieptöne (Originalton)', 'Originalton - warehouse.bots', 'Minimal Techno'] },
+}

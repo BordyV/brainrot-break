@@ -1,0 +1,21 @@
+import type { Locale } from '../../i18n'
+
+export const SPORTS: Locale['videos'] = {
+  trickshots: { name: 'tiri impossibili', captions: ['solo retina', 'di tabella!', 'non può sbagliare', 'conta i canestri puliti'], sounds: ['swish (suono originale)', 'suono originale - nothing.but.net', 'beat carico'] },
+  penalty: { name: 'calci di rigore', captions: ['all’incrocio o parato?', 'il portiere ha indovinato...', 'momento di pressione', 'gol contro parate, tieni il conto'], sounds: ['boato dello stadio (suono originale)', 'suono originale - penalty.king', 'inno dei campioni'] },
+  bowling: { name: 'strike a bowling', captions: ['guarda l’effetto', 'tutti e dieci?', 'la reazione a catena dei birilli', 'venerdì sera al bowling'], sounds: ['birilli che cadono (suono originale)', 'suono originale - strike.zone', 'bowling rétro'] },
+  holeinone: { name: 'buca in uno', captions: ['leggi la pendenza...', 'sta curvando... sta curvando...', 'in buca!', 'ha girato sul bordo, che dolore'], sounds: ['silenzio, prego (suono originale)', 'suono originale - golf.green', 'telecronaca di golf'] },
+  slalom: { name: 'slalom di sci', captions: ['rosso, blu, rosso, blu', 'quelle curve...', 'neve fresca', 'stagione degli sport invernali'], sounds: ['sci sulla neve (ASMR)', 'suono originale - slalom.gate', 'tema dei giochi invernali'] },
+  halfpipe: { name: 'halfpipe di skate', captions: ['pompa per prendere quota', 'la rotazione in cima', 'è caduto lol', 'skate or die'], sounds: ['ruote sul legno (suono originale)', 'suono originale - halfpipe.daily', 'punk rock'] },
+  pitstop: { name: 'pit stop', captions: ['quattro gomme in due secondi', 'box box box', 'la squadra è pazzesca', 'guarda il cronometro'], sounds: ['avvitatori (suono originale)', 'suono originale - pit.crew', 'tema della F1'] },
+  tabletennis: { name: 'ping pong', captions: ['lo scambio non finisce mai', 'ping... pong... ping...', 'chi sbaglia per primo?', 'campione della pausa in ufficio'], sounds: ['ping pong (ASMR)', 'suono originale - ping.pong', 'beat per concentrarsi'] },
+  curling: { name: 'curling', captions: ['SPAZZA! SPAZZA!', 'guarda come curva', 'dentro la casa', 'lo sport più sottovalutato'], sounds: ['stone che scivola (ASMR)', 'suono originale - curl.stone', 'telecronaca olimpica'] },
+  archery: { name: 'tiro con l’arco', captions: ['occhio al vento', 'centro?', 'il volo della freccia è così fluido', 'modalità concentrazione'], sounds: ['vibrazione e colpo (suono originale)', 'suono originale - bullseye.club', 'flauto medievale'] },
+  volleyball: { name: 'beach volley', captions: ['bagher, alzata, SCHIACCIATA', 'che difesa!', 'giochi in spiaggia d’estate', 'rosso o blu?'], sounds: ['pubblico in spiaggia (suono originale)', 'suono originale - beach.volley', 'inno dell’estate'] },
+  skijump: { name: 'salto con gli sci', captions: ['praticamente volano', 'quanto lontano stavolta?', 'lo stile a V', 'atterraggio perfetto'], sounds: ['raffica di vento (suono originale)', 'suono originale - ski.jump', 'fanfara dei giochi invernali'] },
+  horserace: { name: 'corsa di cavalli', captions: ['scegli il colore di un fantino', 'fotofinish?', 'la rimonta all’esterno', 'e partono!'], sounds: ['telecronaca della corsa (suono originale)', 'suono originale - derby.day', 'ouverture del Guglielmo Tell'] },
+  cupstack: { name: 'impilare bicchieri', captions: ['su, giù, fatto', 'più veloce dei tuoi occhi', 'batterà il record?', 'ricordi della palestra della scuola'], sounds: ['bicchieri che sbattono (ASMR)', 'suono originale - cup.stack', 'beat veloce'] },
+  speedcube: { name: 'speedcubing', captions: ['mescola... poi risolvi', 'guarda il timer', 'come FANNO', 'io so fare solo una faccia'], sounds: ['clic del cubo (ASMR)', 'suono originale - cube.solve', 'musica per concentrarsi'] },
+  keepyuppy: { name: 'palleggi', captions: ['piede, ginocchio, testa, ripeti', 'nuovo record?', 'gli è caduta al...', 'abilità da parchetto'], sounds: ['tocchi di palla (suono originale)', 'suono originale - keepy.uppy', 'beat da calcio di strada'] },
+  parkour: { name: 'parkour', captions: ['da un tetto all’altro', 'la capriola all’atterraggio', 'non guardare giù', 'conta i salti'], sounds: ['vento e passi (suono originale)', 'suono originale - rooftop.run', 'drum and bass'] },
+}

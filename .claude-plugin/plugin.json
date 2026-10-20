@@ -1,0 +1,25 @@
+{
+  "name": "brainrot-break",
+  "version": "1.0.0",
+  "description": "A TikTok-style feed of pixel art mini-videos to scroll while Claude is answering: like, scroll, and watch Claude finish.",
+  "author": {
+    "name": "BordyV"
+  },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "language": {
+      "type": "string",
+      "title": "Language",
+      "description": "Language of the feed: en, fr, es, de, pt or it. /brainrot lang <code> also switches it.",
+      "options": [
+        "en",
+        "fr",
+        "es",
+        "de",
+        "pt",
+        "it"
+      ],
+      "default": "en"
+    }
+  }
+}

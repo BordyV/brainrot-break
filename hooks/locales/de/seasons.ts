@@ -1,0 +1,18 @@
+import type { Locale } from '../../i18n'
+
+export const SEASONS: Locale['videos'] = {
+  pumpkins: { name: 'Kürbisfeld', captions: ['sie leuchten einer nach dem anderen auf...', 'die Gruselsaison ist da', 'welches Gesicht ist dein Favorit?', 'Kürbisschnitzabend, richtig gemacht'], sounds: ['Grillen in der Nacht (Originalton)', 'Originalton - pumpkin.patch', 'gruselige Spieluhr'] },
+  haunted: { name: 'Spukhaus', captions: ['hast du das Fenster gesehen?', 'jemand ist zu Hause...', 'zähl die Geister', 'würdest du hier eine Nacht verbringen?'], sounds: ['knarrende Tür (Originalton)', 'Originalton - haunted.manor', 'Theremin-Geisterlied'] },
+  xmaslights: { name: 'Weihnachtslichter', captions: ['welcher Modus ist der beste?', 'der Funkelmodus ist einfach anders', 'es weihnachtet sehr...', 'Lichter an, Heizung an'], sounds: ['Schlittenglocken (Originalton)', 'Originalton - xmas.tree.lights', 'Weihnachts-Lo-Fi'] },
+  sleigh: { name: 'Schlitten vor dem Mond', captions: ['an Heiligabend auf Kamera erwischt', 'schau nach oben!', 'pünktlich wie immer', 'die rote Nase zeigt den Weg'], sounds: ['ferne Schlittenglocken (Originalton)', 'Originalton - night.sleigh', 'magisches Orchester'] },
+  unwrap: { name: 'Geschenk auspacken', captions: ['rate, was drin ist', 'schüttel schüttel schüttel... PLOPP', 'genau das, was ich wollte', 'die Enthüllung!'], sounds: ['Papierrascheln (ASMR)', 'Originalton - gift.reveal', 'Überraschungsfanfare'] },
+  balldrop: { name: 'Silvester-Kugel', captions: ['10... 9... 8...', 'wünsch dir was!', 'neues Jahr, gleicher Feed', 'wen küsst du um Mitternacht?'], sounds: ['Countdown der Menge (Originalton)', 'Originalton - countdown.night', 'Auld Lang Syne'] },
+  dragondance: { name: 'Drachentanz', captions: ['der Drache schlängelt sich durch die Straße', 'überall Böller!', 'Parade zum Mondneujahr', 'zähl die Tänzer'], sounds: ['Trommeln und Becken (Originalton)', 'Originalton - dragon.dance', 'knallende Böller'] },
+  snowman: { name: 'Schneemann', captions: ['rollen, rollen, stapeln', 'der Hut macht’s', 'er hat mir gewinkt!', 'und dann kam der Frühling'], sounds: ['knirschender Schnee (ASMR)', 'Originalton - snowman.day', 'Winter Wonderland (Lo-Fi)'] },
+  blossoms: { name: 'Kirschblüten', captions: ['warte auf den Windstoß', 'Blütenregen', 'Frühling in einem Clip', 'der Weg wird rosa'], sounds: ['sanfte Brise (Originalton)', 'Originalton - sakura.lane', 'Koto und Piano'] },
+  cauldron: { name: 'Hexenkessel', captions: ['was braut sie da?', 'die Farbe wechselt ständig', 'schau auf den Mond...', 'blubber, blubber, Hexenbrühe'], sounds: ['blubbernder Trank (ASMR)', 'Originalton - bubble.brew', 'Hexenwalzer'] },
+  bats: { name: 'Fledermäuse in der Dämmerung', captions: ['Tausende verlassen bei Sonnenuntergang die Höhle', 'ein Fluss aus Fledermäusen', 'die Nachtschicht beginnt', 'sie fressen die Mücken, sei nett'], sounds: ['flatternde Flügel (Originalton)', 'Originalton - bat.cave', 'Doku-Streicher'] },
+  spiderweb: { name: 'Spinnennetz', captions: ['erst die Speichen, dann die Spirale', 'die Ingenieurin der Natur', 'eine Nacht Arbeit', 'der Tau am Ende!'], sounds: ['Garten bei Nacht (Originalton)', 'Originalton - web.weaver', 'ruhige Doku'] },
+  pinata: { name: 'Piñata', captions: ['noch ein Schlag...', 'SÜSSIGKEITENREGEN', 'mit verbundenen Augen und entschlossen', 'wie viele Schläge braucht es?'], sounds: ['Partygäste (Originalton)', 'Originalton - pinata.party', 'Geburtstags-Cumbia'] },
+  leafpile: { name: 'Laubhaufen', captions: ['eine Stunde Rechen, in einer Sekunde weg', 'hat sich gelohnt', 'Herbst-Kindheitserinnerung', 'spring rein!'], sounds: ['raschelndes Laub (ASMR)', 'Originalton - leaf.jump', 'Herbst-Akustik'] },
+}

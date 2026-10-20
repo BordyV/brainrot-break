@@ -1,0 +1,17 @@
+import type { Locale } from '../../i18n'
+
+export const MUSIC: Locale['videos'] = {
+  visualiser: { name: 'visualizador de audio', captions: ['casi puedes oírlo', 'mira los graves en el bombo', 'súbelo (en tu cabeza)', 'nostalgia de Winamp'], sounds: ['bass boosted (sonido original)', 'sonido original - eq.bars', 'mezcla de festival EDM'] },
+  pianotiles: { name: 'teclas de piano', captions: ['no toques las teclas blancas', 'va cada vez más rápido', 'speedrun de Para Elisa', 'la tecla larga...'], sounds: ['Para Elisa (acelerado)', 'sonido original - piano.tiles', 'Canon en re (rápido)'] },
+  trenddance: { name: 'baile de moda', captions: ['apréndelo en 8 tiempos', 'los brazos en el tiempo 3', 'etiqueta a alguien que no sepa hacerlo', 'acaba de salir una nueva tendencia'], sounds: ['sonido viral (acelerado)', 'sonido original - dance.trend', 'remix pop viral'] },
+  guitar: { name: 'autopista de guitarra', captions: ['modo experto, cero fallos', 'mira la racha', 'verde rojo amarillo azul naranja', '2007 ha llamado'], sounds: ['Through the Fire and Flames (8 bits)', 'sonido original - note.streak', 'himno rock'] },
+  bassdrop: { name: 'drop de bajo', captions: ['espera al drop...', 'la subida es insoportable', 'DROP', 'altavoces no incluidos'], sounds: ['subida y drop (sonido original)', 'sonido original - wait.for.drop', 'clásico del dubstep'] },
+  djdecks: { name: 'platos de DJ', captions: ['pov: estás en la cabina', 'el crossfade...', '¡manos arriba!', 'energía de viernes noche'], sounds: ['sesión house (sonido original)', 'sonido original - dj.booth', 'sesión techno'] },
+  rhythm: { name: 'círculos de ritmo', captions: ['300 cada vez', 'haz clic en los círculos', '¿full combo?', 'el movimiento del cursor es limpísimo'], sounds: ['sonidos de golpe (sonido original)', 'sonido original - circle.clicker', 'opening de anime (nightcore)'] },
+  disco: { name: 'pista de disco', captions: ['la pista se sabe el ritmo', 'la disco nunca muere', '¡cambio de patrón!', 'fiebre del sábado noche'], sounds: ['groove disco (sonido original)', 'sonido original - disco.floor', 'Stayin’ Alive (8 bits)'] },
+  stadiumwave: { name: 'ola en el estadio', captions: ['la ola da la vuelta entera', 'una grada siempre se la pierde', 'energía del público', 'levántate en el momento justo'], sounds: ['rugido del público (sonido original)', 'sonido original - the.wave', 'himno de estadio'] },
+  conga: { name: 'conga', captions: ['al final todos se unen', 'boda a la 1 de la mañana', 'la fila no para de crecer', 'nadie guía, todos siguen'], sounds: ['ritmo de conga (sonido original)', 'sonido original - conga.line', 'clásico de fiesta'] },
+  fountain: { name: 'fuente danzante', captions: ['el agua baila con la música', 'espera al final', 'Las Vegas en casa', 'cambio de color en cada golpe'], sounds: ['Con te partirò (orquestal)', 'sonido original - water.show', 'chapoteo'] },
+  xylophone: { name: 'xilófono de canicas', captions: ['cada barra es una nota', 'una canción tocada por la gravedad', 'ding... ding... ding...', 'espera a la melodía completa'], sounds: ['notas de xilófono (sonido original)', 'sonido original - marble.melody', 'caja de música'] },
+  robot: { name: 'robot bailarín', captions: ['bailando el robot (literalmente)', 'pop and lock', 'tiene movimientos', 'bip bup a ritmo'], sounds: ['beat robótico (sonido original)', 'sonido original - robo.dance', 'electro funk'] },
+}

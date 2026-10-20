@@ -1,0 +1,18 @@
+import type { Locale } from '../../i18n'
+
+export const NATURE: Locale['videos'] = {
+  aurore: { name: 'aurora boreale', captions: ['stanotte le luci ballano', 'Lapponia, le 2 di notte', 'il riflesso sul lago...', 'valeva il viaggio'], sounds: ['atmosfera nordica', 'suono originale - aurora.norway', 'pad di synth'] },
+  sunset: { name: 'tramonto sul mare', captions: ['aspetta le stelle', 'ora d’oro sul mare', 'l’ultimo raggio di sole', 'l’estate non finisce mai'], sounds: ['onde (suono originale)', 'lofi estivo', 'gabbiani e chitarra'] },
+  thunderstorm: { name: 'temporale', captions: ['aspetta il fulmine', 'il tempo perfetto per dormire', 'conta i secondi dopo il lampo', 'lo spettacolo di luci della natura'], sounds: ['tuoni e pioggia (ASMR)', 'suono originale - storm.chaser', 'pioggia per dormire'] },
+  tornado: { name: 'tornado', captions: ['sta andando verso il fienile...', 'la staccionata non è sopravvissuta', 'i cacciatori di tempeste be like', 'la natura a piena potenza'], sounds: ['sirena e vento (suono originale)', 'suono originale - twister.cam', 'archi drammatici'] },
+  surfer: { name: 'surfista', captions: ['cavalcando l’ora d’oro', 'su e giù per l’onda', 'occhio alla caduta', 'terapia da spiaggia'], sounds: ['onde (suono originale)', 'suono originale - golden.wave', 'surf rock'] },
+  volcano: { name: 'vulcano', captions: ['prima brontola...', 'poi i fiumi di lava', 'da una distanza di sicurezza, per favore', 'la terra è viva'], sounds: ['brontolio profondo (suono originale)', 'suono originale - lava.flow', 'tamburi epici'] },
+  waterfall: { name: 'cascata', captions: ['trova l’arcobaleno nella nebbiolina', 'rumore bianco, ma vero', 'energia da cascata nascosta', 'resta qui un minuto'], sounds: ['cascata (ASMR)', 'suono originale - falls.daily', 'uccelli del bosco'] },
+  seasons: { name: 'albero delle quattro stagioni', captions: ['un anno intero in 40 secondi', 'che stagione sei?', 'fiori, verde, oro, neve', 'il tempo vola'], sounds: ['Vivaldi - Le quattro stagioni (lofi)', 'suono originale - one.tree', 'piano lungo tutto l’anno'] },
+  bloom: { name: 'fiori che sbocciano', captions: ['una settimana di crescita in 20 secondi', 'guardali aprirsi', 'giorno, notte, fiore', 'la primavera sta caricando'], sounds: ['arpa delicata (suono originale)', 'suono originale - bloom.lapse', 'mattina di primavera'] },
+  forestfire: { name: 'incendio nel bosco', captions: ['fuoco, poi pioggia, poi di nuovo verde', 'guarda i germogli che tornano', 'la natura si ricostruisce sempre', 'il ciclo del bosco'], sounds: ['crepitio poi pioggia (suono originale)', 'suono originale - forest.cycle', 'piano pieno di speranza'] },
+  geyser: { name: 'geyser', captions: ['i turisti hanno aspettato 90 minuti per questo', 'gorgoglia... gorgoglia...', 'BUM', 'puntuale come sempre'], sounds: ['whoosh (suono originale)', 'suono originale - old.faithful', 'stupore della folla'] },
+  leaves: { name: 'foglie che cadono', captions: ['l’autunno è entrato in chat', 'il mucchio cresce...', 'poi il vento', 'tempo da maglione'], sounds: ['fruscio di foglie (ASMR)', 'suono originale - autumn.vibes', 'jazz autunnale'] },
+  mushrooms: { name: 'funghi dopo la pioggia', captions: ['pioggia, poi funghi ovunque', 'time-lapse cottagecore', 'la lumaca si gode il momento', 'magia del sottobosco'], sounds: ['pioggia nel bosco (ASMR)', 'suono originale - forest.floor', 'flauto delle fate'] },
+  reef: { name: 'barriera corallina', captions: ['trova il pesce pagliaccio', 'il banco che passa', 'un’intera città sott’acqua', 'salviamo le barriere coralline'], sounds: ['calma sott’acqua (suono originale)', 'suono originale - reef.life', 'atmosfera oceanica'] },
+}

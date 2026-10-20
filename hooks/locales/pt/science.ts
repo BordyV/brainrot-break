@@ -1,0 +1,18 @@
+import type { Locale } from '../../i18n'
+
+export const SCIENCE: Locale['videos'] = {
+  toothpaste: { name: 'pasta de dente de elefante', captions: ['coloca o catalisador e...', 'a espuma não para de sair', 'aula de química, só que divertida', 'não tente sem óculos de proteção'], sounds: ['vush da espuma (som original)', 'som original - foam.lab', 'música de cientista maluco'] },
+  mentos: { name: 'Mentos e refrigerante', captions: ['joga dentro e CORRE', 'até onde vai?', 'o clássico', 'ciência, só que grudenta'], sounds: ['explosão efervescente (som original)', 'som original - geyser.test', 'contagem regressiva'] },
+  cradle: { name: 'pêndulo de Newton', captions: ['clique... claque... clique...', 'o impulso passa direto', 'todo escritório tinha um', 'entram dois, saem dois'], sounds: ['clique claque (ASMR)', 'som original - click.clack', 'ambiente pra focar'] },
+  tesla: { name: 'bobina de Tesla', captions: ['raio dentro de casa', 'não encoste', 'os arcos tentam pegar tudo', 'ela também toca música'], sounds: ['arcos estalando (som original)', 'som original - tesla.arcs', 'bobina de Tesla cantando'] },
+  mousetrap: { name: 'reação em cadeia de ratoeiras', captions: ['uma bolinha começa tudo', 'fissão nuclear, explicada', 'conta as ratoeiras', 'caos puro'], sounds: ['tlec tlec tlec (som original)', 'som original - trap.reaction', 'música de pipoca'] },
+  sodavolcano: { name: 'vulcão de bicarbonato', captions: ['toda feira de ciências', 'entra vinagre, sai lava', 'memória do 4º ano', 'nunca perde a graça'], sounds: ['efervescência (ASMR)', 'som original - fair.volcano', 'tema de programa infantil'] },
+  crystals: { name: 'crescimento de cristais', captions: ['uma semana de crescimento em segundos', 'eles crescem uns sobre os outros', 'qual é sua cor favorita?', 'a impressora 3D da natureza'], sounds: ['sinos de cristal (som original)', 'som original - crystal.lapse', 'sinos ambiente'] },
+  balloonpop: { name: 'balão de água em câmera lenta', captions: ['a água mantém a forma por um instante', '1000 quadros por segundo', 'a borracha vai saindo...', 'física é esquisita'], sounds: ['estouro em câmera lenta (som original)', 'som original - slow.mo.lab', 'coral dramático'] },
+  chladni: { name: 'placa de Chladni', captions: ['som que dá pra ver', 'a areia acha as linhas silenciosas', 'frequência nova, padrão novo', 'aumenta (não dá)'], sounds: ['varredura de tom senoidal (som original)', 'som original - sound.patterns', 'zumbido de frequência'] },
+  gasbox: { name: 'gás numa caixa', captions: ['esquenta e olha o pistão', 'quente = rápido', 'pressão, visualizada', 'finalmente entendi a aula de física'], sounds: ['bico de Bunsen (som original)', 'som original - thermo.dynamics', 'ambiente de laboratório'] },
+  waterrocket: { name: 'foguete de água', captions: ['bombeia... bombeia... bombeia... LANÇA', 'o paraquedas funcionou!', 'ciência de verão', 'uma garrafa, uma bomba'], sounds: ['vush (som original)', 'som original - bottle.rocket', 'música de lançamento espacial'] },
+  eggdrop: { name: 'queda do ovo', captions: ['paraquedas, caixa ou balões?', 'ele sobreviveu?', 'RIP ovo', 'memórias da aula de engenharia'], sounds: ['splash (som original)', 'som original - egg.drop', 'suspense crescendo'] },
+  coiltrain: { name: 'trem de bobina', captions: ['uma pilha, dois ímãs, uma bobina', 'ele se empurra sozinho', 'o trem mais simples do mundo', 'física ou mágica?'], sounds: ['bobina zumbindo (som original)', 'som original - coil.train', 'música curiosa'] },
+  antfarm: { name: 'formigueiro', captions: ['elas cavam e levam a areia pra cima', 'o monte cresce lá em cima', 'engenheiras minúsculas', 'dias cavando em segundos'], sounds: ['cavando (ASMR)', 'som original - ant.farm', 'cordas de documentário'] },
+}

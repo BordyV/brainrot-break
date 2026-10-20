@@ -1,0 +1,18 @@
+import type { Locale } from '../../i18n'
+
+export const SCIENCE: Locale['videos'] = {
+  toothpaste: { name: 'Elefantenzahnpasta', captions: ['Katalysator rein und...', 'der Schaum hört nicht auf', 'Chemieunterricht, aber lustig', 'nicht ohne Schutzbrille ausprobieren'], sounds: ['Schaum-Wusch (Originalton)', 'Originalton - foam.lab', 'Musik für verrückte Wissenschaftler'] },
+  mentos: { name: 'Mentos und Cola', captions: ['reinwerfen und RENNEN', 'wie hoch geht das?', 'der Klassiker', 'Wissenschaft, aber klebrig'], sounds: ['Sprudelexplosion (Originalton)', 'Originalton - geyser.test', 'Countdown'] },
+  cradle: { name: 'Newtonpendel', captions: ['klick... klack... klick...', 'der Impuls geht glatt durch', 'jedes Büro hatte eins', 'zwei rein, zwei raus'], sounds: ['Klick-Klack (ASMR)', 'Originalton - click.clack', 'Fokus-Atmosphäre'] },
+  tesla: { name: 'Teslaspule', captions: ['Blitze im Wohnzimmer', 'nicht anfassen', 'die Bögen greifen nach allem', 'sie kann auch Musik spielen'], sounds: ['knisternde Bögen (Originalton)', 'Originalton - tesla.arcs', 'singende Teslaspule'] },
+  mousetrap: { name: 'Mausefallen-Kettenreaktion', captions: ['ein Ball löst alles aus', 'Kernspaltung, erklärt', 'zähl die Fallen', 'pures Chaos'], sounds: ['schnapp schnapp schnapp (Originalton)', 'Originalton - trap.reaction', 'Popcorn-Musik'] },
+  sodavolcano: { name: 'Natron-Vulkan', captions: ['jede Wissenschaftsmesse ever', 'Essig rein, Lava raus', 'Kindheitserinnerung aus der 4. Klasse', 'wird nie langweilig'], sounds: ['Sprudeln (ASMR)', 'Originalton - fair.volcano', 'Kindersendungs-Melodie'] },
+  crystals: { name: 'Kristallwachstum', captions: ['eine Woche Wachstum in Sekunden', 'sie bauen aufeinander auf', 'welche Farbe ist dein Favorit?', 'der 3D-Drucker der Natur'], sounds: ['Kristallklänge (Originalton)', 'Originalton - crystal.lapse', 'Ambient-Glocken'] },
+  balloonpop: { name: 'Wasserballon in Zeitlupe', captions: ['das Wasser behält kurz seine Form', '1000 Bilder pro Sekunde', 'das Gummi zieht sich weg...', 'Physik ist seltsam'], sounds: ['Zeitlupen-Plopp (Originalton)', 'Originalton - slow.mo.lab', 'dramatischer Chor'] },
+  chladni: { name: 'Chladni-Platte', captions: ['Schall, den man sieht', 'der Sand findet die stillen Linien', 'neue Frequenz, neues Muster', 'mach lauter (geht nicht)'], sounds: ['Sinuston-Sweep (Originalton)', 'Originalton - sound.patterns', 'Frequenzbrummen'] },
+  gasbox: { name: 'Gas in einer Box', captions: ['erhitzen und auf den Kolben schauen', 'heiß = schnell', 'Druck, sichtbar gemacht', 'endlich hat der Physikunterricht Sinn ergeben'], sounds: ['Bunsenbrenner (Originalton)', 'Originalton - thermo.dynamics', 'Laboratmosphäre'] },
+  waterrocket: { name: 'Wasserrakete', captions: ['pumpen... pumpen... pumpen... START', 'der Fallschirm hat funktioniert!', 'Sommerwissenschaft', 'eine Flasche, eine Pumpe'], sounds: ['Wusch (Originalton)', 'Originalton - bottle.rocket', 'Raketenstart-Musik'] },
+  eggdrop: { name: 'Eierfall', captions: ['Fallschirm, Kiste oder Ballons?', 'hat es überlebt?', 'RIP Ei', 'Erinnerungen an den Technikunterricht'], sounds: ['Platsch (Originalton)', 'Originalton - egg.drop', 'steigende Spannung'] },
+  coiltrain: { name: 'Spulenzug', captions: ['eine Batterie, zwei Magnete, eine Spule', 'er schiebt sich selbst voran', 'der einfachste Zug der Welt', 'Physik oder Magie?'], sounds: ['summende Spule (Originalton)', 'Originalton - coil.train', 'neugierige Musik'] },
+  antfarm: { name: 'Ameisenfarm', captions: ['sie graben und tragen den Sand nach oben', 'oben wächst der Haufen', 'winzige Ingenieure', 'tagelanges Graben in Sekunden'], sounds: ['Graben (ASMR)', 'Originalton - ant.farm', 'Doku-Streicher'] },
+}

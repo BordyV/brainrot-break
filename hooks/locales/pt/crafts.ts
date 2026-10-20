@@ -1,0 +1,16 @@
+import type { Locale } from '../../i18n'
+
+export const CRAFTS: Locale['videos'] = {
+  brickbuild: { name: 'construção com blocos', captions: ['bloco por bloco', 'as janelas entram na camada 3', 'hora do telhado!', 'construção relâmpago'], sounds: ['cliques de blocos (ASMR)', 'som original - brick.builds', 'tudo é incrível (lofi)'] },
+  pixeldraw: { name: 'desenho em pixel art', captions: ['adivinha antes de terminar', 'um pixel de cada vez', 'coração, cogumelo, gato...', 'esse feed é feito disso'], sounds: ['cliques de lápis (som original)', 'som original - pixel.by.pixel', 'chiptune lofi'] },
+  pottery: { name: 'torno de cerâmica', captions: ['um bolo de argila vira um vaso', 'centraliza o barro...', 'vibe Ghost (você sabe a cena)', 'terapia com argila'], sounds: ['torno girando (ASMR)', 'som original - clay.wheel', 'Unchained Melody (lofi)'] },
+  crossstitch: { name: 'ponto-cruz', captions: ['X por X', 'o desenho aparece devagar', 'a vó ficaria orgulhosa', 'só mais uma fileira antes de dormir'], sounds: ['agulha atravessando o tecido (ASMR)', 'som original - stitch.by.stitch', 'folk aconchegante'] },
+  fusebeads: { name: 'miçangas de passar', captions: ['coloca todas... e passa o ferro', 'a revelação depois do ferro', 'artesanato da infância desbloqueado', 'elas derretem juntas!'], sounds: ['miçangas batendo (ASMR)', 'som original - bead.board', 'tema de programa infantil'] },
+  mosaic: { name: 'mosaico', captions: ['peça por peça, aparece uma imagem', 'adivinha a imagem', 'vibe romana', 'tantas pecinhas'], sounds: ['batidinhas nas peças (ASMR)', 'som original - tile.art', 'violão mediterrâneo'] },
+  loom: { name: 'tear', captions: ['por cima, por baixo, por cima, por baixo', 'o desenho cresce fileira por fileira', 'tecnologia antiga, ainda linda', 'a lançadeira faz brrr'], sounds: ['clac do tear (ASMR)', 'som original - weave.daily', 'cordas folk'] },
+  mural: { name: 'mural', captions: ['céu, sol, montanhas, árvore', 'camada por camada', 'uma parede inteira em 30 segundos', 'parede vazia → arte'], sounds: ['som do rolo (ASMR)', 'som original - wall.art', 'hip hop tranquilo'] },
+  sandcastle: { name: 'castelo de areia', captions: ['constrói, constrói, constrói... maré', 'foi lindo enquanto durou', 'puro clima de férias', 'a bandeira lá em cima!'], sounds: ['ondas e gaivotas (som original)', 'som original - sand.castle', 'pop de verão'] },
+  blockhouse: { name: 'casa de blocos', captions: ['a primeira casa antes de anoitecer', 'cantos de pedra, paredes de tábua', 'o telhado é a parte mais difícil', 'speedrun de casa inicial'], sounds: ['bloco colocado (som original)', 'som original - block.builder', 'piano calmo (vibe C418)'] },
+  cardtower: { name: 'castelo de cartas', captions: ['não respira...', 'a última carta...', 'e aí o vento', 'paciência nível 100'], sounds: ['embaralhando cartas (ASMR)', 'som original - card.tower', 'música de tensão'] },
+  jenga: { name: 'Jenga desabando', captions: ['qual bloco vai ser o último?', 'tá balançando...', 'LÁ VAI', 'caos da noite de jogos'], sounds: ['blocos de madeira (ASMR)', 'som original - jenga.pull', 'tambores de suspense'] },
+}

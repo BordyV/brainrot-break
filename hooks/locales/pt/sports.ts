@@ -1,0 +1,21 @@
+import type { Locale } from '../../i18n'
+
+export const SPORTS: Locale['videos'] = {
+  trickshots: { name: 'arremessos impossíveis', captions: ['só rede', 'na tabela!', 'ele não erra', 'conta as cestas limpas'], sounds: ['swish (som original)', 'som original - nothing.but.net', 'beat de hype'] },
+  penalty: { name: 'disputa de pênaltis', captions: ['no ângulo ou defendeu?', 'o goleiro adivinhou...', 'momento de pressão', 'gols contra defesas, conta aí'], sounds: ['estádio rugindo (som original)', 'som original - penalty.king', 'hino dos campeões'] },
+  bowling: { name: 'strike no boliche', captions: ['olha o efeito', 'os dez?', 'a reação em cadeia dos pinos', 'sexta de boliche'], sounds: ['pinos caindo (som original)', 'som original - strike.zone', 'boliche retrô'] },
+  holeinone: { name: 'hole in one', captions: ['lê a inclinação...', 'tá curvando... tá curvando...', 'no buraco!', 'bateu na borda, que dor'], sounds: ['silêncio, por favor (som original)', 'som original - golf.green', 'narração de golfe'] },
+  slalom: { name: 'slalom de esqui', captions: ['vermelho, azul, vermelho, azul', 'essas curvas...', 'neve fresquinha', 'temporada de esportes de inverno'], sounds: ['esqui na neve (ASMR)', 'som original - slalom.gate', 'tema de jogos de inverno'] },
+  halfpipe: { name: 'half-pipe de skate', captions: ['dando impulso pra subir', 'o giro lá em cima', 'ele caiu kkk', 'skate or die'], sounds: ['rodinhas na madeira (som original)', 'som original - halfpipe.daily', 'punk rock'] },
+  pitstop: { name: 'pit stop', captions: ['quatro pneus em dois segundos', 'box box box', 'a equipe é insana', 'olha o cronômetro'], sounds: ['parafusadeiras (som original)', 'som original - pit.crew', 'tema da F1'] },
+  tabletennis: { name: 'tênis de mesa', captions: ['a troca de bola não acaba', 'ping... pong... ping...', 'quem erra primeiro?', 'campeão do intervalo no escritório'], sounds: ['ping pong (ASMR)', 'som original - ping.pong', 'beat pra focar'] },
+  curling: { name: 'curling', captions: ['VARRE! VARRE!', 'olha ela curvando', 'dentro da casa', 'o esporte mais subestimado'], sounds: ['pedra deslizando (ASMR)', 'som original - curl.stone', 'narração olímpica'] },
+  archery: { name: 'tiro com arco', captions: ['cuidado com o vento', 'na mosca?', 'o voo da flecha é tão suave', 'modo foco'], sounds: ['zing e toc (som original)', 'som original - bullseye.club', 'flauta medieval'] },
+  volleyball: { name: 'vôlei de praia', captions: ['manchete, levantamento, CORTADA', 'que defesa!', 'jogos de praia no verão', 'vermelho ou azul?'], sounds: ['torcida na praia (som original)', 'som original - beach.volley', 'hino do verão'] },
+  skijump: { name: 'salto de esqui', captions: ['eles basicamente voam', 'até onde dessa vez?', 'o estilo V', 'crava o pouso'], sounds: ['rajada de vento (som original)', 'som original - ski.jump', 'fanfarra de jogos de inverno'] },
+  horserace: { name: 'corrida de cavalos', captions: ['escolha a cor de um jóquei', 'photo finish?', 'a virada por fora', 'e foi dada a largada!'], sounds: ['narração da corrida (som original)', 'som original - derby.day', 'abertura de Guilherme Tell'] },
+  cupstack: { name: 'empilhar copos', captions: ['sobe, desce, pronto', 'mais rápido que seus olhos', 'vai bater o recorde?', 'memórias da educação física'], sounds: ['copos batendo (ASMR)', 'som original - cup.stack', 'beat acelerado'] },
+  speedcube: { name: 'speedcubing', captions: ['embaralha... e resolve', 'olha o cronômetro', 'como eles FAZEM isso', 'eu só consigo fazer uma face'], sounds: ['cliques do cubo (ASMR)', 'som original - cube.solve', 'música pra focar'] },
+  keepyuppy: { name: 'embaixadinhas', captions: ['pé, joelho, cabeça, repete', 'recorde novo?', 'ele deixou cair no...', 'habilidades de pracinha'], sounds: ['toques na bola (som original)', 'som original - keepy.uppy', 'beat de futebol de rua'] },
+  parkour: { name: 'parkour', captions: ['de telhado em telhado', 'o rolamento no pouso', 'não olha pra baixo', 'conta os vãos'], sounds: ['vento e passos (som original)', 'som original - rooftop.run', 'drum and bass'] },
+}

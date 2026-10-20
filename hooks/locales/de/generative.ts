@@ -1,0 +1,17 @@
+import type { Locale } from '../../i18n'
+
+export const GENERATIVE: Locale['videos'] = {
+  life: { name: 'Game of Life', captions: ['vier Regeln, unendliches Chaos', 'finde den Gleiter', 'das Leben findet einen Weg (dann stoppt es)', 'Mathe, die lebendig aussieht'], sounds: ['Ambient-Synth (Originalton)', 'Originalton - conway.life', 'Philip-Glass-Vibes'] },
+  langton: { name: 'Langtons Ameise', captions: ['eine Ameise, zwei Regeln', 'Chaos... und plötzlich eine Autobahn', 'keiner weiß, warum sie das macht', 'neue Regel, neues Muster'], sounds: ['Ticken (Originalton)', 'Originalton - langton.ant', 'minimale Elektronik'] },
+  boids: { name: 'Boids', captions: ['drei Regeln ergeben einen Schwarm', 'schau, wie sie dem Falken ausweichen', 'kein Anführer, nur Nachbarn', 'Vogelschwarm im Sonnenuntergang'], sounds: ['Flügel (Originalton)', 'Originalton - murmuration', 'filmische Streicher'] },
+  spirograph: { name: 'Spirograph', captions: ['das Spielzeug, das wir alle hatten', 'warte, bis sich die Schleife schließt', 'Zahnräder + Stift = Kunst', 'jedes ist anders'], sounds: ['Stiftkratzen (ASMR)', 'Originalton - spiro.graph', 'Spieluhr'] },
+  fractaltree: { name: 'fraktaler Baum', captions: ['ein Baum, der sich selbst zeichnet', 'verzweigen, teilen, wiederholen', 'dann fallen die Blätter', 'Rekursion ist wunderschön'], sounds: ['Wind in den Blättern (Originalton)', 'Originalton - fractal.tree', 'Akustikgitarre'] },
+  mazesolve: { name: 'Labyrinthlöser', captions: ['gegraben, geflutet, gelöst', 'der Regenbogen ist die Entfernung', 'der Weg am Ende >>>', 'Algorithmen sind Kunst'], sounds: ['Graben (Originalton)', 'Originalton - maze.gen', 'Fokusmusik'] },
+  astar: { name: 'A*-Wegfindung', captions: ['so finden Spielfiguren ihren Weg', 'grün = zu prüfen, blau = geprüft', 'er findet immer den kürzesten', 'Informatikunterricht, sichtbar gemacht'], sounds: ['Such-Pieptöne (Originalton)', 'Originalton - a.star', 'Synthwave zum Lernen'] },
+  voronoi: { name: 'Voronoi-Wachstum', captions: ['jeder Samen beansprucht seinen Platz', 'wie Zellen unterm Mikroskop', 'die Grenzen sind das Beste', 'das Giraffenmuster, erklärt'], sounds: ['sanftes Aufblühen (Originalton)', 'Originalton - voronoi.cells', 'Ambient-Piano'] },
+  dragon: { name: 'Drachenkurve', captions: ['falte einen Papierstreifen in der Mitte, immer wieder', 'schau, wie der Drache erscheint', 'jede Faltung verdoppelt ihn', 'Mathe, aber als Drache'], sounds: ['Papierfalten (ASMR)', 'Originalton - dragon.curve', 'epische Atmosphäre'] },
+  hilbert: { name: 'Hilbert-Kurve', captions: ['eine Linie füllt das ganze Quadrat', 'jede Stufe mehr Details', 'kreuzt sich nie selbst', 'Mathe, die sich kachelt'], sounds: ['Stiftzeichnen (ASMR)', 'Originalton - hilbert.curve', 'Glitch-Lo-Fi'] },
+  cube: { name: 'drehender Würfel', captions: ['3D in 32 Pixeln', 'Würfel, dann Oktaeder, dann...', 'dein erstes 3D-Programm', 'Vaporwave, aber Mathe'], sounds: ['Synth-Arpeggio (Originalton)', 'Originalton - wire.frame', 'Vaporwave-Mix'] },
+  donut: { name: 'drehender Donut', captions: ['der berühmte drehende Donut, jetzt mit Glasur', 'jeder Programmierer kennt den', 'mit Trigonometrie gerendert', 'schon Hunger?'], sounds: ['Tastaturklicks (ASMR)', 'Originalton - donut.c', 'Coding-Lo-Fi'] },
+  wfc: { name: 'Wave Function Collapse', captions: ['eine Stadt baut sich selbst, Kachel für Kachel', 'Straßen sind immer verbunden', 'prozedurale Generierung, erklärt', 'jede Stadt ist neu'], sounds: ['Kachelklicks (Originalton)', 'Originalton - wave.collapse', 'Städtebauspiel-Musik'] },
+}

@@ -1,0 +1,18 @@
+import type { Locale } from '../../i18n'
+
+export const SEASONS: Locale['videos'] = {
+  pumpkins: { name: 'plantação de abóboras', captions: ['elas acendem uma por uma...', 'chegou a temporada assustadora', 'qual carinha é sua favorita?', 'noite de esculpir abóbora bem feita'], sounds: ['grilos à noite (som original)', 'som original - pumpkin.patch', 'caixinha de música assustadora'] },
+  haunted: { name: 'casa mal-assombrada', captions: ['você viu aquela janela?', 'tem alguém em casa...', 'conta os fantasmas', 'você passaria uma noite aqui?'], sounds: ['porta rangendo (som original)', 'som original - haunted.manor', 'música de fantasma no teremim'] },
+  xmaslights: { name: 'luzes de Natal', captions: ['qual modo é o melhor?', 'o modo pisca-pisca é outra coisa', 'já tá com cara de Natal...', 'luzes acesas, aquecedor ligado'], sounds: ['sinos de trenó (som original)', 'som original - xmas.tree.lights', 'lofi de Natal'] },
+  sleigh: { name: 'trenó cruzando a lua', captions: ['flagrado na véspera de Natal', 'olha pra cima!', 'na hora certinha', 'o nariz vermelho mostra o caminho'], sounds: ['sinos ao longe (som original)', 'som original - night.sleigh', 'orquestra mágica'] },
+  unwrap: { name: 'abrindo presente', captions: ['adivinha o que tem dentro', 'chacoalha chacoalha chacoalha... POP', 'exatamente o que eu queria', 'a revelação!'], sounds: ['papel farfalhando (ASMR)', 'som original - gift.reveal', 'fanfarra surpresa'] },
+  balldrop: { name: 'descida da bola de Ano Novo', captions: ['10... 9... 8...', 'faz um pedido!', 'ano novo, mesmo feed', 'quem você vai beijar à meia-noite?'], sounds: ['contagem da multidão (som original)', 'som original - countdown.night', 'Auld Lang Syne'] },
+  dragondance: { name: 'dança do dragão', captions: ['o dragão serpenteia pela rua', 'bombinha pra todo lado!', 'desfile do Ano Novo Lunar', 'conta os dançarinos'], sounds: ['tambores e pratos (som original)', 'som original - dragon.dance', 'bombinhas estourando'] },
+  snowman: { name: 'boneco de neve', captions: ['rola, rola, empilha', 'o chapéu faz toda a diferença', 'ele acenou pra mim!', 'e aí chegou a primavera'], sounds: ['neve crocante (ASMR)', 'som original - snowman.day', 'winter wonderland (lofi)'] },
+  blossoms: { name: 'cerejeiras em flor', captions: ['espera a rajada de vento', 'chuva de pétalas', 'a primavera num clipe', 'o caminho fica rosa'], sounds: ['brisa suave (som original)', 'som original - sakura.lane', 'koto e piano'] },
+  cauldron: { name: 'caldeirão da bruxa', captions: ['o que ela tá preparando?', 'a cor não para de mudar', 'olha a lua...', 'borbulha, borbulha'], sounds: ['poção borbulhando (ASMR)', 'som original - bubble.brew', 'valsa de bruxa'] },
+  bats: { name: 'morcegos ao entardecer', captions: ['milhares saem da caverna no pôr do sol', 'um rio de morcegos', 'começa o turno da noite', 'eles comem os mosquitos, seja legal'], sounds: ['bater de asas (som original)', 'som original - bat.cave', 'cordas de documentário'] },
+  spiderweb: { name: 'teia de aranha', captions: ['primeiro os raios, depois a espiral', 'a engenheira da natureza', 'uma noite de trabalho', 'o orvalho no final!'], sounds: ['jardim à noite (som original)', 'som original - web.weaver', 'documentário calmo'] },
+  pinata: { name: 'piñata', captions: ['só mais uma batida...', 'CHUVA DE DOCES', 'de olhos vendados e determinado', 'quantas batidas vai precisar?'], sounds: ['festa (som original)', 'som original - pinata.party', 'cumbia de aniversário'] },
+  leafpile: { name: 'monte de folhas', captions: ['uma hora rastelando, foi embora num segundo', 'valeu a pena', 'memória de outono', 'pula!'], sounds: ['folhas crocantes (ASMR)', 'som original - leaf.jump', 'acústico de outono'] },
+}

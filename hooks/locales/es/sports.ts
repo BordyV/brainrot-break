@@ -1,0 +1,21 @@
+import type { Locale } from '../../i18n'
+
+export const SPORTS: Locale['videos'] = {
+  trickshots: { name: 'tiros imposibles', captions: ['ni rozar el aro', '¡a tablero!', 'no puede fallar', 'cuenta las canastas limpias'], sounds: ['swish (sonido original)', 'sonido original - nothing.but.net', 'beat de hype'] },
+  penalty: { name: 'tanda de penaltis', captions: ['¿por la escuadra o parada?', 'el portero lo adivinó...', 'momento de presión', 'goles contra paradas, lleva la cuenta'], sounds: ['rugido del estadio (sonido original)', 'sonido original - penalty.king', 'himno de campeones'] },
+  bowling: { name: 'pleno en los bolos', captions: ['mira el efecto', '¿los diez?', 'la reacción en cadena de los bolos', 'viernes de bolos'], sounds: ['choque de bolos (sonido original)', 'sonido original - strike.zone', 'bolera retro'] },
+  holeinone: { name: 'hoyo en uno', captions: ['lee la pendiente...', 'está curvando... está curvando...', '¡dentro!', 'rozó el borde, qué dolor'], sounds: ['silencio, por favor (sonido original)', 'sonido original - golf.green', 'comentario de golf'] },
+  slalom: { name: 'eslalon de esquí', captions: ['rojo, azul, rojo, azul', 'esos giros...', 'nieve polvo recién caída', 'temporada de deportes de invierno'], sounds: ['esquís en la nieve (ASMR)', 'sonido original - slalom.gate', 'tema de juegos de invierno'] },
+  halfpipe: { name: 'halfpipe de skate', captions: ['bombeando para coger altura', 'el giro arriba del todo', 'se cayó jaja', 'skate o muerte'], sounds: ['ruedas sobre madera (sonido original)', 'sonido original - halfpipe.daily', 'punk rock'] },
+  pitstop: { name: 'parada en boxes', captions: ['cuatro ruedas en dos segundos', 'box box box', 'el equipo es una locura', 'mira el cronómetro'], sounds: ['pistolas neumáticas (sonido original)', 'sonido original - pit.crew', 'tema de F1'] },
+  tabletennis: { name: 'ping-pong', captions: ['el peloteo no se acaba', 'ping... pong... ping...', '¿quién falla primero?', 'campeón de la pausa en la oficina'], sounds: ['ping pong (ASMR)', 'sonido original - ping.pong', 'beat para concentrarse'] },
+  curling: { name: 'curling', captions: ['¡BARRE! ¡BARRE!', 'mira cómo curva', 'dentro de la casa', 'el deporte más infravalorado'], sounds: ['piedra deslizándose (ASMR)', 'sonido original - curl.stone', 'comentario olímpico'] },
+  archery: { name: 'tiro con arco', captions: ['ojo con el viento', '¿diana?', 'el vuelo de la flecha es tan suave', 'modo concentración'], sounds: ['zing y toc (sonido original)', 'sonido original - bullseye.club', 'flauta medieval'] },
+  volleyball: { name: 'vóley playa', captions: ['recepción, colocación, ¡REMATE!', '¡qué defensa!', 'juegos de playa en verano', '¿rojo o azul?'], sounds: ['público en la playa (sonido original)', 'sonido original - beach.volley', 'himno del verano'] },
+  skijump: { name: 'salto de esquí', captions: ['básicamente vuelan', '¿hasta dónde esta vez?', 'el estilo en V', 'clava el aterrizaje'], sounds: ['ráfaga de viento (sonido original)', 'sonido original - ski.jump', 'fanfarria de juegos de invierno'] },
+  horserace: { name: 'carrera de caballos', captions: ['elige un color de jinete', '¿foto finish?', 'la remontada por fuera', '¡y salen!'], sounds: ['narración de la carrera (sonido original)', 'sonido original - derby.day', 'obertura de Guillermo Tell'] },
+  cupstack: { name: 'apilar vasos', captions: ['arriba, abajo, hecho', 'más rápido que tus ojos', '¿batirá el récord?', 'recuerdos del gimnasio del cole'], sounds: ['vasos chocando (ASMR)', 'sonido original - cup.stack', 'beat rápido'] },
+  speedcube: { name: 'speedcubing', captions: ['mezcla... y luego resuelve', 'mira el cronómetro', 'cómo LO HACEN', 'yo solo sé hacer una cara'], sounds: ['clics del cubo (ASMR)', 'sonido original - cube.solve', 'música para concentrarse'] },
+  keepyuppy: { name: 'toques de balón', captions: ['pie, rodilla, cabeza, repetir', '¿nuevo récord?', 'se le cayó en el...', 'habilidades de parque'], sounds: ['toques de balón (sonido original)', 'sonido original - keepy.uppy', 'beat de fútbol callejero'] },
+  parkour: { name: 'parkour', captions: ['de azotea en azotea', 'la voltereta al aterrizar', 'no mires abajo', 'cuenta los saltos'], sounds: ['viento y pasos (sonido original)', 'sonido original - rooftop.run', 'drum and bass'] },
+}

@@ -1,0 +1,21 @@
+import type { Locale } from '../../i18n'
+
+export const CITY: Locale['videos'] = {
+  cyber: { name: 'Cyberpunk-Stadt', captions: ['Night City im Regen', 'die fliegenden Autos hören nie auf', 'Neon-Spiegelungen', 'irgendwo ist schon 2077'], sounds: ['Regen + Synthwave', 'Originalton - neon.city', 'Blade-Runner-Ambient'] },
+  traffic: { name: 'Ampeln', captions: ['rot... grün... los', 'Rushhour von oben', 'die Schlange löst sich so schön auf', 'Stadtsimulator im echten Leben'], sounds: ['Stadtverkehr (Originalton)', 'Originalton - crossroads.cam', 'City Pop'] },
+  roundabout: { name: 'Kreisverkehr', captions: ['keiner weiß, wer Vorfahrt hat', 'der Fluss ist seltsam perfekt', 'dritte Ausfahrt bitte', 'Frankreich in einem Video'], sounds: ['Blinkerticken (Originalton)', 'Originalton - roundabout.pov', 'Autofahrt-Playlist'] },
+  parallel: { name: 'Einparken', captions: ['Versuch Nummer...', 'der Rempler lol', 'endlich perfekt', 'Flashbacks an die Fahrprüfung'], sounds: ['Parksensor-Pieptöne (Originalton)', 'Originalton - parallel.park', 'angespannte Musik'] },
+  levelcross: { name: 'Bahnübergang', captions: ['ding ding ding ding', 'zähl die Waggons', 'alle warten', 'Trainspotter, das ist für euch'], sounds: ['Bahnübergangsglocken (Originalton)', 'Originalton - train.spotter', 'Zughupe'] },
+  runway: { name: 'Landebahn', captions: ['Landung, dann Start', 'schau, wie der Schatten das Flugzeug trifft', 'butterweiche Landung', 'Flughafen von oben'], sounds: ['Düsentriebwerke (Originalton)', 'Originalton - plane.spotter', 'Kabinendurchsage'] },
+  carwash: { name: 'Waschanlage', captions: ['schlammig rein, glänzend raus', 'der Schaum!!', 'Kindheitsfavorit', 'die rotierenden Bürsten'], sounds: ['Waschanlage (ASMR)', 'Originalton - car.wash', 'sprudelnder Synth'] },
+  crane: { name: 'Turmdrehkran', captions: ['Stockwerk für Stockwerk', 'Kranführer sind aus anderem Holz geschnitzt', 'Baustellen-Zeitraffer', 'wie hoch diesmal?'], sounds: ['Baustelle (Originalton)', 'Originalton - crane.op', 'Arbeits-Playlist'] },
+  citybuilder: { name: 'Städtebauer', captions: ['von einer Straße zur Stadt', 'erst Straßen, dann Häuser, dann Türme', 'schau auf die Einwohnerzahl', 'Bürgermeister-Modus an'], sounds: ['Städtebau-Soundtrack', 'Originalton - city.sim', 'ruhige Strategiemusik'] },
+  metro: { name: 'U-Bahn-Plan', captions: ['die Fahrgäste wollen ihre Form', 'neuer Bahnhof, neue Linie', 'ÖPNV-Nerds, vereinigt euch', 'es wird schnell voll'], sounds: ['U-Bahn-Gong (Originalton)', 'Originalton - mini.metro', 'minimales Piano'] },
+  dragrace: { name: 'Dragrace', captions: ['schau auf die Lichter', 'die Reaktionszeit ist alles', 'Rot oder Blau?', 'Wheelie-Start'], sounds: ['Motorbrüllen (Originalton)', 'Originalton - quarter.mile', 'Fast-and-Furious-Remix'] },
+  monstertruck: { name: 'Monstertruck', captions: ['der Sprung... das Zerquetschen', 'RIP diese Autos', 'Große-Räder-Energie', 'zähl die platten Autos'], sounds: ['Gebrüll der Menge (Originalton)', 'Originalton - monster.jam', 'Heavy Metal'] },
+  port: { name: 'Containerhafen', captions: ['vom Lager aufs Schiff, einer nach dem anderen', 'der Kran hört nie auf', 'da ist deine Bestellung', 'Logistik ist wunderschön'], sounds: ['Hafenatmosphäre (Originalton)', 'Originalton - port.ops', 'Schiffshorn'] },
+  drawbridge: { name: 'Klappbrücke', captions: ['Brücke hoch, Boot durch', 'die Autos warten einfach', 'Ingenieurskunst ist cool', 'sie teilt sich in der Mitte'], sounds: ['Brückenglocken (Originalton)', 'Originalton - bridge.up', 'Flussatmosphäre'] },
+  nighthighway: { name: 'Autobahn bei Nacht', captions: ['weiß kommend, rot fahrend', 'Langzeitbelichtungs-Vibes', 'Nachtfahrt-Playlist an', 'Autobahn um 3 Uhr nachts'], sounds: ['Nightcall (Synthwave)', 'Originalton - long.exposure', 'Outrun-Mix'] },
+  coaster: { name: 'Achterbahn', captions: ['klick... klick... klick... ABFAHRT', 'Hände hoch beim Looping', 'nur erste Reihe', 'Freizeitpark-Saison'], sounds: ['Schreie (Originalton)', 'Originalton - coaster.pov', 'Freizeitparkmusik'] },
+  demolition: { name: 'Gebäudesprengung', captions: ['3... 2... 1...', 'es faltet sich in sich zusammen', 'kontrolliertes Chaos', 'die Staubwolke!'], sounds: ['Bumm und Grollen (Originalton)', 'Originalton - implosion.cam', 'Zeitlupen-Orchester'] },
+}
