@@ -2,6 +2,10 @@
 
 The project follows [Semantic Versioning](https://semver.org/) and [Conventional Commits](https://www.conventionalcommits.org/).
 
+## 1.0.1
+
+- Desktop app: the wheel goes back up to the previous video again (it only went down).
+
 ## 1.0.0
 
 The first public release.
