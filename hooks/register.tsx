@@ -83,6 +83,8 @@ let desktopSite: string | undefined
 // so a lower rate leaves the mouse more time to land a click.
 let desktopFps = 10
 let desktopCredit = 0
+// The desktop site last scrolled to the feed's row, past the spare one above.
+let desktopPlaced: string | undefined
 let ticker: Timer | undefined
 let openTimer: Timer | undefined
 let closeTimer: Timer | undefined
@@ -693,6 +695,10 @@ function tick($: EngineInterface) {
   // The desktop redraws ten times a second at most; the clip keeps its speed.
   // Each tick earns desktopFps fifteenths of a redraw, so 10 fps is two ticks in
   // three, not one in two (a rounded divisor gave 7.5).
+  if (desktopSite && desktopPlaced !== desktopSite) {
+    desktopPlaced = desktopSite
+    void $.ui.scroll({ to: { key: 'feed' }, in: desktopSite, block: 'start' }).catch(() => undefined)
+  }
   if (desktopSite && desktopFps > 0) {
     desktopCredit = Math.min(15, desktopCredit) + Math.min(15, desktopFps)
     if (desktopCredit >= 15) {
@@ -716,6 +722,7 @@ function stopTicker($: EngineInterface) {
   player.watchFrom = 0
   mounted = undefined
   desktopSite = undefined
+  desktopPlaced = undefined
 }
 
 async function ensureFeed($: EngineInterface) {
@@ -1133,11 +1140,15 @@ async function desktopTree($: EngineInterface, els: Elements['desktop'], request
       {info}
     </Box>
   )
-  // The pane only hands the wheel on while it has something to scroll: one
-  // spare row past its height gives it that, and ui.scroll keeps it in place.
+  // The pane only hands the wheel on while it has something to scroll, in
+  // that direction: a spare row above the feed and one below give it room both
+  // ways, and ui.scroll keeps the window on the feed, one row down.
   return (
-    <Box flexDirection="column" minHeight={bodyRows + 1}>
-      {body}
+    <Box flexDirection="column" minHeight={bodyRows + 2}>
+      <Box height={1} />
+      <Box key="feed" flexDirection="column">
+        {body}
+      </Box>
     </Box>
   )
 }
@@ -1333,16 +1344,19 @@ export const register: Register = (on, options) => {
       (e.component === 'Pane' && e.requestId === PANE) ||
       (e.component === 'AbovePrompt' && (await read($, modeAtom)) === 'band')
     if (!isOurs || e.origin.kind !== 'person' || e.by === 0) return next(e)
+    // The window stays on row 1 (the desktop keeps a spare row above the feed,
+    // so the wheel can reach us upward too); the terminal's tree fits, so 0.
+    const pinned = { ...e, offset: Math.min(1, Math.max(0, e.contentRows - e.bodyRows)) }
     // The menu scrolls a row a tick.
     if (menu.isOpen) {
       await move($, e.by > 0 ? 1 : -1, 1)
-      return {}
+      return next(pinned)
     }
     // A wheel flick sends a burst of ticks: one swipe per flick.
     const now = Date.now()
     if (now - lastSwipe >= SWIPE_COOLDOWN_MS) await swipe($, e.by > 0 ? 1 : -1)
     lastSwipe = now
-    return {}
+    return next(pinned)
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {

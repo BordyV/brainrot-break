@@ -15,6 +15,9 @@ const PANE = {
   view: {},
 } as const
 
+// The test runtime has timers; the engine's types (no DOM, no Node) do not declare them.
+declare function setTimeout(fn: () => void, ms: number): unknown
+
 // /brainrot as the person types it in the prompt.
 const brainrot = ($: Engine, args: string) =>
   $.command.run({ command: 'brainrot', args, origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 120 } })
@@ -519,4 +522,30 @@ test('ticking a theme brings every video that has it, from whichever home', asyn
   // the robot arm, the warehouse robots... not only the robot vacuum
   expect([...seen].some(k => k !== 'robovac')).toBe(true)
   await ui.unmount()
+})
+
+test('on the desktop, the wheel goes back up to the previous video', async ($, on) => {
+  const clock = mock.clock(on)
+  mock.store(on)
+  on('ui.open', () => ({ value: { isPlaced: true as const } }))
+  on('ui.close', () => ({ value: undefined }))
+
+  // the engine's own scroll, beneath the mod: the window moves where it is told
+  // (a call on $ is answered as { value }, which the hook's own type does not spell)
+  on('ui.scroll', () => ({ value: {} }) as never)
+  await brainrot($, '')
+  const desktop = await $.ui.mount({ plugin: 'brainrot-break', surface: 'desktop', component: 'Pane', requestId: 'brainrot-break', props: PANE })
+  const author = async () => (await desktop.find({ type: 'Text', text: /^@/ }))?.text
+  // the desktop tree keeps a spare row above the feed, so a tick upward can arrive
+  const wheel = (by: number) =>
+    $.ui.scroll({ component: 'Pane', requestId: 'brainrot-break', offset: 1 + by, by, bodyRows: 30, contentRows: 32, origin: { kind: 'person' } })
+  const first = await author()
+  await wheel(1)
+  expect(await author()).not.toBe(first)
+  // one swipe per wheel flick: the next flick comes after the cooldown, in real time
+  await new Promise(resolve => setTimeout(() => resolve(undefined), 400))
+  await clock.advance(1000)
+  await wheel(-1)
+  expect(await author()).toBe(first)
+  await desktop.unmount()
 })
