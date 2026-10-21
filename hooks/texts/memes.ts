@@ -133,4 +133,88 @@ export const MEMES = {
       fr: ['tum tum tum (son original)', 'son original - tronchetto.tumtum', 'coups de bois (bass boosted)'],
     },
   },
+  tierlist: {
+    name: { en: 'tier list', fr: 'tier list' },
+    authors: ['@tier.maker', '@ranked.everything', '@s.tier.only'],
+    tags: ['#tierlist #ranking #debate', '#hottake #opinion', '#fyp #foryou'],
+    captions: {
+      en: ['the rock in A tier. explain.', 'ranking things nobody asked for', 'you will disagree with this', 'S tier is reserved for pizza'],
+      fr: ['le caillou en tier A. expliquez.', 'je classe des trucs que personne n’a demandés', 'vous allez pas être d’accord', 'le tier S est réservé à la pizza'],
+    },
+    sounds: {
+      en: ['dramatic tier list music', 'original sound - tier.maker', 'ticking clock (deciding)'],
+      fr: ['musique de tier list dramatique', 'son original - tier.maker', 'tic-tac (il hésite)'],
+    },
+  },
+
+  catkeys: {
+    name: { en: 'cat on the keyboard', fr: 'le chat sur le clavier' },
+    authors: ['@cat.commits', '@keyboard.walker', '@paws.on.prod'],
+    tags: ['#cat #coding #keyboard', '#devlife #catsofinstagram', '#fyp #foryou'],
+    captions: {
+      en: ['he pushed to prod', 'ctrl+z ctrl+z ctrl+z', 'new senior dev just joined', 'it compiled. how?'],
+      fr: ['il a push en prod', 'ctrl+z ctrl+z ctrl+z', 'le nouveau senior vient d’arriver', 'ça compile. comment ?'],
+    },
+    sounds: {
+      en: ['keyboard clacks (ASMR)', 'original sound - cat.commits', 'lofi beats to debug to'],
+      fr: ['clavier qui claque (ASMR)', 'son original - cat.commits', 'lofi pour débugger'],
+    },
+  },
+
+  touchgrass: {
+    name: { en: 'touch grass', fr: 'touch grass' },
+    authors: ['@touch.grass.daily', '@offline.dev', '@sun.exposure'],
+    tags: ['#touchgrass #devlife #outside', '#nature #logoff', '#fyp #foryou'],
+    captions: {
+      en: ['day 1 of touching grass', 'the sun is real??', 'POV: you closed the laptop', 'grass: touched. bugs: still there'],
+      fr: ['jour 1 à toucher de l’herbe', 'le soleil existe ??', 'POV : tu as fermé le laptop', 'herbe : touchée. bugs : toujours là'],
+    },
+    sounds: {
+      en: ['birds chirping (original sound)', 'original sound - touch.grass.daily', 'wallpaper meadow ambience'],
+      fr: ['oiseaux qui chantent (son original)', 'son original - touch.grass.daily', 'ambiance prairie fond d’écran'],
+    },
+  },
+
+  feedfeed: {
+    name: { en: 'the feed in the feed', fr: 'le feed dans le feed' },
+    authors: ['@feed.inception', '@scroll.loop', '@infinite.thumb'],
+    tags: ['#scrolling #meta #inception', '#doomscroll #feed', '#fyp #foryou'],
+    captions: {
+      en: ['you are here', 'scrolling while you scroll', 'one more and I stop. promise.', 'it goes deeper'],
+      fr: ['vous êtes ici', 'scroller pendant que tu scrolles', 'encore une et j’arrête. promis.', 'ça va plus loin'],
+    },
+    sounds: {
+      en: ['inception bwaaam', 'original sound - feed.inception', 'thumb swipe (ASMR)'],
+      fr: ['bwaaam d’inception', 'son original - feed.inception', 'swipe du pouce (ASMR)'],
+    },
+  },
+
+  ballerina: {
+    name: { en: 'Ballerina Cappuccina', fr: 'Ballerina Cappuccina' },
+    authors: ['@ballerina.cappuccina', '@espresso.pirouette', '@la.tazza.danza'],
+    tags: ['#italianbrainrot #brainrot #ballerina', '#cappuccino #dance', '#fyp #foryou'],
+    captions: {
+      en: ['she spins. the foam flies.', 'mi mi mi mi mi', 'extra shot of pirouette', 'bravissima! roses on stage'],
+      fr: ['elle tourne. la mousse vole.', 'mi mi mi mi mi', 'un shot de pirouette en plus', 'bravissima ! des roses sur scène'],
+    },
+    sounds: {
+      en: ['music box waltz (sped up)', 'original sound - ballerina.cappuccina', 'espresso machine + violins'],
+      fr: ['valse de boîte à musique (accélérée)', 'son original - ballerina.cappuccina', 'machine à espresso + violons'],
+    },
+  },
+
+  elefantino: {
+    name: { en: 'Elefantino Cactusino', fr: 'Elefantino Cactusino' },
+    authors: ['@elefantino.cactusino', '@prickly.parade', '@balloon.popper'],
+    tags: ['#italianbrainrot #brainrot #cactus', '#elephant #balloons', '#fyp #foryou'],
+    captions: {
+      en: ['he just wanted a hug', 'balloons: 0. elefantino: undefeated', 'do not pet', 'pop pop pop'],
+      fr: ['il voulait juste un câlin', 'ballons : 0. elefantino : invaincu', 'ne pas caresser', 'pop pop pop'],
+    },
+    sounds: {
+      en: ['desert guitar (original sound)', 'original sound - elefantino.cactusino', 'balloon pops (bass boosted)'],
+      fr: ['guitare du désert (son original)', 'son original - elefantino.cactusino', 'ballons qui éclatent (bass boosted)'],
+    },
+  },
+
 } satisfies Record<string, Entry>

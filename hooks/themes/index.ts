@@ -96,6 +96,8 @@ export const THEME_OF: Record<string, Theme> = {
 // where their code and texts live) and these. Hiding any of a video's themes
 // hides it; a hashtag focus on any of them shows it.
 export const EXTRA_THEMES: Record<string, Theme[]> = {
+  catkeys: ['dev', 'animals'],
+  touchgrass: ['dev'],
   sokoban: ['puzzles'],
   minesweeper: ['puzzles'],
   game2048: ['puzzles'],

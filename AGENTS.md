@@ -84,7 +84,7 @@ A video is a `Maker`: `(W, H, rng) => { step(), draw(px) }`.
 - The bottom pixel row is the progress bar, and like hearts are drawn over the middle and lower right. Keep scores and text to the top corners, as the other videos do (`text(...)`).
 - Budget: under 1 ms a frame (the slowest today take about 0.3), and under 131,072 characters of SVG per frame, which is the desktop's limit. The SVG has one rectangle per horizontal run of one colour, so per-pixel noise and dithering cost the most (the rainy window, at about 38 k, is the largest). `render.ts` prints both numbers and fails above the SVG limit.
 - `draw` can be called before the first `step`, so the starting state must already draw. Never call `rng` in `draw`: the terminal and the desktop draw at different rates, so it would change the clip. For noise in `draw`, use `hash(x, y, seed)`.
-- Helpers in `hooks/draw.ts`: `rgb`, `mix`, `add`, `scale`, `hsv`, `rect`, `dot`, `disc`, `sprite` (ASCII art rows mapped to colours), `text`, `sky` (vertical gradient). `text` knows the digits, `D V Z` and `+ - x % : ! ? . /`.
+- Helpers in `hooks/draw.ts`: `rgb`, `mix`, `add`, `scale`, `hsv`, `rect`, `dot`, `disc`, `sprite` (ASCII art rows mapped to colours), `text`, `sky` (vertical gradient). `text` knows the digits, `A B C D S V Z` and `+ - x % : ! ? . /`.
 - Helpers in `hooks/kit.ts`: maths (`clamp`, `lerp`, `irand`, `pick`, `shuffle`, `hash`, `rot`, `DIRS`), drawing (`line`, `ring`, `ellipse`, `poly`, `tint`, `shade`, `textWidth`), balls (`Ball`, `wallCircle`, `hitSeg`, `collide`, `keepSpeed`, `shiny`) and sparks (`Spark`, `burst`, `sparks`).
 - A video can loop or reset itself. Games that play themselves need a bot that mostly wins, with the odd failure for drama (see `geodash` and `snake`).
 

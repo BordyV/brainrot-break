@@ -81,9 +81,9 @@ The language can also be set in the plugin's config (`language`: `en`, `fr`, `es
 
 ## The videos
 
-349 of them, in 24 themes:
+355 of them, in 24 themes:
 
-![The 349 videos of the feed](assets/preview.png)
+![The 355 videos of the feed](assets/preview.png)
 
 - **Satisfying & ASMR** (22): hourglass, bubbles, paint mixing, dominoes, kinetic sand, soap cubes, slime stretch, pressure washing, carpet cleaning, perfect fit, laser rust removal, ball sort, paint bucket, screen film peel, wood planer, bubble wrap, fridge restock, lawn stripes, snow plough, window squeegee, floor tiling, zen garden.
 - **Ball & marble physics** (22): marbles, double pendulum, growing ball, escape the rings, marble race, ball splits, string art bounce, which colour wins, spinning hexagon, marble funnel, balls vs saws, bounce flashes, marble machine, gravity maze, 100 balls one hole, snooker, pinball, peg breaker, colour gates, sky track, will it make it, rainbow ball.
@@ -103,7 +103,7 @@ The language can also be set in the plugin's config (`language`: `en`, `fr`, `es
 - **Crafts & makers** (12): brick build, pixel art drawing, pottery wheel, cross-stitch, fuse beads, mosaic, weaving loom, mural, sandcastle, block house, card tower, Jenga collapse.
 - **Science experiments** (14): elephant toothpaste, Mentos and cola, Newton’s cradle, Tesla coil, mousetrap chain reaction, baking soda volcano, crystal growth, water balloon slow-mo, Chladni plate, gas in a box, water rocket, egg drop, coil train, ant farm.
 - **Developer humour** (21): sorting, Matrix rain, stuck at 99%, git branches, merge conflict, CI pipeline, stack overflow, whack-a-bug, server rack, loading spinners, network packets, garbage collector, memory leak, rubber duck debugging, pipes screensaver, flying toasters, disk defragmenter, test suite, robot coder, neural network, node_modules.
-- **Internet memes** (10): DVD logo, Nyan Cat, absurd creature parade, split-screen runner, spinning cat, rat dance, bongo cat, the backrooms, and two Italian brainrot heroes: Coccodrillo Bombardiere and Tronchetto Tum Tum.
+- **Internet memes** (16): DVD logo, Nyan Cat, absurd creature parade, split-screen runner, spinning cat, rat dance, bongo cat, the backrooms, tier list, cat on the keyboard, touch grass, the feed in the feed, and four Italian brainrot heroes: Coccodrillo Bombardiere, Tronchetto Tum Tum, Ballerina Cappuccina and Elefantino Cactusino.
 - **Seasons, holidays & spooky** (14): pumpkin patch, haunted house, Christmas lights, sleigh across the moon, unwrapping, New Year’s ball drop, dragon dance, snowman, cherry blossoms, witch’s cauldron, bats at dusk, spider web, piñata, leaf pile.
 - **Puzzles & logic** (6): Tower of Hanoi, sokoban*, minesweeper*, 2048*, water sort*, ball sort*.
 - **Simulations & emergence** (7): falling sand world, phantom traffic jam, Game of Life*, Langton’s ant*, boids*, foxes and rabbits*, zombie outbreak*.

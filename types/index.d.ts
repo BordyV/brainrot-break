@@ -348,6 +348,12 @@ export type Kind =
   | 'robovac'
   | 'crocbomber'
   | 'tumtum'
+  | 'tierlist'
+  | 'catkeys'
+  | 'touchgrass'
+  | 'feedfeed'
+  | 'ballerina'
+  | 'elefantino'
 
 export type Video = {
   id: string

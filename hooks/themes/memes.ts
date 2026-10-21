@@ -1,6 +1,6 @@
-import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
+import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, ellipse, hash, irand, lerp, line, pick, poly, ring, sparks } from '../kit'
+import { burst, clamp, ellipse, hash, irand, lerp, line, pick, poly, ring, sparks } from '../kit'
 import type { Spark } from '../kit'
 
 // Internet memes & brainrot: original characters only, no named memes.
@@ -1155,6 +1155,825 @@ const tumtum: Maker = (W, H, rng) => {
   }
 }
 
+// --- tier list ----------------------------------------------------------------------
+
+const tierlist: Maker = (W, H, rng) => {
+  const TIERS = [0xff7070, 0xffb060, 0xffe070, 0x90e070]
+  const LETTERS = ['S', 'A', 'B', 'C']
+  const top = 1
+  const rowH = Math.max(4, Math.floor((H * 0.72 - top) / 4))
+  const lab = Math.max(5, Math.round(W * 0.2))
+  const ic = Math.max(3, rowH - 3)
+  const slotW = ic + 2
+  const slots = Math.max(1, Math.floor((W - lab - 1) / slotW))
+  const poolY = top + rowH * 4 + (H - top - rowH * 4) / 2 - 1
+  type Item = { k: number; x: number; y: number; row: number; vy: number }
+  let placed: Item[] = []
+  const queue = [irand(rng, 7), irand(rng, 7), irand(rng, 7)]
+  let cur: Item = { k: irand(rng, 7), x: W / 2, y: H + ic, row: -1, vy: 0 }
+  let phase: 'rise' | 'hover' | 'place' | 'clear' = 'rise'
+  let pt = 0
+  let visits: number[] = []
+  let slot = 0
+  let bits: Spark[] = []
+  const slotXY = (row: number, s: number): [number, number] => [lab + 2 + s * slotW + ic / 2, top + row * rowH + (rowH - 1) / 2]
+  const fill = (row: number) => placed.filter(p => p.row === row).length
+  const next = () => {
+    cur = { k: queue.shift() as number, x: W / 2, y: H + ic, row: -1, vy: 0 }
+    queue.push(irand(rng, 7))
+    phase = 'rise'
+    pt = 0
+  }
+
+  return {
+    step() {
+      pt++
+      if (phase === 'rise') {
+        cur.y = lerp(H + ic, poolY, Math.min(1, pt / 8))
+        if (pt >= 14) {
+          const open = [0, 1, 2, 3].filter(r => fill(r) < slots)
+          if (placed.length >= slots * 3 || !open.length) {
+            phase = 'clear'
+            pt = 0
+            return
+          }
+          const target = pick(rng, open)
+          visits = []
+          for (let n = 1 + irand(rng, 3); n > 0; n--) visits.push(irand(rng, 4))
+          visits.push(target)
+          cur.row = target
+          phase = 'hover'
+          pt = 0
+        }
+      } else if (phase === 'hover') {
+        const idx = Math.floor(pt / 10)
+        if (idx >= visits.length) {
+          slot = fill(cur.row)
+          phase = 'place'
+          pt = 0
+        } else {
+          const ty = slotXY(visits[idx] as number, 0)[1]
+          cur.x += (lab + (W - lab) * 0.62 - cur.x) * 0.3
+          cur.y += (ty - cur.y) * 0.35
+        }
+      } else if (phase === 'place') {
+        const [sx, sy] = slotXY(cur.row, slot)
+        cur.x += (sx - cur.x) * 0.4
+        cur.y += (sy - cur.y) * 0.4
+        if (pt >= 8) {
+          cur.x = sx
+          cur.y = sy
+          placed.push(cur)
+          burst(bits, rng, sx, sy, TIERS[cur.row] as number, 8, 0.9)
+          next()
+        }
+      } else {
+        for (const p of placed) {
+          p.vy += 0.12
+          p.y += p.vy
+        }
+        if (pt > 40) {
+          placed = []
+          next()
+        }
+      }
+      bits = sparks(bits, 0.04)
+    },
+    draw(px) {
+      px.fill(0x1a1a22)
+      const hot = phase === 'hover' ? visits[Math.min(visits.length - 1, Math.floor(pt / 10))] : -1
+      for (let r = 0; r < 4; r++) {
+        const y = top + r * rowH
+        rect(px, W, H, 0, y, lab, rowH - 1, TIERS[r] as number)
+        text(px, W, H, Math.floor((lab - 3) / 2), y + Math.floor((rowH - 6) / 2), LETTERS[r] as string, 0x1a1a22)
+        rect(px, W, H, lab + 1, y, W - lab - 1, rowH - 1, r === hot ? 0x44445a : 0x2a2a36)
+      }
+      rect(px, W, H, 0, top + rowH * 4, W, H - top - rowH * 4, 0x22222c)
+      for (let q = 0; q < 2; q++) icon(px, W, H, queue[q] as number, W - 3 - q * (ic * 0.7 + 2), H - 3 - ic * 0.35, ic * 0.7, 0.45)
+      for (const p of placed) icon(px, W, H, p.k, p.x, p.y, ic, 1)
+      const wob = phase === 'hover' ? Math.round(Math.sin(pt * 1.3)) : 0
+      if (phase !== 'clear') icon(px, W, H, cur.k, cur.x + wob, cur.y, phase === 'rise' ? ic * 1.3 : ic, 1)
+      for (const b of bits) dot(px, W, H, b.x, b.y, b.c)
+    },
+  }
+}
+
+// a small item drawn at (cx, cy), s pixels wide, faded towards the background by 1 - k
+function icon(px: Uint32Array, W: number, H: number, k: number, cx: number, cy: number, s: number, f: number) {
+  const r = s / 2
+  const c = (v: number) => mix(0x22222c, v, f)
+  if (k === 0) {
+    poly(px, W, H, [[cx - r, cy - r], [cx + r, cy - r], [cx, cy + r]], c(0xf0c050))
+    rect(px, W, H, cx - r, cy - r, s, Math.max(1, s * 0.2), c(0xc07830))
+    dot(px, W, H, cx, cy - r * 0.2, c(0xe03a2a))
+  } else if (k === 1) {
+    disc(px, W, H, cx - r * 0.1, cy + r * 0.3, r * 0.75, c(0xffd840))
+    disc(px, W, H, cx + r * 0.3, cy - r * 0.4, r * 0.5, c(0xffd840))
+    dot(px, W, H, cx + r * 0.85, cy - r * 0.3, c(0xff8a20))
+    dot(px, W, H, cx + r * 0.35, cy - r * 0.5, c(0x101010))
+  } else if (k === 2) {
+    rect(px, W, H, cx - r * 0.8, cy - r * 0.6, r * 1.4, r * 1.4, c(0xf4f0e8))
+    rect(px, W, H, cx - r * 0.8, cy - r * 0.6, r * 1.4, 1, c(0x6a3a1a))
+    dot(px, W, H, cx + r * 0.8, cy, c(0xf4f0e8))
+  } else if (k === 3) {
+    for (let a = 0.3; a < 2.9; a += 0.25) {
+      dot(px, W, H, cx + Math.cos(a) * r * 0.9, cy - r * 0.5 + Math.sin(a) * r * 0.9, c(0xf8e050))
+      dot(px, W, H, cx + Math.cos(a) * r * 0.6, cy - r * 0.5 + Math.sin(a) * r * 0.6, c(0xe8c030))
+    }
+  } else if (k === 4) {
+    disc(px, W, H, cx, cy + r * 0.1, r * 0.85, c(0x8a8a92))
+    dot(px, W, H, cx - r * 0.3, cy - r * 0.2, c(0xb0b0b8))
+  } else if (k === 5) {
+    disc(px, W, H, cx, cy + r * 0.1, r * 0.8, c(0xf0a040))
+    poly(px, W, H, [[cx - r * 0.8, cy - r * 0.2], [cx - r * 0.7, cy - r], [cx - r * 0.1, cy - r * 0.5]], c(0xf0a040))
+    poly(px, W, H, [[cx + r * 0.8, cy - r * 0.2], [cx + r * 0.7, cy - r], [cx + r * 0.1, cy - r * 0.5]], c(0xf0a040))
+    dot(px, W, H, cx - r * 0.35, cy, c(0x101010))
+    dot(px, W, H, cx + r * 0.35, cy, c(0x101010))
+  } else {
+    rect(px, W, H, cx - r, cy - r * 0.4, s, r * 1.1, c(0x4a9a3a))
+    rect(px, W, H, cx - r * 0.2, cy + r * 0.3, r * 1.2, 1, c(0xffffff))
+    dot(px, W, H, cx - r * 0.4, cy - r * 0.6, c(0xfff060))
+  }
+}
+
+// --- cat on the keyboard ------------------------------------------------------------
+
+const catkeys: Maker = (W, H, rng) => {
+  const u = W / 32
+  const CODE = [0xc678dd, 0x61afef, 0x98c379, 0xe5c07b, 0xabb2bf, 0xabb2bf]
+  const mTop = 1
+  const mH = Math.round(H * 0.46)
+  const desk = Math.round(H * 0.56)
+  const kbTop = Math.round(H * 0.66)
+  const kbBot = Math.round(H * 0.88)
+  const COLS = 9
+  const ROWS = 4
+  const kw = (W - 4) / COLS
+  const kh = (kbBot - kbTop - 2) / ROWS
+  type Seg = { w: number; c: number }
+  type Line = { ind: number; segs: Seg[]; bad: boolean }
+  const fresh = (): Line => {
+    const segs: Seg[] = []
+    const ind = irand(rng, 3) * 2
+    let room = W - 8 - ind
+    for (let n = 1 + irand(rng, 4); n > 0 && room > 3; n--) {
+      const w = Math.min(room, 2 + irand(rng, 6))
+      segs.push({ w, c: pick(rng, CODE) })
+      room -= w + 1
+    }
+    return { ind, segs, bad: false }
+  }
+  const lines: Line[] = []
+  for (let n = 0; n < 8; n++) lines.push(fresh())
+  const pressed = new Float32Array(COLS * ROWS)
+  let phase: 'type' | 'walk' | 'oops' | 'undo' = 'type'
+  let pt = 0
+  let dir = 1
+  let x = 0
+  let paw = 0
+
+  return {
+    step() {
+      pt++
+      for (let k = 0; k < pressed.length; k++) if (pressed[k]) pressed[k] = Math.max(0, (pressed[k] as number) - 1)
+      const press = (col: number) => {
+        const k = clamp(col, 0, COLS - 1) + COLS * irand(rng, ROWS)
+        pressed[k] = 4
+      }
+      if (phase === 'type') {
+        // the owner types calm, tidy code
+        if (pt % 9 === 0) {
+          lines.push(fresh())
+          press(irand(rng, COLS))
+        }
+        if (pt > 60) {
+          phase = 'walk'
+          pt = 0
+          x = dir > 0 ? -10 * u : W + 10 * u
+        }
+      } else if (phase === 'walk') {
+        x += dir * 0.6
+        if (pt % 5 === 0) {
+          paw++
+          const fx = x + dir * (paw % 2 ? 3 : -2) * u
+          if (fx > 1 && fx < W - 2) {
+            press(Math.floor((fx - 2) / kw))
+            let last = lines[lines.length - 1] as Line
+            const used = last.ind + last.segs.reduce((a, s) => a + s.w + 1, 0)
+            if (!last.bad || used > W - 10) {
+              last = { ind: irand(rng, 4), segs: [], bad: true }
+              lines.push(last)
+            }
+            last.segs.push({ w: 1 + irand(rng, 4), c: hsv(rng(), 0.7, 1) })
+          }
+        }
+        if ((dir > 0 && x > W + 10 * u) || (dir < 0 && x < -10 * u)) {
+          phase = 'oops'
+          pt = 0
+        }
+      } else if (phase === 'oops') {
+        if (pt > 24) {
+          phase = 'undo'
+          pt = 0
+        }
+      } else if (pt % 4 === 0) {
+        // ctrl+z, one line at a time
+        const i = lines.map(l => l.bad).lastIndexOf(true)
+        if (i < 0) {
+          phase = 'type'
+          pt = 0
+          dir = -dir
+        } else {
+          lines.splice(i, 1)
+          press(1)
+          press(2)
+        }
+      }
+      while (lines.length > 40) lines.shift()
+    },
+    draw(px) {
+      px.fill(0x3a3048)
+      for (let y = 0; y < desk; y += 4) rect(px, W, H, 0, y, W, 1, 0x40354e)
+      // monitor
+      rect(px, W, H, 1, mTop, W - 2, mH, 0x2a2a32)
+      rect(px, W, H, 2, mTop + 1, W - 4, mH - 3, 0x14161e)
+      rect(px, W, H, W / 2 - 2 * u, mTop + mH, 4 * u, desk - mTop - mH, 0x2a2a32)
+      const maxL = Math.floor((mH - 5) / 2)
+      const shown = lines.slice(-maxL)
+      const flash = phase === 'oops' && Math.floor(pt / 4) % 2 === 0
+      shown.forEach((l, j) => {
+        const y = mTop + 2 + j * 2
+        let xx = 3 + l.ind
+        for (const s of l.segs) {
+          if (xx >= W - 3) break
+          rect(px, W, H, xx, y, Math.min(s.w, W - 3 - xx), 1, l.bad && flash ? 0xff4040 : s.c)
+          xx += s.w + 1
+        }
+        if (l.bad) dot(px, W, H, 2, y, 0xff4040)
+      })
+      if (Math.floor(pt / 6) % 2 === 0) {
+        const l = shown[shown.length - 1]
+        const y = mTop + 2 + (shown.length - 1) * 2
+        const end = l ? 3 + l.ind + l.segs.reduce((a, s) => a + s.w + 1, 0) : 3
+        rect(px, W, H, Math.min(end, W - 4), y - 1, 1, 2, 0xffffff)
+      }
+      if (phase === 'oops' || phase === 'undo') text(px, W, H, W - 6, mTop + mH - 8, '!', 0xff4040)
+      // desk and keyboard
+      rect(px, W, H, 0, desk, W, H - desk, 0x6a4a30)
+      rect(px, W, H, 0, desk, W, 1, 0x8a6a48)
+      rect(px, W, H, 1, kbTop, W - 2, kbBot - kbTop, 0x2a2a30)
+      for (let r = 0; r < ROWS; r++)
+        for (let c = 0; c < COLS; c++) {
+          const p = pressed[c + r * COLS] as number
+          rect(px, W, H, 2 + c * kw, kbTop + 1 + r * kh + (p ? 1 : 0), Math.max(1, kw - 1), Math.max(1, kh - 1), p ? 0x8a8a98 : 0xc8c8d4)
+        }
+      // the cat walks across the keys
+      if (phase === 'walk') {
+        const fy = kbTop + 2 * u
+        const ph = Math.sin(pt * 0.63)
+        const bx = x
+        const by = fy - 4 * u
+        for (const [lx, s] of [[-3, 1], [-2, -1], [2, -1], [3, 1]] as const)
+          line(px, W, H, bx + dir * lx * u, by + u, bx + dir * lx * u + ph * s * u, fy, 0xe08a30)
+        for (let k = 0; k <= 6; k++) {
+          const tx = bx - dir * (4 + k * 0.7) * u
+          const ty = by - k * 0.9 * u + Math.sin(pt * 0.3 + k * 0.6) * k * 0.2 * u
+          disc(px, W, H, tx, ty, 0.6 * u, 0xf0a040)
+        }
+        ellipse(px, W, H, bx, by, 4.5 * u, 2.2 * u, 0xf0a040)
+        for (let k = -1; k <= 1; k++) rect(px, W, H, bx + k * 2 * u, by - 2 * u, Math.max(1, 0.7 * u), 1.5 * u, 0xc06a20)
+        const hx = bx + dir * 5 * u
+        const hy = by - 2 * u
+        disc(px, W, H, hx, hy, 2.2 * u, 0xf0a040)
+        poly(px, W, H, [[hx - 2 * u, hy - u], [hx - 1.6 * u, hy - 3.6 * u], [hx - 0.2 * u, hy - 1.8 * u]], 0xf0a040)
+        poly(px, W, H, [[hx + 2 * u, hy - u], [hx + 1.6 * u, hy - 3.6 * u], [hx + 0.2 * u, hy - 1.8 * u]], 0xf0a040)
+        dot(px, W, H, hx + dir * u, hy - 0.3 * u, 0x101010)
+        dot(px, W, H, hx + dir * 2 * u, hy + 0.6 * u, 0xff8aa0)
+      }
+    },
+  }
+}
+
+// --- touch grass --------------------------------------------------------------------
+
+const touchgrass: Maker = (W, H, rng) => {
+  const u = W / 32
+  const gy = Math.round(H * 0.8)
+  const T = 340
+  const seed = irand(rng, 1000)
+  const SKIN = 0xf0c8a0
+  const HAIR = 0x3a2418
+  const HOODIE = 0x6a6a7a
+  const JEANS = 0x3a4a7a
+  let t = 0
+
+  const standing = (px: Uint32Array, x: number, foot: number, walk: number) => {
+    const sw = Math.sin(walk * 0.5) * 1.5 * u
+    line(px, W, H, x - 0.5 * u, foot - 4 * u, x - 0.5 * u + sw, foot - 1, JEANS)
+    line(px, W, H, x + 0.5 * u, foot - 4 * u, x + 0.5 * u - sw, foot - 1, JEANS)
+    rect(px, W, H, x - 1.5 * u, foot - 9 * u, 3 * u + 1, 5 * u, HOODIE)
+    line(px, W, H, x, foot - 8 * u, x - sw * 0.8, foot - 5 * u, HOODIE)
+    disc(px, W, H, x, foot - 10.8 * u, 1.8 * u, SKIN)
+    rect(px, W, H, x - 1.8 * u, foot - 12.8 * u, 3.6 * u + 1, 1.2 * u, HAIR)
+    dot(px, W, H, x + u, foot - 11 * u, 0x101010)
+  }
+
+  return {
+    step() {
+      t++
+    },
+    draw(px) {
+      const f = t % T
+      if (f < 120) {
+        // the room: a desk on the left, a door on the right
+        px.fill(0x1c1a2a)
+        rect(px, W, H, 0, gy, W, H - gy, 0x2a2434)
+        const doorX = W - 8 * u
+        const open = f > 100
+        rect(px, W, H, doorX, gy - 16 * u, 7 * u, 16 * u, open ? 0xfff4c0 : 0x4a3424)
+        if (open) for (let y = gy; y < H; y++) rect(px, W, H, doorX - (y - gy) * 0.6, y, 7 * u + (y - gy) * 0.6, 1, 0x5a5040)
+        else dot(px, W, H, doorX + u, gy - 8 * u, 0xf0c040)
+        const deskY = gy - 7 * u
+        const glow = f < 70 ? 0.7 + 0.3 * Math.sin(f * 0.9) * Math.sin(f * 0.37) : 0.5
+        rect(px, W, H, 0, deskY - 7 * u, 9 * u, 6 * u, 0x20222a)
+        rect(px, W, H, u, deskY - 6 * u, 7 * u, 4 * u, mix(0x203050, 0x60a0ff, glow))
+        rect(px, W, H, 3.5 * u, deskY - u, 2 * u, u, 0x20222a)
+        rect(px, W, H, 0, deskY, 11 * u, u, 0x5a4030)
+        rect(px, W, H, 9 * u, deskY, u, 7 * u, 0x5a4030)
+        if (f < 70) {
+          // hunched over the keyboard, typing
+          const x = 13 * u
+          rect(px, W, H, x - 2 * u, gy - 6 * u, 4 * u, u, 0x3a3a44)
+          rect(px, W, H, x + u, gy - 5 * u, u, 5 * u, 0x3a3a44)
+          rect(px, W, H, x - 4 * u, gy - 6.5 * u, 5 * u, 1.5 * u, JEANS)
+          line(px, W, H, x - 4 * u, gy - 5 * u, x - 4 * u, gy - 1, JEANS)
+          poly(px, W, H, [[x - u, gy - 6 * u], [x + 2 * u, gy - 6 * u], [x - u, gy - 11 * u], [x - 4 * u, gy - 10 * u]], HOODIE)
+          const tap = f % 4 < 2 ? 0 : 0.6 * u
+          line(px, W, H, x - 2 * u, gy - 10 * u, x - 6 * u, deskY - 0.5 - tap, HOODIE)
+          disc(px, W, H, x - 4.5 * u, gy - 11.5 * u, 1.8 * u, mix(SKIN, 0x80b0ff, 0.35))
+          rect(px, W, H, x - 5 * u, gy - 13.4 * u, 3.6 * u, 1.2 * u, HAIR)
+        } else {
+          const x = lerp(13 * u, doorX + 3 * u, clamp((f - 72) / 40, 0, 1))
+          standing(px, x, gy, f)
+        }
+      } else {
+        // outside
+        const g = f - 120
+        sky(px, W, H, 0x5ab0f0, 0xc8ecff, gy)
+        const sx = W * 0.78
+        const sy = H * 0.14
+        for (let k = 0; k < 8; k++) {
+          const a = k * 0.785 + g * 0.02
+          line(px, W, H, sx + Math.cos(a) * 4 * u, sy + Math.sin(a) * 4 * u, sx + Math.cos(a) * 6 * u, sy + Math.sin(a) * 6 * u, 0xfff0a0)
+        }
+        disc(px, W, H, sx, sy, 3 * u, 0xffe060)
+        const cx = ((W * 0.2 - g * 0.15) % (W + 12 * u) + W + 12 * u) % (W + 12 * u) - 6 * u
+        ellipse(px, W, H, cx, H * 0.3, 5 * u, 1.5 * u, 0xffffff)
+        ellipse(px, W, H, cx + 2 * u, H * 0.3 - u, 3 * u, 1.5 * u, 0xffffff)
+        rect(px, W, H, 0, gy, W, H - gy, 0x3a9a3a)
+        for (let y = gy + 2; y < H; y += 3) for (let x = 0; x < W; x++) if (hash(x, y, seed) < 0.12) px[y * W + x] = 0x2e8030
+        const mid = W * 0.42
+        const blades = (front: boolean) => {
+          for (let x = 0; x < W; x++) {
+            if ((hash(x, 1, seed) < 0.5) !== front) continue
+            if (front && g >= 50 && x > mid - 8 * u && x < mid + 9 * u) continue
+            const h = Math.round((front ? 1 : 2) * u + hash(x, 0, seed) * 3 * u)
+            const lean = Math.round(Math.sin(g * 0.12 + x * 0.4) * 0.7)
+            for (let k = 1; k <= h; k++) dot(px, W, H, x + (k > h / 2 ? lean : 0), gy - k + (front ? 2 : 0), front ? 0x4ab84a : 0x3aa83a)
+          }
+        }
+        blades(false)
+        if (g < 50) standing(px, lerp(-4 * u, mid, g / 50), gy + u, g)
+        else {
+          // lying in the grass, arms behind the head
+          const y = gy - 1.5 * u
+          rect(px, W, H, mid - 3 * u, y - u, 6 * u, 2.2 * u, HOODIE)
+          rect(px, W, H, mid + 3 * u, y - 0.4 * u, 5 * u, 1.6 * u, JEANS)
+          line(px, W, H, mid - 3 * u, y - u, mid - 6 * u, y - 2.5 * u, HOODIE)
+          disc(px, W, H, mid - 5 * u, y - 0.5 * u, 1.8 * u, SKIN)
+          rect(px, W, H, mid - 7 * u, y - 2 * u, 1.2 * u, 3 * u, HAIR)
+          dot(px, W, H, mid - 4.4 * u, y - 1.4 * u, 0x101010)
+          dot(px, W, H, mid - 4.4 * u, y + 0.4 * u, 0xc06050)
+          // flowers sprout around
+          for (let k = 0; k < 7; k++) {
+            if (g - 60 < k * 14) break
+            const fx = Math.round(hash(k, 3, seed) * (W - 2)) + 1
+            const fy = gy + 1 + Math.round(hash(k, 4, seed) * (H - gy - 4))
+            const c = [0xff70a0, 0xffe060, 0xffffff, 0xb080ff][k % 4] as number
+            dot(px, W, H, fx, fy, c)
+            dot(px, W, H, fx - 1, fy, c)
+            dot(px, W, H, fx + 1, fy, c)
+            dot(px, W, H, fx, fy - 1, c)
+            dot(px, W, H, fx, fy, 0xf0a020)
+          }
+          // a butterfly visits
+          const ba = g * 0.05
+          const bx = mid + Math.cos(ba) * 7 * u
+          const by = gy - 8 * u + Math.sin(ba * 2) * 3 * u
+          const flap = Math.floor(g / 2) % 2
+          dot(px, W, H, bx, by, 0x302010)
+          dot(px, W, H, bx - 1, by - flap, 0xff9030)
+          dot(px, W, H, bx + 1, by - flap, 0xff9030)
+          if (flap) {
+            dot(px, W, H, bx - 1, by - 2, 0xff9030)
+            dot(px, W, H, bx + 1, by - 2, 0xff9030)
+          }
+        }
+        blades(true)
+        if (f > T - 20) {
+          const k = (f - (T - 20)) / 20
+          for (let i = 0; i < px.length; i++) px[i] = mix(px[i] as number, 0x000000, k)
+        }
+      }
+    },
+  }
+}
+
+// --- the feed in the feed -----------------------------------------------------------
+
+const feedfeed: Maker = (W, H, rng) => {
+  const pw = Math.max(8, Math.round(W * 0.66))
+  const ph = Math.max(12, Math.round(H * 0.68))
+  const ox = Math.round((W - pw) / 2)
+  const oy = Math.round(H * 0.1)
+  const sw = pw - 2
+  const sh = ph - 4
+  const CLIP = 50
+  const SWIPE = 8
+  const KINDS = 6
+  const buf = new Uint32Array(sw * sh)
+  let order = [irand(rng, KINDS)]
+  let t = 0
+  let liked = false
+  const tri = (v: number, m: number) => m - Math.abs((((v % (2 * m)) + 2 * m) % (2 * m)) - m)
+
+  // one tiny clip, drawn from its own clock alone
+  const clip = (k: number, b: Uint32Array, w: number, h: number, tt: number) => {
+    if (k === 0) {
+      b.fill(0x101018)
+      const bw = Math.max(2, Math.round(w * 0.3))
+      const x = tri(tt * 0.6, w - bw)
+      const y = tri(tt * 0.45 + 3, h - 2)
+      rect(b, w, h, x, y, bw, 2, hsv(Math.floor((tt * 0.6) / (w - bw)) * 0.17 + Math.floor((tt * 0.45 + 3) / (h - 2)) * 0.31, 0.7, 1))
+    } else if (k === 1) {
+      sky(b, w, h, 0x4aa0e8, 0xb8e4f8)
+      rect(b, w, h, 0, h - 3, w, 3, 0x2a7ac0)
+      const y = h * 0.35 + Math.sin(tt * 0.2) * 1.5
+      rect(b, w, h, w / 2 - 4, y, 8, 2, 0x4a9a3a)
+      rect(b, w, h, w / 2 - 1, y + 1, 2, 3, 0x9aa4b0)
+      dot(b, w, h, w / 2 + 2, y, 0xfff060)
+      dot(b, w, h, w / 2 + 4, y + (tt % 2), 0xd8d8d8)
+    } else if (k === 2) {
+      for (let y = 0; y < h; y++)
+        for (let x = 0; x < w; x++) {
+          const a = Math.atan2(y - h / 2, x - w / 2) + tt * 0.15
+          b[y * w + x] = Math.floor(((a + Math.PI * 8) / (Math.PI * 2)) * 8) % 2 ? 0xff70a0 : 0xffd060
+        }
+    } else if (k === 3) {
+      b.fill(0x2a1a3a)
+      const r = Math.max(2, w * 0.25)
+      const cx = w / 2
+      const cy = h / 2
+      const s = Math.cos(tt * 0.4)
+      disc(b, w, h, cx, cy, r, 0xf0a040)
+      dot(b, w, h, cx - r * 0.7 * s, cy - r, 0xf0a040)
+      dot(b, w, h, cx + r * 0.7 * s, cy - r, 0xf0a040)
+      if (s > 0) {
+        dot(b, w, h, cx - r * 0.4 * s, cy - 1, 0x101010)
+        dot(b, w, h, cx + r * 0.4 * s, cy - 1, 0x101010)
+      }
+    } else if (k === 4) {
+      b.fill(0x1a1020)
+      const pile = Math.min(h * 0.6, tt * 0.25)
+      for (let x = 0; x < w; x++) {
+        const hh = Math.max(0, pile - Math.abs(x - w / 2) * 0.9)
+        rect(b, w, h, x, h - hh, 1, hh, hash(x, 0, 3) < 0.5 ? 0xe0b060 : 0xd0a050)
+      }
+      for (let k2 = 0; k2 < 3; k2++) dot(b, w, h, w / 2, (tt * 1.5 + k2 * 4) % (h - pile), 0xe0b060)
+    } else {
+      // the feed, inside the feed, inside the feed
+      b.fill(0x2a1a3a)
+      const iw = Math.max(3, Math.round(w * 0.5))
+      const ih = Math.max(5, Math.round(h * 0.6))
+      const ix = Math.round((w - iw) / 2)
+      const iy = Math.round((h - ih) / 2)
+      rect(b, w, h, ix, iy, iw, ih, 0x101014)
+      rect(b, w, h, ix + 1, iy + 1, iw - 2, ih - 2, hsv(tt * 0.01, 0.5, 0.5))
+      dot(b, w, h, ix + 1 + tri(tt * 0.4, iw - 3), iy + 1 + tri(tt * 0.3, ih - 3), 0xffffff)
+    }
+  }
+
+  const HEART = ['.r.r.', 'rrrrr', 'rrrrr', '.rrr.', '..r..']
+
+  return {
+    step() {
+      t++
+      const f = t % (CLIP + SWIPE)
+      if (f === 0) {
+        let k = irand(rng, KINDS)
+        if (k === order[order.length - 1]) k = (k + 1) % KINDS
+        order.push(k)
+        if (order.length > 3) order = order.slice(-3)
+        liked = rng() < 0.4
+      }
+    },
+    draw(px) {
+      sky(px, W, H, 0x2a1a3a, 0x4a2a5a)
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (hash(x, y, 11) < 0.01) px[y * W + x] = 0x6a4a7a
+      rect(px, W, H, ox - 1, oy - 1, pw + 2, ph + 2, 0x3a3a44)
+      rect(px, W, H, ox, oy, pw, ph, 0x101014)
+      const f = t % (CLIP + SWIPE)
+      const cur = order[order.length - 1] as number
+      const prev = order[order.length - 2]
+      const tt = Math.floor(t / (CLIP + SWIPE)) * 7 + f
+      // during the first frames of a clip, the previous one slides away
+      const slide = prev !== undefined && f < SWIPE ? Math.round(sh * (1 - f / SWIPE) ** 2) : 0
+      const blit = (k: number, dy: number, at: number) => {
+        clip(k, buf, sw, sh, at)
+        for (let y = 0; y < sh; y++) {
+          const yy = y + dy
+          if (yy < 0 || yy >= sh) continue
+          for (let x = 0; x < sw; x++) dot(px, W, H, ox + 1 + x, oy + 2 + yy, buf[y * sw + x] as number)
+        }
+      }
+      blit(cur, slide, tt)
+      if (slide) blit(prev as number, slide - sh, tt + CLIP)
+      // the tiny app around the clip
+      for (let k = 0; k < 3; k++) dot(px, W, H, ox + pw - 3, oy + ph * 0.45 + k * 3, 0xffffff)
+      rect(px, W, H, ox + 1, oy + ph - 3, ((sw * f) / (CLIP + SWIPE)) | 0, 1, 0xffffff)
+      rect(px, W, H, ox + pw / 2 - 1, oy + 1, 3, 1, 0x2a2a30)
+      if (liked && f > 22 && f < 36) {
+        const k = Math.min(1, (f - 22) / 3)
+        if (k >= 1) sprite(px, W, H, ox + pw / 2 - 2, oy + ph * 0.45 - 2 - (f - 25) * 0.3, HEART, { r: 0xff3060 })
+        else dot(px, W, H, ox + pw / 2, oy + ph * 0.45, 0xff3060)
+      }
+      // the thumb: it rests, then flicks up
+      const lift = f >= CLIP + SWIPE - 6 ? (f - (CLIP + SWIPE - 6)) / 6 : f < 3 ? 1 - f / 3 : 0
+      const tx = ox + pw * 0.6
+      const ty = oy + ph * (0.85 - lift * 0.45)
+      line(px, W, H, W + 2, H - 1, tx, ty, 0xe0a880)
+      line(px, W, H, W + 2, H, tx + 1, ty + 1, 0xe0a880)
+      line(px, W, H, W + 2, H - 2, tx + 1, ty, 0xe0a880)
+      dot(px, W, H, tx, ty, 0xf0c0a0)
+      // the fingers holding the left edge
+      for (let k = 0; k < 3; k++) rect(px, W, H, ox - 2, oy + ph * 0.5 + k * 3, 2, 2, 0xe0a880)
+      rect(px, W, H, ox - 1, oy + ph + 1, pw * 0.7, H, 0xd09870)
+    },
+  }
+}
+
+// --- Ballerina Cappuccina -----------------------------------------------------------
+
+const ballerina: Maker = (W, H, rng) => {
+  const u = W / 32
+  const gy = Math.round(H * 0.82)
+  const T = 250
+  const CUP = 0xf4f0e8
+  const PINK = 0xf8a0c8
+  const SKIN = 0xf0c8a0
+  let t = 0
+  let a = 0
+  let foam: Spark[] = []
+  let roses: { x: number; y: number; vy: number }[] = []
+  const speed = (f: number) => (f < 110 ? lerp(0.05, 0.75, f / 110) : f < 160 ? 0.75 : f < 210 ? lerp(0.75, 0, (f - 160) / 50) : 0)
+
+  return {
+    step() {
+      t++
+      const f = t % T
+      if (f === 0) roses = []
+      a += speed(f)
+      const cx = W / 2
+      const cupTop = gy - 23 * u
+      if (f > 90 && f < 170 && rng() < 0.6) {
+        const s = rng() < 0.5 ? -1 : 1
+        foam.push({ x: cx + s * 2 * u, y: cupTop, vx: s * (0.6 + rng() * 0.8), vy: -0.5 - rng() * 0.6, l: 14 + irand(rng, 8), c: rng() < 0.5 ? 0xf0e0c0 : 0xffffff })
+      }
+      if (f > 212 && f < 240 && rng() < 0.25) roses.push({ x: W * 0.15 + rng() * W * 0.7, y: -2, vy: 0.5 })
+      for (const r of roses) {
+        if (r.y < gy + 2 * u) {
+          r.vy += 0.06
+          r.y = Math.min(gy + 2 * u, r.y + r.vy)
+        }
+      }
+      foam = sparks(foam, 0.06)
+    },
+    draw(px) {
+      const f = t % T
+      const cx = W / 2
+      // stage, curtains, spotlight
+      for (let y = 0; y < H; y++)
+        for (let x = 0; x < W; x++) {
+          let c = y < gy ? 0x3a1020 : (Math.floor(y - gy) % 3 === 2 ? 0x6a4020 : 0x8a5a30)
+          const half = 2 * u + (y / H) * W * 0.32
+          if (Math.abs(x - cx) < half) c = mix(c, 0xfff0c0, y < gy ? 0.18 : 0.35)
+          px[y * W + x] = c
+        }
+      for (const side of [0, 1])
+        for (let x = 0; x < 5 * u; x++) {
+          const xx = side ? W - 1 - x : x
+          const c = Math.floor(x / Math.max(1, u * 1.2)) % 2 ? 0x801828 : 0xa02030
+          rect(px, W, H, xx, 0, 1, gy + 2 * u - (x / (5 * u)) * 4 * u, c)
+        }
+      rect(px, W, H, 0, 0, W, 2 * u, 0xa02030)
+      ellipse(px, W, H, cx, gy + u, 5 * u, 1.2 * u, mix(0x8a5a30, 0x000000, 0.35))
+
+      const ca = Math.cos(a)
+      const sa = Math.sin(a)
+      // standing leg, and the bent one swinging round
+      const hip = gy - 10 * u
+      rect(px, W, H, cx - 0.5 * u, hip, Math.max(1, u), 10 * u, PINK)
+      dot(px, W, H, cx, gy - 1, 0xffe0f0)
+      const knee: [number, number] = [cx + ca * 3 * u, hip + 3 * u]
+      const back = sa < 0
+      const leg = () => {
+        line(px, W, H, cx, hip + u, knee[0], knee[1], PINK)
+        line(px, W, H, knee[0], knee[1], cx + ca * 0.5 * u, hip + 5 * u, PINK)
+      }
+      if (back) leg()
+      // torso and tutu
+      rect(px, W, H, cx - u, hip - 6 * u, 2 * u + 1, 6 * u, 0xe880b0)
+      ellipse(px, W, H, cx, hip, 6 * u, 1.6 * u, PINK)
+      for (let j = 0; j < 6; j++) {
+        const b = a + (j * Math.PI) / 3
+        if (Math.sin(b) > 0) dot(px, W, H, cx + Math.cos(b) * 5 * u, hip + Math.sin(b) * 0.8 * u, 0xd870a0)
+      }
+      if (!back) leg()
+      // arms in an arch above the cup
+      const sh = hip - 6 * u
+      const reach = 2 * u + Math.abs(ca) * 3 * u
+      for (const s of [-1, 1]) {
+        line(px, W, H, cx + s * u, sh, cx + s * reach, sh - 5 * u, SKIN)
+        line(px, W, H, cx + s * reach, sh - 5 * u, cx + s * 0.5, sh - 11 * u, SKIN)
+      }
+      // the head: a cappuccino cup on its saucer
+      const handleX = cx + ca * 3 * u
+      const cupY = sh - 1
+      const handle = () => ring(px, W, H, handleX, cupY - 2.5 * u, 1.2 * u, CUP)
+      ellipse(px, W, H, cx, cupY, 3.5 * u, 0.8 * u, 0xe0dcd0)
+      if (back) handle()
+      poly(px, W, H, [[cx - 2.6 * u, cupY - 5 * u], [cx + 2.6 * u, cupY - 5 * u], [cx + 1.8 * u, cupY - 0.5], [cx - 1.8 * u, cupY - 0.5]], CUP)
+      ellipse(px, W, H, cx, cupY - 5 * u, 2.6 * u, 0.9 * u, 0x8a5a30)
+      ellipse(px, W, H, cx + sa * 0.6 * u, cupY - 5 * u, 1.3 * u, 0.5 * u, 0xf0e0c0)
+      if (!back) handle()
+      // a face painted on the cup, when it looks this way
+      if (ca > -0.3) {
+        const fx = cx + sa * 1.2 * u
+        dot(px, W, H, fx - 0.8 * u, cupY - 3 * u, 0x3a2418)
+        dot(px, W, H, fx + 0.8 * u, cupY - 3 * u, 0x3a2418)
+        dot(px, W, H, fx, cupY - 1.8 * u, 0xe05a7a)
+      }
+      // speed lines when she really goes
+      if (speed(f) > 0.5)
+        for (let k = 0; k < 4; k++) {
+          const b = a * 0.5 + k * 1.57
+          dot(px, W, H, cx + Math.cos(b) * 8 * u, hip - 4 * u + Math.sin(b) * 2 * u, 0xfff0c0)
+        }
+      for (const s of foam) dot(px, W, H, s.x, s.y, s.c)
+      for (const r of roses) {
+        dot(px, W, H, r.x, r.y, 0xe02040)
+        dot(px, W, H, r.x + 1, r.y, 0xe02040)
+        dot(px, W, H, r.x - 1, r.y + 1, 0x3a8a3a)
+      }
+    },
+  }
+}
+
+// --- Elefantino Cactusino -----------------------------------------------------------
+
+const elefantino: Maker = (W, H, rng) => {
+  const u = W / 32
+  const gy = Math.round(H * 0.78)
+  const SPEED = 0.5
+  const G = 0x4aa050
+  const GD = 0x3a8040
+  const SPINE = 0xf8f4c8
+  type Balloon = { x: number; y: number; c: number; ph: number }
+  let balloons: Balloon[] = []
+  let bits: Spark[] = []
+  let cam = 0
+  let t = 0
+  let lift = 0
+  let shock = 0
+  let popped = 0
+  let next = 10
+  const cx = W * 0.4
+  const by = gy - 9 * u
+  const head: [number, number] = [cx + 7 * u, gy - 13 * u]
+  // the trunk: a curve from the face, curled down, or raised to reach
+  const trunk = (k: number): [number, number] => {
+    const x0 = head[0] + 3 * u
+    const y0 = head[1] + u
+    const ang = lerp(1.3, -0.9, lift) + k * lerp(0.2, -0.6, lift)
+    let x = x0
+    let y = y0
+    const n = Math.round(k * 6)
+    for (let i = 0; i < n; i++) {
+      const b = ang + (i / 6) * lerp(0.9, -1.2, lift)
+      x += Math.cos(b) * 1.3 * u
+      y += Math.sin(b) * 1.3 * u
+    }
+    return [x, y]
+  }
+
+  return {
+    step() {
+      t++
+      cam += SPEED
+      if (--next <= 0) {
+        balloons.push({ x: W + 3 * u, y: H * (0.12 + rng() * 0.38), c: hsv(rng(), 0.65, 1), ph: rng() * 6 })
+        next = 18 + irand(rng, 22)
+      }
+      for (const b of balloons) {
+        b.x -= SPEED + 0.25
+        b.y += Math.sin(t * 0.08 + b.ph) * 0.15
+      }
+      const near = balloons.find(b => b.x > cx && b.x < cx + 20 * u && b.y > head[1] - 12 * u)
+      lift += ((near ? 1 : 0) - lift) * 0.12
+      const tip = trunk(1)
+      balloons = balloons.filter(b => {
+        const r = 2.2 * u
+        const hitTip = Math.hypot(b.x - tip[0], b.y - tip[1]) < r + 1.5 * u
+        const hitHead = Math.hypot(b.x - head[0], b.y - head[1]) < r + 4.5 * u
+        const hitBody = Math.hypot((b.x - cx) / (8 * u), (b.y - by) / (5 * u)) < 1.2
+        if (hitTip || hitHead || hitBody) {
+          burst(bits, rng, b.x, b.y, b.c, 12, 1.3)
+          shock = 10
+          popped++
+          return false
+        }
+        return b.x > -4 * u
+      })
+      for (const s of bits) s.x -= SPEED
+      bits = sparks(bits, 0.05)
+      if (shock > 0) shock--
+    },
+    draw(px) {
+      sky(px, W, H, 0xf8a050, 0xfcd890, gy)
+      disc(px, W, H, W * 0.78, H * 0.17, 4 * u, 0xfff0a0)
+      for (let x = 0; x < W; x++) {
+        const dy = Math.round(gy - 4 * u - Math.sin((x + cam * 0.25) * 0.09) * 3 * u)
+        rect(px, W, H, x, dy, 1, gy - dy, 0xe8b068)
+      }
+      // little cacti far behind
+      for (let k = 0; k < 3; k++) {
+        const span = W + 10 * u
+        const x = ((((k * 13 * u - cam * 0.6) % span) + span) % span) - 4 * u
+        rect(px, W, H, x, gy - 6 * u, 2 * u, 6 * u, 0x6a9a50)
+        rect(px, W, H, x - 1.5 * u, gy - 4 * u, 1.5 * u, u, 0x6a9a50)
+        rect(px, W, H, x - 1.5 * u, gy - 5.5 * u, u, 1.5 * u, 0x6a9a50)
+      }
+      rect(px, W, H, 0, gy, W, H - gy, 0xf0c070)
+      for (let y = gy + 1; y < H; y += 2)
+        for (let x = 0; x < W; x++) if (hash(Math.floor(x + cam), y, 5) < 0.06) px[y * W + x] = 0xd09a50
+
+      // legs, walking
+      for (const [lx, s] of [[-5, 1], [-2, -1], [3, 1], [5.5, -1]] as const) {
+        const up = Math.max(0, Math.sin(t * 0.35) * s) * u
+        rect(px, W, H, cx + lx * u - u, by + 3 * u, 2.5 * u, gy - by - 3 * u - up, lx === -2 || lx === 5.5 ? GD : G)
+        rect(px, W, H, cx + lx * u - u, gy - up - 1, 2.5 * u, 1, 0xd8e8b0)
+      }
+      line(px, W, H, cx - 8 * u, by - u, cx - 10 * u, by + 2 * u, GD)
+      // body with cactus ribs and spines
+      ellipse(px, W, H, cx, by, 8 * u, 5 * u, G)
+      for (let k = -3; k <= 3; k++) line(px, W, H, cx + k * 2 * u, by - 4 * u + Math.abs(k) * 0.6 * u, cx + k * 2 * u, by + 4 * u - Math.abs(k) * 0.6 * u, GD)
+      for (let k = 0; k < 14; k++) {
+        const b = (k / 14) * Math.PI * 2
+        dot(px, W, H, cx + Math.cos(b) * 8.6 * u, by + Math.sin(b) * 5.6 * u, SPINE)
+      }
+      // head, ear pad, trunk
+      disc(px, W, H, head[0], head[1], 4 * u, G)
+      for (let k = 0; k < 9; k++) {
+        const b = -Math.PI * 0.9 + (k / 8) * Math.PI * 1.1
+        dot(px, W, H, head[0] + Math.cos(b) * 4.6 * u, head[1] + Math.sin(b) * 4.6 * u, SPINE)
+      }
+      ellipse(px, W, H, head[0] - 2.5 * u, head[1] + 0.5 * u, 2.6 * u, 3.6 * u, GD)
+      dot(px, W, H, head[0] - 2.5 * u, head[1] - 3.6 * u, SPINE)
+      dot(px, W, H, head[0] - 4.6 * u, head[1] + u, SPINE)
+      for (let k = 0; k <= 12; k++) {
+        const [x, y] = trunk(k / 12)
+        disc(px, W, H, x, y, 1.2 * u * (1 - k / 30), G)
+        if (k % 4 === 2) dot(px, W, H, x, y - 1.2 * u, SPINE)
+      }
+      const er = shock ? 1.4 * u : 0.9 * u
+      disc(px, W, H, head[0] + 1.5 * u, head[1] - u, er, 0xffffff)
+      dot(px, W, H, head[0] + 1.5 * u + (shock ? 0 : 0.3 * u), head[1] - u, 0x101010)
+      // a flower on top
+      for (const [fx, fy] of [[0, -1], [-1, 0], [1, 0], [0, 1]] as const) dot(px, W, H, head[0] + fx, head[1] - 4.8 * u + fy, 0xff70b0)
+      dot(px, W, H, head[0], head[1] - 4.8 * u, 0xffe060)
+
+      for (const b of balloons) {
+        line(px, W, H, b.x, b.y + 2.2 * u, b.x + Math.sin(t * 0.2 + b.ph), b.y + 6 * u, 0x8a6a50)
+        disc(px, W, H, b.x, b.y, 2.2 * u, b.c)
+        dot(px, W, H, b.x - 0.8 * u, b.y - 0.8 * u, mix(b.c, 0xffffff, 0.6))
+      }
+      for (const s of bits) dot(px, W, H, s.x, s.y, s.c)
+      if (shock) text(px, W, H, head[0] + 4 * u, head[1] - 9 * u, '!', 0xffffff)
+      text(px, W, H, 1, 1, String(popped), 0xffffff)
+    },
+  }
+}
+
 export const MEMES = {
   dvd,
   nyan,
@@ -1166,4 +1985,10 @@ export const MEMES = {
   backrooms,
   crocbomber,
   tumtum,
+  tierlist,
+  catkeys,
+  touchgrass,
+  feedfeed,
+  ballerina,
+  elefantino,
 }
