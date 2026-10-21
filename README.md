@@ -81,7 +81,7 @@ The language can also be set in the plugin's config (`language`: `en`, `fr`, `es
 
 ## The videos
 
-347 of them, in 24 themes:
+349 of them, in 24 themes:
 
 ![The 349 videos of the feed](assets/preview.png)
 
