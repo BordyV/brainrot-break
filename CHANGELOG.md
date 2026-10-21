@@ -2,6 +2,12 @@
 
 The project follows [Semantic Versioning](https://semver.org/) and [Conventional Commits](https://www.conventionalcommits.org/).
 
+## 1.3.0
+
+- Eight new videos in the memes theme: Coccodrillo Bombardiere, Tronchetto Tum Tum, Ballerina Cappuccina, Elefantino Cactusino, a tier list, the cat on the keyboard, touch grass and the feed in the feed. The cat and touch grass also show under the dev theme.
+- A project page plays the feed in the browser, every video included: https://bordyv.github.io/brainrot-break/
+- An install now copies only the mod (the repository's `plugin/` folder), not the README's pictures, the tools and the docs.
+
 ## 1.2.1
 
 - Desktop app: the video takes the most the pane allows, across and down, instead of stopping at a fixed size.
