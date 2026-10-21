@@ -2,6 +2,12 @@
 
 The project follows [Semantic Versioning](https://semver.org/) and [Conventional Commits](https://www.conventionalcommits.org/).
 
+## 1.1.0
+
+- The caption always goes under the video, in the terminal and the desktop app; the open menu takes the whole height.
+- On a narrow terminal, the feed plays above the prompt with a new ⇥ button (`p`) that moves it to the side. That works from 110 columns, and after it the feed opens beside the conversation by itself from 110 columns instead of 144.
+- The feed moves from above the prompt to the side by itself once the terminal gets wide enough.
+
 ## 1.0.1
 
 - Desktop app: the wheel goes back up to the previous video again (it only went down).
