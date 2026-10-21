@@ -1009,8 +1009,8 @@ async function feedTree($: EngineInterface, els: Elements['terminal'], requestId
     return [Math.round((R * 9) / 8), R]
   }
   // Under the video: the caption (author, two lines, sound) or the end card,
-  // then the shortcuts in a pane or the move to the side in the band.
-  const footer = card ? 7 : 5
+  // then, in the band, the move to the side.
+  const footer = (card ? 7 : 4) + (isBand ? 1 : 0)
   let [C, R] = fit(rows - footer)
   if (C > columns - SIDE - 1) {
     C = Math.max(10, columns - SIDE - 1)
@@ -1043,16 +1043,10 @@ async function feedTree($: EngineInterface, els: Elements['terminal'], requestId
         {actions}
       </Box>
       {!menu.isOpen && info}
-      {menu.isOpen ? null : isBand ? (
+      {isBand && !menu.isOpen && (
         <Button key="side" plain hotkey="p" onPress={() => moveToPane($)}>
           <Text color="cyan">⇥ {S().toSide} (p)</Text>
         </Button>
-      ) : (
-        !card && (
-          <Text dimColor wrap="truncate-end">
-            {S().hint}
-          </Text>
-        )
       )}
     </Box>
   )
@@ -1154,7 +1148,6 @@ async function desktopTree($: EngineInterface, els: Elements['desktop'], request
         {actions}
       </Box>
       {info}
-      {!card && <Text dimColor>{S().hintDesktop}</Text>}
     </Box>
   )
   // The pane only hands the wheel on while it has something to scroll, in
