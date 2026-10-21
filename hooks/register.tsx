@@ -1081,7 +1081,12 @@ async function desktopTree($: EngineInterface, els: Elements['desktop'], request
 
   load(video, DESKTOP_W, DESKTOP_H)
   desktopSite = requestId
-  const scale = Math.max(4, Math.min(9, Math.floor((columns * 8 - 80) / DESKTOP_W)))
+  // As big as the pane allows (about 8 x 16 pixels a cell): beside the side
+  // column across, above the caption (author, two lines, sound, a gap) down,
+  // in half steps so the pixels stay even.
+  const byWidth = ((columns - SIDE - 2) * 8) / DESKTOP_W
+  const byHeight = ((bodyRows - 7) * 16) / DESKTOP_H
+  const scale = Math.max(2, Math.floor(Math.min(byWidth, byHeight) * 2) / 2)
   const { info: caption } = await feedParts($, els, { ...d, video, card: null }, true, 0, Math.min(44, columns))
   const { Client } = els
   // The Svg's size in cells (about 8 x 16 a cell): the tap layer's, and the side column's height.
