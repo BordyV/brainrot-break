@@ -2,7 +2,7 @@
 //
 //   npx tsx tools/check.ts
 //
-// every kind listed in types/index.d.ts, type-check, `claude plugin validate`, `claude plugin test`, then the offline
+// every kind listed in plugin/types/index.d.ts, type-check, `claude plugin validate`, `claude plugin test`, then the offline
 // render (every video runs 600 frames, SVG frames stay under the desktop's
 // limit, assets/preview.png is redrawn), and the project page's build.
 
@@ -12,18 +12,18 @@ import { spawnSync } from 'node:child_process'
 const steps: [string, string][] = [
   ['kinds', 'npx -y tsx@4.19.2 tools/sync-kinds.ts --check'],
   ['locales', 'npx -y tsx@4.19.2 tools/sync-locales.ts --check'],
-  ['types', 'npx -y -p typescript@5.6.3 tsc -p . --noEmit'],
-  ['validate', 'claude plugin validate .'],
-  ['test', 'claude plugin test .'],
+  ['types', 'npx -y -p typescript@5.6.3 tsc -p plugin --noEmit'],
+  ['validate', 'claude plugin validate . && claude plugin validate plugin'],
+  ['test', 'claude plugin test plugin'],
   ['render', 'npx -y tsx@4.19.2 tools/render.ts'],
   ['site', 'npx -y tsx@4.19.2 tools/site.ts'],
 ]
 
 for (const [name, command] of steps) {
-  if (name === 'types' && !existsSync('.claude-plugin/types/tsconfig.json')) {
+  if (name === 'types' && !existsSync('plugin/.claude-plugin/types/tsconfig.json')) {
     console.warn(
-      '\n== types: skipped. The engine writes .claude-plugin/types/ when it hot-reloads the mod:\n' +
-        '   run `claude --plugin-dir .` here once (an interactive session), then check again.',
+      '\n== types: skipped. The engine writes plugin/.claude-plugin/types/ when it hot-reloads the mod:\n' +
+        '   run `claude --plugin-dir plugin` here once (an interactive session), then check again.',
     )
     continue
   }

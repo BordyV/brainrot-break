@@ -2,5 +2,5 @@
   "name": "brainrot-break",
   "description": "A feed of pixel art mini-videos to scroll while Claude thinks.",
   "owner": { "name": "BordyV" },
-  "plugins": [{ "name": "brainrot-break", "source": "./" }]
+  "plugins": [{ "name": "brainrot-break", "source": "./plugin" }]
 }

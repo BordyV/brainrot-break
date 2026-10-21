@@ -8,9 +8,9 @@
 
 import { writeFileSync } from 'node:fs'
 
-import { rngFrom } from '../hooks/draw'
-import { MAKERS } from '../hooks/themes'
-import type { Kind } from '../types'
+import { rngFrom } from '../plugin/hooks/draw'
+import { MAKERS } from '../plugin/hooks/themes'
+import type { Kind } from '../plugin/types'
 
 const W = 32
 const H = 56

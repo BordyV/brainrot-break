@@ -1,23 +1,23 @@
-// Keeps each language of hooks/locales/ in step with the videos:
+// Keeps each language of plugin/hooks/locales/ in step with the videos:
 //
-//   npx tsx tools/sync-locales.ts           rewrites hooks/locales/<lang>/videos.ts
+//   npx tsx tools/sync-locales.ts           rewrites plugin/hooks/locales/<lang>/videos.ts
 //                                           from the theme files there, and lists
 //                                           the videos each language still lacks
 //   npx tsx tools/sync-locales.ts --check   only lists them, and fails if any
 //
-// A language's videos come one file per theme (hooks/locales/<lang>/<theme>.ts),
+// A language's videos come one file per theme (plugin/hooks/locales/<lang>/<theme>.ts),
 // each exporting the theme's name in capitals.
 
 import { existsSync, readdirSync, writeFileSync } from 'node:fs'
 
-import { MISSING } from '../hooks/i18n'
-import { LOCALES } from '../hooks/locales'
+import { MISSING } from '../plugin/hooks/i18n'
+import { LOCALES } from '../plugin/hooks/locales'
 
 const isCheck = process.argv.includes('--check')
 let missing = 0
 
 for (const lang of Object.keys(LOCALES) as (keyof typeof LOCALES)[]) {
-  const dir = `hooks/locales/${lang}`
+  const dir = `plugin/hooks/locales/${lang}`
   if (!isCheck) {
     const files = readdirSync(dir)
       .filter(f => f.endsWith('.ts') && !['index.ts', 'ui.ts', 'videos.ts'].includes(f))

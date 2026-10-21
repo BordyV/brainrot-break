@@ -3,17 +3,17 @@
 //   npx tsx tools/new-video.ts <theme> <kind> "<English name>" "<French name>"
 //   npx tsx tools/new-video.ts sports bowling "bowling" "bowling"
 //
-// 1. types/index.d.ts          the kind joins the `Kind` union
-// 2. hooks/themes/<theme>.ts   a working placeholder simulation, listed in the theme's table
-// 3. hooks/texts/<theme>.ts    its name, authors, tags, captions and sounds (TODO lines)
+// 1. plugin/types/index.d.ts          the kind joins the `Kind` union
+// 2. plugin/hooks/themes/<theme>.ts   a working placeholder simulation, listed in the theme's table
+// 3. plugin/hooks/texts/<theme>.ts    its name, authors, tags, captions and sounds (TODO lines)
 //
 // Then write the simulation, replace every TODO and translate it in
-// hooks/locales/: the tests fail until all of it is done, so a half-made video
+// plugin/hooks/locales/: the tests fail until all of it is done, so a half-made video
 // never ships. AGENTS.md has the rest.
 
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 
-const themes = readdirSync('hooks/themes')
+const themes = readdirSync('plugin/hooks/themes')
   .filter(f => f.endsWith('.ts') && f !== 'index.ts')
   .map(f => f.slice(0, -3))
 
@@ -29,9 +29,9 @@ if (!themes.includes(theme)) {
 }
 
 const files = {
-  types: 'types/index.d.ts',
-  videos: `hooks/themes/${theme}.ts`,
-  texts: `hooks/texts/${theme}.ts`,
+  types: 'plugin/types/index.d.ts',
+  videos: `plugin/hooks/themes/${theme}.ts`,
+  texts: `plugin/hooks/texts/${theme}.ts`,
 }
 // Read with LF line endings whatever the checkout uses; written back with LF.
 const text = Object.fromEntries(Object.entries(files).map(([k, p]) => [k, readFileSync(p, 'utf8').split('\r\n').join('\n')])) as Record<keyof typeof files, string>
@@ -117,7 +117,7 @@ Next:
   2. Replace every TODO in its entry in ${files.texts}, English and French.
      Author handles must be unique across every video.
   3. npx tsx tools/render.ts ${kind}   look at tools/out/${kind}.png
-  4. Translate it in hooks/locales/<lang>/${theme}.ts (es, de, pt, it), the same
+  4. Translate it in plugin/hooks/locales/<lang>/${theme}.ts (es, de, pt, it), the same
      lines in the same order; npx tsx tools/sync-locales.ts lists what is left.
   5. npx tsx tools/check.ts             everything else
 `)

@@ -3,7 +3,7 @@
 //   npx tsx tools/render.ts           every video: assets/preview.png, plus a
 //                                     table of ms per frame and SVG frame sizes
 //   npx tsx tools/render.ts <kind>    one video over time: tools/out/<kind>.png
-//   npx tsx tools/render.ts <theme>   a theme of hooks/themes/, one row per video:
+//   npx tsx tools/render.ts <theme>   a theme of plugin/hooks/themes/, one row per video:
 //                                     tools/out/<theme>.png, and a check that each
 //                                     video paints every pixel at three sizes
 //
@@ -12,11 +12,11 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { deflateSync } from 'node:zlib'
 
-import { svgFrame } from '../hooks/cells'
-import { THEMES } from '../hooks/themes'
-import { rngFrom } from '../hooks/draw'
-import { MAKERS } from '../hooks/themes'
-import type { Kind } from '../types'
+import { svgFrame } from '../plugin/hooks/cells'
+import { THEMES } from '../plugin/hooks/themes'
+import { rngFrom } from '../plugin/hooks/draw'
+import { MAKERS } from '../plugin/hooks/themes'
+import type { Kind } from '../plugin/types'
 
 const W = 32
 const H = 56

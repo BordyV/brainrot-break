@@ -1,13 +1,13 @@
 // The project page: the feed playing in the browser, from the same
 // simulations and texts as the mod. Built by tools/site.ts.
 
-import type { Kind } from '../types'
-import { drawHeart, drawProgress, rngFrom } from '../hooks/draw'
-import type { Sim } from '../hooks/draw'
-import { LABELS, LANGS, META, THEME_NAMES } from '../hooks/i18n'
-import type { Lang } from '../hooks/i18n'
-import { MAKERS, THEMES, themesOf } from '../hooks/themes'
-import type { Theme } from '../hooks/themes'
+import type { Kind } from '../plugin/types'
+import { drawHeart, drawProgress, rngFrom } from '../plugin/hooks/draw'
+import type { Sim } from '../plugin/hooks/draw'
+import { LABELS, LANGS, META, THEME_NAMES } from '../plugin/hooks/i18n'
+import type { Lang } from '../plugin/hooks/i18n'
+import { MAKERS, THEMES, themesOf } from '../plugin/hooks/themes'
+import type { Theme } from '../plugin/hooks/themes'
 
 const W = 32
 const H = 56
@@ -15,7 +15,7 @@ const FPS = 15
 const LOOP_FRAMES = 300
 const KEPT = 8
 
-// The page's own texts. The videos' texts come from hooks/i18n.ts.
+// The page's own texts. The videos' texts come from plugin/hooks/i18n.ts.
 const SITE: Record<Lang, Record<string, string>> = {
   en: {
     tagline: 'A TikTok-style feed of pixel art mini-videos that opens while Claude answers. Every video is a tiny simulation drawn locally: no tokens, no model.',

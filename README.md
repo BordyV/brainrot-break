@@ -114,7 +114,7 @@ The language can also be set in the plugin's config (`language`: `en`, `fr`, `es
 
 \* Also in this theme, though its home is another one: a video can have several themes.
 
-Each one is a small simulation of a few hundred lines, drawn at 32 × 56 pixels and about 15 frames a second. They live in [`hooks/themes/`](hooks/themes), one file per theme.
+Each one is a small simulation of a few hundred lines, drawn at 32 × 56 pixels and about 15 frames a second. They live in [`plugin/hooks/themes/`](plugin/hooks/themes), one file per theme.
 
 ## Notes
 
@@ -131,7 +131,7 @@ npx tsx tools/gif.ts                   # rewrite assets/feed.gif
 npx tsx tools/new-video.ts <theme> <kind> "<English name>" "<French name>"
 ```
 
-`claude --plugin-dir .` starts a session with this folder loaded. [AGENTS.md](AGENTS.md) explains how the mod works and how to add a video.
+`claude --plugin-dir plugin` starts a session with the mod loaded from its folder, `plugin/`. [AGENTS.md](AGENTS.md) explains how the mod works and how to add a video.
 
 ## License
 

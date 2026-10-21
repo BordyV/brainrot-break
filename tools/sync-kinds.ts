@@ -1,4 +1,4 @@
-// Adds the kinds of hooks/themes/ to the `Kind` union in types/index.d.ts,
+// Adds the kinds of plugin/hooks/themes/ to the `Kind` union in plugin/types/index.d.ts,
 // which must list every kind by name (the engine wants that file to stand alone):
 //
 //   npx tsx tools/sync-kinds.ts           adds the missing kinds
@@ -6,9 +6,9 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 
-import { THEME_MAKERS } from '../hooks/themes'
+import { THEME_MAKERS } from '../plugin/hooks/themes'
 
-const path = 'types/index.d.ts'
+const path = 'plugin/types/index.d.ts'
 const text = readFileSync(path, 'utf8').split('\r\n').join('\n')
 const union = text.match(/export type Kind =\n(?: {2}\| '[a-z0-9]+'\n)+/)
 if (!union || union.index === undefined) {

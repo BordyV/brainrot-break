@@ -1,5 +1,5 @@
 # The checks that run without a Claude Code session. Type-checking needs the
-# engine's types (.claude-plugin/types/, written by a session) and the plugin
+# engine's types (plugin/.claude-plugin/types/, written by a session) and the plugin
 # tests need the claude CLI, so `npx tsx tools/check.ts` stays the full check
 # to run locally before a push.
 name: check
