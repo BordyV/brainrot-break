@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>brainrot-break</title>
+    <meta name="description" content="A TikTok-style feed of pixel art mini-videos that opens while Claude answers." />
+    <meta property="og:title" content="brainrot-break" />
+    <meta property="og:description" content="A TikTok-style feed of pixel art mini-videos that opens while Claude answers." />
+    <meta property="og:image" content="preview.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>brainrot-break</h1>
+      <select id="lang" aria-label="language"></select>
+    </header>
+
+    <main>
+      <div class="stage">
+        <div class="pane" id="phone">
+          <div class="row">
+            <canvas id="screen" width="32" height="56"></canvas>
+            <aside class="side">
+              <div>
+                <button id="menu" aria-label="themes">···</button>
+                <button id="help" aria-label="help">?</button>
+              </div>
+              <div>
+                <button id="nope" aria-label="not interested">⊘</button>
+                <br />
+                <button id="like" aria-label="like">♡</button>
+                <small id="likes"></small>
+                <br />
+                <button aria-label="comments">≡</button>
+                <small id="comments"></small>
+                <br />
+                <button id="up" aria-label="previous">▲</button>
+                <small id="index"></small>
+                <button id="down" aria-label="next">▼</button>
+              </div>
+            </aside>
+          </div>
+          <div class="info">
+            <b id="author"></b>
+            <p><span id="caption"></span> <span class="tags" id="tags"></span></p>
+            <p class="sound" id="sound"></p>
+          </div>
+        </div>
+        <p class="keys" id="keys" data-t="keys" hidden></p>
+        <label class="auto"><input type="checkbox" id="auto" /> <span data-t="auto"></span></label>
+      </div>
+
+      <div class="about">
+        <p class="tagline" data-t="tagline"></p>
+        <h2 data-t="install"></h2>
+        <div class="cmd"><code>/plugin marketplace add BordyV/brainrot-break</code><button data-copy="/plugin marketplace add BordyV/brainrot-break" data-t="copy"></button></div>
+        <div class="cmd"><code>/plugin install brainrot-break@brainrot-break</code><button data-copy="/plugin install brainrot-break@brainrot-break" data-t="copy"></button></div>
+        <p class="small" data-t="desktop"></p>
+        <p><a href="https://github.com/BordyV/brainrot-break">github.com/BordyV/brainrot-break</a></p>
+        <div class="themes" id="themes"></div>
+      </div>
+    </main>
+
+    <h2 class="all"><span id="count"></span> <span data-t="videos"></span></h2>
+    <div id="grid"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

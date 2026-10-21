@@ -1,0 +1,302 @@
+:root {
+  --bg: #0d0d12;
+  --panel: #17171f;
+  --line: #2a2a36;
+  --text: #f2f2f2;
+  --dim: #9a9aa8;
+  --pink: #ff2d55;
+  --cyan: #25f4ee;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+  padding: 0 16px 48px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+header {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+
+h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+select {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font: inherit;
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  gap: 48px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The mod's pane: the bare clip, its column of glyphs, the caption below. */
+.pane {
+  width: min(360px, calc(100vw - 32px));
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 13px;
+  overscroll-behavior: contain;
+  touch-action: pan-x;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+#screen {
+  flex: 1;
+  min-width: 0;
+  aspect-ratio: 32 / 56;
+  display: block;
+  image-rendering: pixelated;
+  cursor: pointer;
+}
+
+#screen.up {
+  animation: up 0.25s ease-out;
+}
+
+#screen.down {
+  animation: down 0.25s ease-out;
+}
+
+@keyframes up {
+  from {
+    transform: translateY(30%);
+    opacity: 0.2;
+  }
+}
+
+@keyframes down {
+  from {
+    transform: translateY(-30%);
+    opacity: 0.2;
+  }
+}
+
+.side {
+  width: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.side > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.side button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.side button:hover {
+  color: var(--cyan);
+}
+
+.side small {
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#like.on {
+  color: var(--pink);
+}
+
+.info {
+  margin-top: 10px;
+}
+
+.info p {
+  margin: 0;
+}
+
+.tags {
+  color: var(--cyan);
+}
+
+.sound {
+  color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.keys,
+.small {
+  color: var(--dim);
+  font-size: 12px;
+  margin: 0;
+  max-width: 320px;
+  text-align: center;
+}
+
+.small {
+  text-align: left;
+  max-width: none;
+}
+
+.auto {
+  font-size: 13px;
+  color: var(--dim);
+}
+
+.about {
+  flex: 1 1 360px;
+  max-width: 560px;
+}
+
+.tagline {
+  font-size: 18px;
+  margin-top: 0;
+}
+
+h2 {
+  font-size: 18px;
+  margin: 24px 0 8px;
+}
+
+.cmd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 8px 8px 12px;
+  margin: 6px 0;
+}
+
+.cmd code {
+  flex: 1;
+  overflow-x: auto;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.cmd button,
+.chip {
+  background: #23232e;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 2px 10px;
+  font-size: 13px;
+}
+
+a {
+  color: var(--cyan);
+}
+
+.themes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.chip.on {
+  background: var(--pink);
+  border-color: var(--pink);
+}
+
+.all {
+  max-width: 1100px;
+  margin: 56px auto 0;
+  font-size: 22px;
+}
+
+#grid {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+#grid h3 {
+  font-size: 15px;
+  color: var(--cyan);
+  margin: 24px 0 8px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 10px;
+}
+
+.tile {
+  background: none;
+  border: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.tile canvas {
+  width: 100%;
+  aspect-ratio: 32 / 56;
+  image-rendering: pixelated;
+  border-radius: 8px;
+  outline: 1px solid var(--line);
+  transition: transform 0.15s;
+}
+
+.tile:hover canvas {
+  transform: scale(1.06);
+  outline-color: var(--pink);
+}
+
+.tile span {
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.2;
+}

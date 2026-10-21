@@ -13,6 +13,8 @@ When an answer from Claude takes more than a couple of seconds, a TikTok-style f
 
 ![Six of the feed's videos playing](assets/feed.gif)
 
+**[Try the feed in your browser](https://bordyv.github.io/brainrot-break/)**: every video, playing as in the mod.
+
 ## Install
 
 At the prompt of a Claude Code session:

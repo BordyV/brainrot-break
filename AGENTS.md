@@ -24,6 +24,8 @@ brainrot-break is a Claude Code mod (a plugin of function hooks): a TikTok-style
 | `tests/feed.test.tsx` | `claude plugin test` tests |
 | `tools/` | Scripts run with `npx tsx` (below) |
 | `.github/workflows/check.yml` | CI: the kinds check, the translations check and the offline render, the parts of `check.ts` that need no Claude Code session |
+| `site/` | The project page on GitHub Pages: the feed playing in the browser (`app.ts`, `index.html`, `style.css`), drawn like the mod's pane. It imports the videos and their texts from `hooks/`, so every video is on it. Its own texts are the `SITE` table in `app.ts`, in every language |
+| `.github/workflows/pages.yml` | Builds the page with `tools/site.ts` and publishes it on GitHub Pages at each push to `main` |
 | `docs/` | Two lists of 500 scored video ideas (`video-ideas.md`, `video-ideas-2.md`). The second one writes the score out as points per criterion; score new ideas the same way. Pick the next videos from there |
 | `assets/preview.png` | The README's picture of every video, written by `tools/render.ts` |
 | `assets/feed.gif` | The README's moving picture, written by `tools/gif.ts` |
@@ -35,10 +37,11 @@ Run from the repository root.
 
 | Command | What it does |
 | --- | --- |
-| `npx tsx tools/check.ts` | Everything before a commit: type-check, validate, tests, render. Stops at the first failure |
+| `npx tsx tools/check.ts` | Everything before a commit: type-check, validate, tests, render, the page's build. Stops at the first failure |
 | `npx tsx tools/render.ts` | Runs every video 600 frames offline, prints ms per frame and SVG sizes, rewrites `assets/preview.png` |
 | `npx tsx tools/render.ts <kind>` | One video over 32 s, frames side by side in `tools/out/<kind>.png` (git-ignored). Look at it |
 | `npx tsx tools/render.ts <theme>` | Every video of a theme, one row each, in `tools/out/<theme>.png`, with each one's time and SVG size. Several kinds or themes can be given |
+| `npx tsx tools/site.ts [--serve]` | Builds the project page into `site/dist/` (git-ignored); `--serve` then serves it on http://localhost:8080 |
 | `npx tsx tools/gif.ts [kind...]` | Rewrites `assets/feed.gif`: six videos playing side by side, or the kinds given |
 | `npx tsx tools/sync-locales.ts` | Rewrites each `hooks/locales/<lang>/videos.ts` from its theme files and lists the videos a language lacks. `--check` only lists them; `check.ts` runs it |
 | `npx tsx tools/sync-kinds.ts` | Adds the theme kinds missing from the `Kind` union. `--check` only reports them; `check.ts` runs it first |
@@ -60,7 +63,8 @@ To exercise the feed, open it with `/brainrot`, or ask something that keeps Clau
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `type(scope): summary`, the summary in the imperative and lowercase, no full stop. Types: `feat` (a new video or feature), `fix`, `perf`, `refactor`, `docs`, `test`, `ci`, `chore`. The scope is optional: a theme (`feat(sports): add bowling`), a surface (`fix(desktop): ...`) or a part (`i18n`, `menu`, `tools`). A breaking change takes `!` after the type and a `BREAKING CHANGE:` footer. The body says why, in plain sentences.
 - Versions follow [Semantic Versioning](https://semver.org/), from the commits since the last release: `feat` bumps the minor, `fix` and `perf` the patch, a breaking change the major. A release is a `chore(release): x.y.z` commit that bumps `version` in `.claude-plugin/plugin.json` and adds the version's entry to `CHANGELOG.md`.
 - Commit locally. Push only when the user says so.
-- Before a push: `tools/check.ts`, then the plugin-authoring skill's secret scan (`mcp__plugin-authoring__scan_secrets` on this folder). Keep the README's video list and `assets/preview.png` in step with the videos.
+- Before a push: `tools/check.ts`, then the plugin-authoring skill's secret scan (`mcp__plugin-authoring__scan_secrets` on this folder). Keep the README's video list, `assets/preview.png` and the project page in step with the videos.
+- Every video is on the project page. It comes from `MAKERS` and `hooks/i18n.ts` by itself, so never list videos by hand in `site/`; but a new video, or a change to how the feed or the pane looks, is not done until it shows right on the page (`npx tsx tools/site.ts --serve`).
 - Nothing personal or machine-specific goes in the repository: no local paths, names, accounts or keys.
 
 ## Adding a video
@@ -71,7 +75,8 @@ To exercise the feed, open it with `/brainrot`, or ask something that keeps Clau
 4. **Fill its texts:** in `hooks/texts/<theme>.ts`, write 3 author handles, 3 tag lines, 4 captions and 3 sounds. Captions and sounds come in both `en` and `fr`, the same number of lines in the same order, because a video stores indexes into these lists and switching language retranslates it. Author handles must be unique across every video: the feed tells kinds apart by them, and a test checks it. The tone is TikTok: short, playful, a hook ("wait for it..."). The tests fail while any TODO is left.
 5. **Translate it:** in `hooks/locales/<lang>/<theme>.ts` for `es`, `de`, `pt` and `it`, its name, the 4 captions and the 3 sounds, in the same order as English (create the file if the theme has none there, then run `npx tsx tools/sync-locales.ts`). The tests fail while a language lacks it.
 6. **Check everything:** `npx tsx tools/check.ts`. The tests check that every kind shows up once before any repeats, that every video has a name, captions and sounds in every language, that author handles are unique, and that every kind has its texts.
-7. **Publish it:** add the video to the README's list, in the family it belongs to. `render.ts` has already redrawn `assets/preview.png`. Commit, and push when the user says so.
+7. **See it on the page:** `npx tsx tools/site.ts --serve`, then open http://localhost:8080/#<kind>: the video plays in the pane, with its caption and sound, and has its tile in its theme's row of the grid.
+8. **Publish it:** add the video to the README's list, in the family it belongs to. `render.ts` has already redrawn `assets/preview.png`. Commit, and push when the user says so: the push republishes the page.
 
 ### The simulation contract
 
