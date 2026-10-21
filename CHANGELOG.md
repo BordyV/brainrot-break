@@ -2,6 +2,10 @@
 
 The project follows [Semantic Versioning](https://semver.org/) and [Conventional Commits](https://www.conventionalcommits.org/).
 
+## 1.2.1
+
+- Desktop app: the video takes the most the pane allows, across and down, instead of stopping at a fixed size.
+
 ## 1.2.0
 
 - Terminal under 110 columns: no feed by the prompt any more, one line says the window is too narrow (with ⇥ to move to the side when it is wide enough). The clip waits and picks up on the side once the window is widened.
