@@ -6,6 +6,7 @@ export const strings: Locale['strings'] = {
   paneTitle: 'Für dich',
   commandDescription: 'Pixel-Art-Minivideos zum Scrollen, während Claude antwortet (on | off | stats | lang en|fr|es|de|pt|it | fps 0-15 | ohne Argument: öffnen)',
   tooSmall: 'Mach das etwas größer, um den Feed zu sehen.',
+  tooNarrow: columns => `▶ Brainrot break: Das Fenster ist zu schmal für den Feed (${columns} Spalten, 110 nötig).`,
   loading: 'Feed wird geladen...',
   terminalOnly: 'Der Pixel-Art-Feed läuft im Terminal und in der Desktop-App.',
   pause: 'Pause',

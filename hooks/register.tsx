@@ -995,7 +995,7 @@ async function feedParts(
   return { actions, info }
 }
 
-async function feedTree($: EngineInterface, els: Elements['terminal'], requestId: string, columns: number, rows: number, isBand = false) {
+async function feedTree($: EngineInterface, els: Elements['terminal'], requestId: string, columns: number, rows: number) {
   const { Box, Text, Button, Raster, Client } = els
   if (columns < SIDE + 12 || rows < 7) return <Text dimColor>{S().tooSmall}</Text>
 
@@ -1008,10 +1008,8 @@ async function feedTree($: EngineInterface, els: Elements['terminal'], requestId
     const R = Math.max(6, Math.min(36, r))
     return [Math.round((R * 9) / 8), R]
   }
-  // Under the video: the caption (author, two lines, sound) or the end card,
-  // then, in the band, the move to the side.
-  const footer = (card ? 7 : 4) + (isBand ? 1 : 0)
-  let [C, R] = fit(rows - footer)
+  // Under the video: the caption (author, two lines, sound) or the end card.
+  let [C, R] = fit(rows - (card ? 7 : 4))
   if (C > columns - SIDE - 1) {
     C = Math.max(10, columns - SIDE - 1)
     R = Math.max(6, Math.min(R, Math.round((C * 8) / 9)))
@@ -1043,7 +1041,26 @@ async function feedTree($: EngineInterface, els: Elements['terminal'], requestId
         {actions}
       </Box>
       {!menu.isOpen && info}
-      {isBand && !menu.isOpen && (
+    </Box>
+  )
+}
+
+// Docked beside the transcript from 110 terminal columns; below that the
+// engine seats the pane by the prompt, where the feed would push the
+// conversation away. A body narrower than this (the frame takes two) is that.
+const DOCK_COLUMNS = 108
+
+// Too narrow for the side: no feed, a line that says so. In the band, once
+// wide enough, a press moves it to the side (the person asking).
+function narrowNotice($: EngineInterface, els: Elements['terminal'], columns: number) {
+  const { Box, Text, Button } = els
+  mounted = undefined
+  return (
+    <Box flexDirection="row" gap={1}>
+      <Text dimColor wrap="truncate-end">
+        {S().tooNarrow(columns + 2)}
+      </Text>
+      {columns >= DOCK_COLUMNS && (
         <Button key="side" plain hotkey="p" onPress={() => moveToPane($)}>
           <Text color="cyan">⇥ {S().toSide} (p)</Text>
         </Button>
@@ -1372,7 +1389,10 @@ export const register: Register = (on, options) => {
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
-    if (e.surface === 'terminal') return feedTree($, $.ui.resolve(e), e.requestId, e.props.bodyColumns, e.props.scroll.bodyRows)
+    if (e.surface === 'terminal') {
+      if (e.props.placement === 'inline' && e.props.bodyColumns < DOCK_COLUMNS) return narrowNotice($, $.ui.resolve(e), e.props.bodyColumns)
+      return feedTree($, $.ui.resolve(e), e.requestId, e.props.bodyColumns, e.props.scroll.bodyRows)
+    }
     if (e.surface === 'desktop') return desktopTree($, $.ui.resolve(e), e.requestId, e.props.bodyColumns, e.props.scroll.bodyRows)
     const { Text } = $.ui.resolve(e)
     return <Text dimColor>{S().terminalOnly}</Text>
@@ -1380,7 +1400,7 @@ export const register: Register = (on, options) => {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey || (await read($, modeAtom)) !== 'band') return next(e)
-    if (e.surface === 'terminal') return feedTree($, $.ui.resolve(e), e.requestId, e.props.bodyColumns, Math.min(e.props.maxRows, 24), true)
+    if (e.surface === 'terminal') return narrowNotice($, $.ui.resolve(e), e.props.bodyColumns)
     if (e.surface === 'desktop') return desktopTree($, $.ui.resolve(e), e.requestId, e.props.bodyColumns, e.props.scroll.bodyRows)
     return next(e)
   })
