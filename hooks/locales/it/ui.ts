@@ -11,6 +11,7 @@ export const strings: Locale['strings'] = {
   hintDesktop: 'rotella o ▲ ▼: scorri · doppio clic o ♥: mi piace · clic: pausa · #tag: solo quel tema · ≡: commenti · ⊘: non mi interessa · ···: menu',
   pause: 'Pausa',
   play: 'Riproduci',
+  toSide: 'Metti di lato',
   hint: 'rotella o j/k: scorri · doppio clic o l: mi piace · clic: pausa · m: commenti · clic sui #tag: solo quel tema · n: non mi interessa · t: menu · h o ?: scorciatoie',
   answered: '✓ Claude ha risposto',
   waiting: 'la tua risposta ti aspetta nella conversazione',

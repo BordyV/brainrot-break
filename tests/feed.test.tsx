@@ -186,9 +186,10 @@ test('the theme menu hides themes, keeps the last one, and shows them all again'
   const choose = async (act: string) => click((await rows()).findIndex(r => r.act === act))
 
   // ··· opens the sheet on the playing clip; "Hide #theme" hides its theme and moves on
+  // the open menu covers the caption: read the author first
+  const playing = THEME_OF[kindOf(await author()) ?? '']
   await ui.press({ key: 'themes' })
   expect(await ui.find({ key: 'video' })).toBeUndefined()
-  const playing = THEME_OF[kindOf(await author()) ?? '']
   await choose('hide')
   expect(await ui.find({ key: 'video' })).toBeDefined()
   // shown because another of its themes is ticked
@@ -502,9 +503,10 @@ test('ticking a theme brings every video that has it, from whichever home', asyn
   const rows = async () => ((await ui.find({ key: 'menu' }))?.props.props as { rows: MenuRow[] }).rows
   const choose = async (act: string) => ui.pointer({ type: 'down', x: 1, y: (await rows()).findIndex(r => r.act === act), button: 'left', in: 'menu' })
 
+  // the open menu covers the caption: read the author first
+  const kept = THEME_OF[await kind()] as string
   await ui.press({ key: 'themes' })
   await choose('themes')
-  const kept = THEME_OF[await kind()] as string
   await choose('none')
   // robots only: tick it, untick the one hide all kept
   if (kept !== 'robots') {

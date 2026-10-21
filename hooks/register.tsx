@@ -85,6 +85,9 @@ let desktopFps = 10
 let desktopCredit = 0
 // The desktop site last scrolled to the feed's row, past the spare one above.
 let desktopPlaced: string | undefined
+// The feed plays in the band while its pane, opened unasked on a narrow
+// terminal, waits undrawn: the ticker moves it there once the engine seats it.
+let paneWaits = false
 let ticker: Timer | undefined
 let openTimer: Timer | undefined
 let closeTimer: Timer | undefined
@@ -685,7 +688,10 @@ function tick($: EngineInterface) {
   const term = mounted && mounted.columns === player.W && mounted.rows * 2 === player.H ? mounted : undefined
   if (!term && !desktopSite) return
   advance()
-  if (++frames % 15 === 0) void flushStats($)
+  if (++frames % 15 === 0) {
+    void flushStats($)
+    if (paneWaits) void seatPane($)
+  }
   // Next video by itself: once the clip has played its loop through.
   if (autoScroll && player.t === LOOP_FRAMES) void swipe($, 1, false)
   if (term) {
@@ -745,13 +751,33 @@ async function openFeed($: EngineInterface) {
   turn = { views: 0, likes: 0, startedAt: Date.now() }
   const opened = await $.ui.open({ id: PANE, title: S().paneTitle, rows: 30 })
   if (opened.isPlaced) {
+    paneWaits = false
     await update($, modeAtom, () => 'pane' as FeedMode)
   } else {
     // Too narrow for a pane opened unasked: play in the band above the prompt.
-    await $.ui.close({ id: PANE })
+    // The pane stays open, undrawn, so the engine seats it if the terminal widens.
+    paneWaits = true
     await update($, modeAtom, () => 'band' as FeedMode)
   }
   startTicker($)
+}
+
+// From the band to the pane: a press is the person asking, so the engine places
+// it at any width, and from then on opens it unasked from 110 columns.
+async function moveToPane($: EngineInterface) {
+  if ((await read($, modeAtom)) !== 'band') return
+  const opened = await $.ui.open({ id: PANE, title: S().paneTitle, rows: 30 })
+  if (!opened.isPlaced) return
+  paneWaits = false
+  await update($, modeAtom, () => 'pane' as FeedMode)
+}
+
+// The waiting pane got seated (the terminal widened): leave the band for it.
+async function seatPane($: EngineInterface) {
+  const pane = (await $.ui.panes()).find(p => p.id === PANE)
+  if (!paneWaits || !pane?.isPlaced || (await read($, modeAtom)) !== 'band') return
+  paneWaits = false
+  await update($, modeAtom, () => 'pane' as FeedMode)
 }
 
 async function closeFeed($: EngineInterface) {
@@ -761,7 +787,9 @@ async function closeFeed($: EngineInterface) {
   await clearEndCard($)
   const mode = await read($, modeAtom)
   await update($, modeAtom, () => 'off' as FeedMode)
-  if (mode === 'pane') await $.ui.close({ id: PANE })
+  // In the band, the pane may still wait undrawn.
+  paneWaits = false
+  if (mode !== 'off') await $.ui.close({ id: PANE })
 }
 
 async function showEndCard($: EngineInterface) {
@@ -857,12 +885,12 @@ async function feedData($: EngineInterface) {
 }
 
 // The like and scroll column and the caption (or the end card): the same on
-// every surface, only the video beside them differs.
+// every surface, only the video beside them differs. The caption always goes
+// under the video, two lines at most.
 async function feedParts(
   $: EngineInterface,
   els: Common,
   d: { video: Video; index: number; isLiked: boolean; card: EndCard | null },
-  isWide: boolean,
   isDesktop: boolean,
   height = 0,
   captionWidth = 44,
@@ -907,7 +935,7 @@ async function feedParts(
     </Box>
   )
   // The hashtags take a click: only this video's theme for now. Its own line, so the click lands on them.
-  const capRows = captionRows(meta.captions[lang][video.caption] as string, meta.tags[video.tags] as string, captionWidth, isWide ? 4 : 1)
+  const capRows = captionRows(meta.captions[lang][video.caption] as string, meta.tags[video.tags] as string, captionWidth, 2)
   const focusText = focus ? `◉ ${S().focusOn(`#${THEME_NAMES[lang][focus]}`)}` : ''
   const focusLine = isDesktop ? (
     <Client key="unfocus" module="./controls.tsx" props={{ rows: [{ text: focusText, act: 'focus', color: 'cyan', bold: true }], width: Math.min(44, [...focusText].length), isLeft: true }} width={Math.min(44, [...focusText].length)} height={1} />
@@ -967,8 +995,8 @@ async function feedParts(
   return { actions, info }
 }
 
-async function feedTree($: EngineInterface, els: Elements['terminal'], requestId: string, columns: number, rows: number) {
-  const { Box, Text, Raster, Client } = els
+async function feedTree($: EngineInterface, els: Elements['terminal'], requestId: string, columns: number, rows: number, isBand = false) {
+  const { Box, Text, Button, Raster, Client } = els
   if (columns < SIDE + 12 || rows < 7) return <Text dimColor>{S().tooSmall}</Text>
 
   const d = await feedData($)
@@ -980,23 +1008,23 @@ async function feedTree($: EngineInterface, els: Elements['terminal'], requestId
     const R = Math.max(6, Math.min(36, r))
     return [Math.round((R * 9) / 8), R]
   }
-  let [C, R] = fit(rows - 1)
-  const isWide = columns >= C + SIDE + 28
-  if (!isWide) {
-    ;[C, R] = fit(rows - (card ? 7 : 4))
-    if (C > columns - SIDE - 1) {
-      C = Math.max(10, columns - SIDE - 1)
-      R = Math.max(6, Math.min(R, Math.round((C * 8) / 9)))
-    }
+  // Under the video: the caption (author, two lines, sound) or the end card,
+  // then the shortcuts in a pane or the move to the side in the band.
+  const footer = card ? 7 : 5
+  let [C, R] = fit(rows - footer)
+  if (C > columns - SIDE - 1) {
+    C = Math.max(10, columns - SIDE - 1)
+    R = Math.max(6, Math.min(R, Math.round((C * 8) / 9)))
   }
 
   load(video, C, R * 2)
   mounted = { requestId, columns: C, rows: R }
-  const captionWidth = isWide ? Math.min(44, columns - C - SIDE - 2) : columns
-  const { actions, info } = await feedParts($, els, { ...d, video }, isWide, false, R, captionWidth)
-  const menuList = menu.isOpen ? menuRows(C, R) : []
+  const { actions, info } = await feedParts($, els, { ...d, video }, false, R, columns)
+  // The open menu covers the caption too: it takes every row.
+  const menuH = Math.max(R, rows)
+  const menuList = menu.isOpen ? menuRows(C, menuH) : []
   const screen = menu.isOpen ? (
-    <Box width={C} height={R}>
+    <Box width={C} height={menuH}>
       <Client key="menu" module="./controls.tsx" props={{ rows: menuList, width: C, isLeft: true }} width={C} height={menuList.length} />
     </Box>
   ) : (
@@ -1008,26 +1036,24 @@ async function feedTree($: EngineInterface, els: Elements['terminal'], requestId
     </Box>
   )
 
-  if (isWide) {
-    return (
-      <Box flexDirection="row" gap={1}>
-        {screen}
-        {actions}
-        <Box flexDirection="column" justifyContent="flex-end" width={Math.min(44, columns - C - SIDE - 2)}>
-          {info}
-          <Text> </Text>
-          {!card && <Text dimColor>{S().hint}</Text>}
-        </Box>
-      </Box>
-    )
-  }
   return (
     <Box flexDirection="column">
       <Box flexDirection="row" gap={1}>
         {screen}
         {actions}
       </Box>
-      {info}
+      {!menu.isOpen && info}
+      {menu.isOpen ? null : isBand ? (
+        <Button key="side" plain hotkey="p" onPress={() => moveToPane($)}>
+          <Text color="cyan">⇥ {S().toSide} (p)</Text>
+        </Button>
+      ) : (
+        !card && (
+          <Text dimColor wrap="truncate-end">
+            {S().hint}
+          </Text>
+        )
+      )}
     </Box>
   )
 }
@@ -1044,9 +1070,8 @@ async function desktopTree($: EngineInterface, els: Elements['desktop'], request
 
   load(video, DESKTOP_W, DESKTOP_H)
   desktopSite = requestId
-  const isWide = columns >= 70
-  const scale = Math.max(4, Math.min(9, Math.floor((columns * 8 - (isWide ? 360 : 80)) / DESKTOP_W)))
-  const { info: caption } = await feedParts($, els, { ...d, video, card: null }, isWide, true, 0, Math.min(44, columns))
+  const scale = Math.max(4, Math.min(9, Math.floor((columns * 8 - 80) / DESKTOP_W)))
+  const { info: caption } = await feedParts($, els, { ...d, video, card: null }, true, 0, Math.min(44, columns))
   const { Client } = els
   // The Svg's size in cells (about 8 x 16 a cell): the tap layer's, and the side column's height.
   const tapCols = Math.ceil((DESKTOP_W * scale) / 8)
@@ -1121,23 +1146,15 @@ async function desktopTree($: EngineInterface, els: Elements['desktop'], request
       </Box>
     </Box>
   )
-  const body = isWide ? (
-    <Box flexDirection="row" gap={1}>
-      {screen}
-      {actions}
-      <Box flexDirection="column" justifyContent="flex-end" width={44}>
-        {info}
-        <Text> </Text>
-        {!card && <Text dimColor>{S().hintDesktop}</Text>}
-      </Box>
-    </Box>
-  ) : (
+  // The caption always goes under the video.
+  const body = (
     <Box flexDirection="column" gap={1}>
       <Box flexDirection="row" gap={1}>
         {screen}
         {actions}
       </Box>
       {info}
+      {!card && <Text dimColor>{S().hintDesktop}</Text>}
     </Box>
   )
   // The pane only hands the wheel on while it has something to scroll, in
@@ -1198,7 +1215,9 @@ export const register: Register = (on, options) => {
       }
     }
     // After a hot reload the feed may still be on screen: keep it playing.
-    if ((await read($, modeAtom)) !== 'off') startTicker($)
+    const mode = await read($, modeAtom)
+    if (mode !== 'off') startTicker($)
+    if (mode === 'band') paneWaits = true
 
     return next(e)
   })
@@ -1368,7 +1387,7 @@ export const register: Register = (on, options) => {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey || (await read($, modeAtom)) !== 'band') return next(e)
-    if (e.surface === 'terminal') return feedTree($, $.ui.resolve(e), e.requestId, e.props.bodyColumns, Math.min(e.props.maxRows, 24))
+    if (e.surface === 'terminal') return feedTree($, $.ui.resolve(e), e.requestId, e.props.bodyColumns, Math.min(e.props.maxRows, 24), true)
     if (e.surface === 'desktop') return desktopTree($, $.ui.resolve(e), e.requestId, e.props.bodyColumns, e.props.scroll.bodyRows)
     return next(e)
   })
