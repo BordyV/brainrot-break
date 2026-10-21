@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - run: npx -y tsx@4.19.2 tools/site.ts
       - uses: actions/upload-pages-artifact@v5
         with:

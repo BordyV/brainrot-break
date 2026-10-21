@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - name: Every kind is in the Kind union
         run: npx -y tsx@4.19.2 tools/sync-kinds.ts --check
       - name: Every video is translated in every language
