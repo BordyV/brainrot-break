@@ -117,7 +117,7 @@ Each one is a small simulation of a few hundred lines, drawn at 32 × 56 pixels 
 ## Notes
 
 - Terminal and desktop app: the terminal draws the video with half-block characters at ~15 frames a second, the desktop app as an SVG at up to 10. VS Code and mobile show a note instead.
-- In the terminal, the feed opens as a pane beside the conversation from 144 columns (110 once you have opened it with `/brainrot`); on a narrower terminal it plays in the band above the prompt.
+- In the terminal, the feed opens as a pane beside the conversation from 144 columns (110 once you have opened it with `/brainrot`); on a narrower terminal a line by the prompt says so, with a button to move the feed to the side from 110 columns. Below 110 columns there is no room beside the conversation: widen the window and the feed comes back where it was.
 - In the terminal, clicks need Claude Code's fullscreen layout; the wheel and keys work everywhere.
 
 ## Development
