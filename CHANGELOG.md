@@ -2,6 +2,10 @@
 
 The project follows [Semantic Versioning](https://semver.org/) and [Conventional Commits](https://www.conventionalcommits.org/).
 
+## 1.1.1
+
+- The shortcuts line under the caption is gone: `?` lists them.
+
 ## 1.1.0
 
 - The caption always goes under the video, in the terminal and the desktop app; the open menu takes the whole height.
