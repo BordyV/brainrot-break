@@ -13,12 +13,12 @@ const OUT = 'site/dist'
 
 mkdirSync(OUT, { recursive: true })
 execSync(`npx -y esbuild@0.28.2 site/app.ts --bundle --minify --format=iife --target=es2020 --outfile=${OUT}/app.js`, { stdio: 'inherit' })
-for (const f of ['index.html', 'style.css']) copyFileSync(join('site', f), join(OUT, f))
+for (const f of ['index.html', 'style.css', 'favicon.svg']) copyFileSync(join('site', f), join(OUT, f))
 for (const f of ['preview.png', 'feed.gif']) copyFileSync(join('assets', f), join(OUT, f))
 console.log(`site built in ${OUT}/`)
 
 if (process.argv.includes('--serve')) {
-  const types: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.gif': 'image/gif' }
+  const types: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.gif': 'image/gif', '.svg': 'image/svg+xml' }
   createServer((req, res) => {
     const path = (req.url ?? '/').split(/[?#]/)[0] as string
     try {
