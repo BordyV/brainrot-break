@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, ellipse, hash, irand, line, pick, poly, ring, sparks } from '../kit'
+import { burst, ellipse, hash, irand, lerp, line, pick, poly, ring, sparks } from '../kit'
 import type { Spark } from '../kit'
 
 // Internet memes & brainrot: original characters only, no named memes.
@@ -832,6 +832,329 @@ const nyan: Maker = (W, H, rng) => {
   }
 }
 
+// --- Coccodrillo Bombardiere --------------------------------------------------------
+
+const crocbomber: Maker = (W, H, rng) => {
+  const u = W / 32
+  const gy = Math.round(H * 0.84)
+  const SPEED = 0.7
+  const HOUSE_COLS = [0xf0c060, 0xe89a70, 0xf4d8b0, 0xe0807a, 0xf0e0a0, 0xc0d890]
+  type House = { x: number; w: number; h: number; c: number }
+  type Drop = { x: number; y: number; vy: number; meat: boolean }
+  type Splat = { x: number; y: number; c: number }
+  const houses: House[] = []
+  let edge = 0
+  const grow = () => {
+    while (edge < cam + W + 10) {
+      const w = Math.max(4, Math.round((5 + irand(rng, 4)) * u))
+      houses.push({ x: edge, w, h: Math.round((7 + irand(rng, 9)) * u), c: pick(rng, HOUSE_COLS) })
+      edge += w
+    }
+    while (houses.length && (houses[0] as House).x + (houses[0] as House).w < cam - 2) houses.shift()
+  }
+  const roofAt = (wx: number) => {
+    for (const h of houses) if (wx >= h.x && wx < h.x + h.w) return gy - h.h
+    return gy
+  }
+  let cam = 0
+  let t = 0
+  let drops: Drop[] = []
+  let splats: Splat[] = []
+  let bits: Spark[] = []
+  let nextDrop = 12
+  grow()
+
+  const body = () => {
+    const cx = W * 0.52 + Math.sin(t * 0.031) * 2 * u
+    const cy = H * 0.3 + Math.sin(t * 0.083) * 3 * u
+    return [cx, cy] as const
+  }
+
+  return {
+    step() {
+      t++
+      cam += SPEED
+      grow()
+      const [cx, cy] = body()
+      if (--nextDrop <= 0) {
+        drops.push({ x: cam + cx - u, y: cy + 3 * u, vy: 0.2, meat: rng() < 0.35 })
+        nextDrop = 14 + irand(rng, 16)
+      }
+      for (const d of drops) {
+        d.vy += 0.05
+        d.y += d.vy
+        d.x += 0.25
+      }
+      drops = drops.filter(d => {
+        const top = roofAt(Math.round(d.x))
+        if (d.y < top - 1) return true
+        const c = d.meat ? 0x8a3a20 : 0xe03a2a
+        splats.push({ x: Math.round(d.x), y: top, c })
+        burst(bits, rng, d.x - cam, top - 1, c, 8, 1)
+        burst(bits, rng, d.x - cam, top - 1, d.meat ? 0xe03a2a : 0xf0d060, 5, 0.9)
+        return false
+      })
+      for (const b of bits) b.x -= SPEED
+      bits = sparks(bits, 0.06)
+      splats = splats.filter(s => s.x > cam - 4)
+    },
+    draw(px) {
+      sky(px, W, H, 0x4aa0e8, 0xb8e4f8, gy)
+      // clouds, slower than the town
+      for (let k = 0; k < 3; k++) {
+        const span = W + 20 * u
+        const x = (((k * 17 * u - cam * 0.35) % span) + span) % span - 10 * u
+        const y = H * (0.08 + k * 0.17)
+        ellipse(px, W, H, x, y, 5 * u, 1.5 * u, 0xffffff)
+        ellipse(px, W, H, x + 2 * u, y - u, 3 * u, 1.5 * u, 0xffffff)
+      }
+      // hills far behind
+      for (let x = 0; x < W; x++) {
+        const hy = Math.round(gy - 9 * u - Math.sin((x + cam * 0.2) * 0.12) * 3 * u)
+        for (let y = hy; y < gy; y++) px[y * W + x] = y === hy ? 0x8ac070 : 0x6aa058
+      }
+      // houses
+      for (const h of houses) {
+        const x = h.x - cam
+        const top = gy - h.h
+        rect(px, W, H, x, top, h.w, h.h, h.c)
+        rect(px, W, H, x, top - 1, h.w, 1.5, 0xc0502a)
+        rect(px, W, H, x + h.w - 1, top, 1, h.h, scale(h.c, 0.85))
+        for (let wy = top + 2 * u; wy < gy - 3 * u; wy += 4 * u)
+          for (let wx = x + u; wx < x + h.w - 2 * u; wx += 3 * u) {
+            rect(px, W, H, wx, wy, Math.max(1, u), 2 * u, 0x3a5a2a)
+            rect(px, W, H, wx + u, wy, Math.max(1, u), 2 * u, 0x4a7a3a)
+          }
+      }
+      for (const s of splats) {
+        dot(px, W, H, s.x - cam, s.y - 1, s.c)
+        dot(px, W, H, s.x - cam - 1, s.y - 1, s.c)
+        dot(px, W, H, s.x - cam + 1, s.y, s.c)
+      }
+      // quay and sea
+      rect(px, W, H, 0, gy, W, Math.max(1, u), 0x9a9a9a)
+      for (let y = gy + Math.max(1, Math.round(u)); y < H; y++)
+        for (let x = 0; x < W; x++)
+          px[y * W + x] = hash(Math.floor((x + cam * 0.5) / 3), y, Math.floor(t / 6)) < 0.08 ? 0xc8ecff : 0x2a7ac0
+
+      for (const d of drops) {
+        const x = d.x - cam
+        if (d.meat) {
+          disc(px, W, H, x, d.y, 1.2 * u, 0x8a3a20)
+          dot(px, W, H, x - 0.4 * u, d.y - 0.4 * u, 0xc06a40)
+        } else {
+          disc(px, W, H, x, d.y, 1.6 * u, 0xe0a040)
+          disc(px, W, H, x, d.y, 1.1 * u, 0xf0d060)
+          dot(px, W, H, x - 0.5 * u, d.y, 0xe03a2a)
+          dot(px, W, H, x + 0.6 * u, d.y - 0.5 * u, 0xe03a2a)
+        }
+      }
+
+      // the crocodile plane, facing right
+      const [cx, cy] = body()
+      const v = 0.85 * u
+      const g = 0x4a9a3a
+      const dk = 0x2a6a2a
+      const belly = 0xc8d880
+      const steel = 0x9aa4b0
+      // far wing, tail fin
+      poly(px, W, H, [[cx - u, cy - u], [cx + 2 * v, cy - u], [cx, cy - 5 * v], [cx - 3 * v, cy - 5 * v]], 0x7a848e)
+      poly(px, W, H, [[cx - 14 * v, cy - u], [cx - 10 * v, cy - u], [cx - 13 * v, cy - 6 * v], [cx - 15 * v, cy - 6 * v]], steel)
+      // tail
+      poly(px, W, H, [[cx - 6 * v, cy - 2 * v], [cx - 6 * v, cy + 2 * v], [cx - 15 * v, cy + 0.5 * v]], g)
+      // body and belly
+      ellipse(px, W, H, cx, cy, 7 * v, 2.6 * v, g)
+      ellipse(px, W, H, cx, cy + 1.2 * v, 6 * v, 1.2 * v, belly)
+      for (let k = -2; k <= 2; k++) dot(px, W, H, cx + k * 2.4 * v, cy - 2.5 * v, dk)
+      // jaws, slightly open, with teeth
+      const jaw = Math.sin(t * 0.25) > 0.6 ? u : 0
+      poly(px, W, H, [[cx + 5 * v, cy - 2 * v], [cx + 13 * v, cy - 0.5 * v], [cx + 13 * v, cy + 0.5 * v], [cx + 5 * v, cy + 0.5 * v]], g)
+      poly(px, W, H, [[cx + 5 * v, cy + u], [cx + 12 * v, cy + u + jaw], [cx + 12 * v, cy + 2 * v + jaw], [cx + 5 * v, cy + 2.2 * v]], belly)
+      for (let k = 0; k < 4; k++) dot(px, W, H, cx + (6 + k * 1.8) * v, cy + 0.8 * v, 0xffffff)
+      dot(px, W, H, cx + 12.4 * v, cy - u, dk)
+      // eye on a bump, aviator goggles
+      disc(px, W, H, cx + 5 * v, cy - 2.6 * v, 1.6 * v, g)
+      disc(px, W, H, cx + 5 * v, cy - 2.8 * v, 1.1 * v, 0x6a4a2a)
+      dot(px, W, H, cx + 5 * v, cy - 2.8 * v, 0xfff060)
+      dot(px, W, H, cx + 5.4 * v, cy - 2.8 * v, 0x101010)
+      line(px, W, H, cx + 3.4 * v, cy - 2.8 * v, cx - 1.5 * v, cy - 2.2 * v, 0x6a4a2a)
+      // near wing with a roundel
+      poly(px, W, H, [[cx - 3 * v, cy + u], [cx + 2 * v, cy + u], [cx - 2 * v, cy + 7 * v], [cx - 6 * v, cy + 7 * v]], steel)
+      dot(px, W, H, cx - 2.5 * v, cy + 4.5 * v, 0xe03a2a)
+      dot(px, W, H, cx - 3.5 * v, cy + 4.5 * v, 0x2aa04a)
+      // propeller on the nose
+      const pr = Math.abs(Math.cos(t * 1.3)) * 3.5 * v
+      line(px, W, H, cx + 13.5 * v, cy - pr, cx + 13.5 * v, cy + pr, 0xd8d8d8)
+      dot(px, W, H, cx + 13.5 * v, cy, 0x606060)
+      // a little exhaust trail
+      for (let k = 1; k <= 3; k++) {
+        const wob = hash(k, Math.floor(t / 3)) * 2 - 1
+        dot(px, W, H, cx - 15 * v - k * 2 * v, cy + wob, mix(0xffffff, 0xb8e4f8, k / 4))
+      }
+
+      for (const b of bits) dot(px, W, H, b.x, b.y, b.c)
+    },
+  }
+}
+
+// --- Tronchetto Tum Tum -------------------------------------------------------------
+
+const tumtum: Maker = (W, H, rng) => {
+  const u = W / 32
+  const gy = Math.round(H * 0.8)
+  const GAP = Math.round(30 * u)
+  const BAT = 8 * u
+  const HOUSE_COLS = [0x5a4a6a, 0x4a5a6a, 0x6a5048, 0x4a6058]
+  type House = { x: number; h: number; c: number; lit: number }
+  const houses: House[] = []
+  const house = (i: number): House => {
+    while (houses.length <= i)
+      houses.push({ x: Math.round(14 * u) + houses.length * GAP, h: Math.round((20 + irand(rng, 8)) * u), c: pick(rng, HOUSE_COLS), lit: -1 })
+    return houses[i] as House
+  }
+  const doorX = (h: House) => h.x + 3 * u
+  const standX = (h: House) => doorX(h) - BAT - 3 * u
+  let i = 0
+  let x = -6 * u
+  let phase: 'walk' | 'knock' = 'walk'
+  let kt = 0
+  let t = 0
+  let walk = 0
+  let shake = 0
+  let rings: { x: number; y: number; r: number }[] = []
+  let dust: Spark[] = []
+  let hits = 0
+  const HIT = [9, 22, 35]
+  const swing = (k: number) => {
+    // bat angle: 0 points right at the door, negative is up
+    const rest = -1.1
+    for (const h of HIT) {
+      const s = k - (h - 9)
+      if (s < 0 || s >= 13) continue
+      if (s < 6) return lerp(rest, -2.4, s / 6)
+      if (s < 9) return lerp(-2.4, -0.05, (s - 6) / 3)
+      return lerp(-0.05, rest, (s - 9) / 4)
+    }
+    return rest
+  }
+
+  return {
+    step() {
+      t++
+      house(i + 2)
+      if (phase === 'walk') {
+        const target = standX(house(i))
+        x += 0.8
+        walk++
+        if (x >= target) {
+          x = target
+          phase = 'knock'
+          kt = 0
+          hits = 0
+        }
+      } else {
+        kt++
+        const h = house(i)
+        if (HIT.includes(kt)) {
+          hits++
+          shake = 3
+          const hy = gy - 9 * u
+          rings.push({ x: doorX(h), y: hy, r: 1 })
+          burst(dust, rng, doorX(h), hy, 0xd8b070, 5, 0.8)
+        }
+        if (kt === 48) h.lit = t
+        if (kt === 66) {
+          phase = 'walk'
+          i++
+        }
+      }
+      for (const r of rings) r.r += 0.8
+      rings = rings.filter(r => r.r < 9 * u)
+      dust = sparks(dust, 0.05)
+      if (shake > 0) shake--
+    },
+    draw(px) {
+      const cam = Math.round(x - W * 0.3) + (shake % 2 ? 1 : 0)
+      sky(px, W, H, 0x0a0a24, 0x2a2050, gy)
+      for (let y = 0; y < gy * 0.6; y++)
+        for (let xx = 0; xx < W; xx++) {
+          const wx = xx + Math.floor(cam * 0.1)
+          if (hash(wx, y, 7) < 0.015) px[y * W + xx] = hash(wx, y, Math.floor(t / 8)) < 0.5 ? 0xffffff : 0x8888b0
+        }
+      disc(px, W, H, W * 0.8, H * 0.1, 3 * u, 0xf0eccc)
+      disc(px, W, H, W * 0.8 + 1.5 * u, H * 0.1 - u, 2.5 * u, 0x16143a)
+
+      for (const h of houses) {
+        const hx = h.x - cam
+        if (hx > W || hx + 22 * u < 0) continue
+        const top = gy - h.h
+        poly(px, W, H, [[hx - u, top], [hx + 23 * u, top], [hx + 11 * u, top - 7 * u]], 0x6a2a2a)
+        rect(px, W, H, hx, top, 22 * u, h.h, h.c)
+        const on = h.lit >= 0
+        const glow = on ? Math.min(1, (t - h.lit) / 6) : 0
+        for (const wx of [hx + 4 * u, hx + 13 * u]) {
+          const wy = top + 4 * u
+          rect(px, W, H, wx, wy, 5 * u, 5 * u, mix(0x1a1a2a, 0xffd860, glow))
+          if (on && t - h.lit > 10 && wx > hx + 10 * u) {
+            // a sleepy face shows up
+            disc(px, W, H, wx + 2.5 * u, wy + 3.4 * u, 1.4 * u, 0x2a2018)
+            dot(px, W, H, wx + 2 * u, wy + 3 * u, 0xffffff)
+            dot(px, W, H, wx + 3 * u, wy + 3 * u, 0xffffff)
+          }
+          rect(px, W, H, wx + 2.5 * u - 0.3, wy, 1, 5 * u, 0x2a2018)
+        }
+        const dx = doorX(h) - cam
+        rect(px, W, H, dx, gy - 11 * u, 6 * u, 11 * u, 0x5a3418)
+        rect(px, W, H, dx + u, gy - 10 * u, 4 * u, 4 * u, 0x6a4422)
+        dot(px, W, H, dx + 4.5 * u, gy - 5 * u, 0xf0c040)
+        if (on) for (let k = 0; k < 3; k++) dot(px, W, H, dx + (1 + k * 2) * u, gy - 12.5 * u, 0xffd860)
+      }
+      // street
+      rect(px, W, H, 0, gy, W, H - gy, 0x2a2a34)
+      rect(px, W, H, 0, gy, W, Math.max(1, u), 0x5a5a64)
+      for (let xx = 0; xx < W; xx++) if (((xx + cam) >> 2) % 3 === 0) dot(px, W, H, xx, gy + (H - gy) * 0.55, 0x8a8a70)
+
+      // the log
+      const lx = x - cam
+      const bob = phase === 'walk' ? Math.abs(Math.sin(walk * 0.4)) * u : 0
+      const top = gy - 16 * u - bob
+      const lw = 7 * u
+      for (const side of [0, 1]) {
+        const swingL = phase === 'walk' ? Math.sin(walk * 0.4 + side * Math.PI) * 1.5 * u : 0
+        line(px, W, H, lx + (2 + side * 3) * u, gy - 3 * u - bob, lx + (2 + side * 3) * u + swingL, gy - 1, 0x3a2410)
+      }
+      rect(px, W, H, lx, top, lw, gy - 3 * u - top, 0x9a6a38)
+      for (let k = 1; k < 4; k++) rect(px, W, H, lx + k * 1.8 * u, top + 2 * u + (k % 2) * 3 * u, Math.max(1, 0.5 * u), 7 * u, 0x7a4a24)
+      ellipse(px, W, H, lx + lw / 2, top, lw / 2, 1.5 * u, 0xe0b878)
+      ellipse(px, W, H, lx + lw / 2, top, lw / 4, 0.7 * u, 0xb08048)
+      // face: wide eyes, a grin
+      const ey = top + 4 * u
+      for (const ex of [lx + 2 * u, lx + 5 * u]) {
+        disc(px, W, H, ex, ey, 1.2 * u, 0xffffff)
+        dot(px, W, H, ex + 0.4 * u, ey, 0x101010)
+      }
+      line(px, W, H, lx + 1.5 * u, ey - 2 * u, lx + 3 * u, ey - 1.5 * u, 0x3a2410)
+      line(px, W, H, lx + 4 * u, ey - 1.5 * u, lx + 5.5 * u, ey - 2 * u, 0x3a2410)
+      rect(px, W, H, lx + 1.5 * u, ey + 2.5 * u, 4.5 * u, 1.2 * u, 0x2a1408)
+      rect(px, W, H, lx + 2 * u, ey + 2.5 * u, 3.5 * u, Math.max(1, 0.5 * u), 0xffffff)
+      // arm and bat
+      const hx = lx + lw + u
+      const hy = top + 9 * u
+      line(px, W, H, lx + lw - u, top + 8 * u, hx, hy, 0x7a4a24)
+      const a = phase === 'knock' ? swing(kt) : -1.1 + Math.sin(walk * 0.4) * 0.15
+      const bx = hx + Math.cos(a) * BAT
+      const by = hy + Math.sin(a) * BAT
+      line(px, W, H, hx, hy, bx, by, 0xd8b070)
+      line(px, W, H, hx + Math.cos(a) * BAT * 0.4, hy + Math.sin(a) * BAT * 0.4 + 1, bx, by + 1, 0xd8b070)
+      line(px, W, H, hx, hy, hx + Math.cos(a) * 2 * u, hy + Math.sin(a) * 2 * u, 0x4a2a14)
+
+      for (const r of rings) ring(px, W, H, r.x - cam, r.y, r.r, mix(0xfff0c0, 0x2a2050, r.r / (9 * u)))
+      for (const d of dust) dot(px, W, H, d.x - cam, d.y, d.c)
+      if (phase === 'knock' && hits) text(px, W, H, 1, 1, 'x' + hits, 0xffd860)
+    },
+  }
+}
+
 export const MEMES = {
   dvd,
   nyan,
@@ -841,4 +1164,6 @@ export const MEMES = {
   ratdance,
   bongocat,
   backrooms,
+  crocbomber,
+  tumtum,
 }

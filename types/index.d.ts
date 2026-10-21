@@ -346,6 +346,8 @@ export type Kind =
   | 'phantomjam'
   | 'wreckingball'
   | 'robovac'
+  | 'crocbomber'
+  | 'tumtum'
 
 export type Video = {
   id: string

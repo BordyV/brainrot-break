@@ -107,4 +107,30 @@ export const MEMES = {
       fr: ['bourdonnement de néons (son original)', 'son original - level.zero', 'ambiance liminale'],
     },
   },
+  crocbomber: {
+    name: { en: 'Coccodrillo Bombardiere', fr: 'Coccodrillo Bombardiere' },
+    authors: ['@coccodrillo.volante', '@pizza.airdrop', '@brainrot.italiano'],
+    tags: ['#italianbrainrot #brainrot #crocodile', '#pizza #airdrop', '#fyp #foryou'],
+    captions: {
+      en: ['pizza delivery, but make it airborne', 'he does not miss. ever.', 'mamma mia, the rooftops', 'italian brainrot season 2'],
+      fr: ['livraison de pizza, mais en avion', 'il ne rate jamais. jamais.', 'mamma mia, les toits', 'brainrot italien saison 2'],
+    },
+    sounds: {
+      en: ['dramatic italian narrator (original sound)', 'original sound - coccodrillo.volante', 'propeller + mandolin'],
+      fr: ['narrateur italien dramatique (son original)', 'son original - coccodrillo.volante', 'hélice + mandoline'],
+    },
+  },
+  tumtum: {
+    name: { en: 'Tronchetto Tum Tum', fr: 'Tronchetto Tum Tum' },
+    authors: ['@tronchetto.tumtum', '@knock.at.4am', '@wooden.wakeup'],
+    tags: ['#italianbrainrot #brainrot #log', '#knockknock #3am', '#fyp #foryou'],
+    captions: {
+      en: ['tum tum tum tum tum tum tum', 'if you hear three knocks... open.', 'the neighbourhood alarm clock', 'he knocks on every door. every one.'],
+      fr: ['tum tum tum tum tum tum tum', 'si tu entends trois coups... ouvre.', 'le réveil du quartier', 'il frappe à toutes les portes. toutes.'],
+    },
+    sounds: {
+      en: ['tum tum tum (original sound)', 'original sound - tronchetto.tumtum', 'wooden knocks (bass boosted)'],
+      fr: ['tum tum tum (son original)', 'son original - tronchetto.tumtum', 'coups de bois (bass boosted)'],
+    },
+  },
 } satisfies Record<string, Entry>
