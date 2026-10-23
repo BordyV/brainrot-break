@@ -2,6 +2,12 @@
 
 The project follows [Semantic Versioning](https://semver.org/) and [Conventional Commits](https://www.conventionalcommits.org/).
 
+## 1.4.0
+
+- Every video is redrawn with light and shading: one light from the upper left, three or four tones per material, outlines and layered backgrounds, so objects have volume instead of flat fills. The simulations are unchanged, and the classic arcade screens and the memes keep their known looks.
+- The aquarium's small fish get a readable shape on the desktop app.
+- The project page gets a favicon, a picture when its link is shared, and an `llms.txt` for agents that read it.
+
 ## 1.3.0
 
 - Eight new videos in the memes theme: Coccodrillo Bombardiere, Tronchetto Tum Tum, Ballerina Cappuccina, Elefantino Cactusino, a tier list, the cat on the keyboard, touch grass and the feed in the feed. The cat and touch grass also show under the dev theme.
