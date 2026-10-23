@@ -128,6 +128,7 @@ Each one is a small simulation of a few hundred lines, drawn at 32 × 56 pixels 
 npx tsx tools/check.ts                 # type-check, validate, tests, offline render
 npx tsx tools/render.ts [kind|theme]   # look at the videos without a session
 npx tsx tools/gif.ts                   # rewrite assets/feed.gif
+npx tsx tools/social.ts                # rewrite assets/social.png, the link preview
 npx tsx tools/new-video.ts <theme> <kind> "<English name>" "<French name>"
 ```
 

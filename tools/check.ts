@@ -4,7 +4,8 @@
 //
 // every kind listed in plugin/types/index.d.ts, type-check, `claude plugin validate`, `claude plugin test`, then the offline
 // render (every video runs 600 frames, SVG frames stay under the desktop's
-// limit, assets/preview.png is redrawn), and the project page's build.
+// limit, assets/preview.png is redrawn), the social preview, and the project
+// page's build.
 
 import { existsSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
@@ -16,6 +17,7 @@ const steps: [string, string][] = [
   ['validate', 'claude plugin validate . && claude plugin validate plugin'],
   ['test', 'claude plugin test plugin'],
   ['render', 'npx -y tsx@4.19.2 tools/render.ts'],
+  ['social', 'npx -y tsx@4.19.2 tools/social.ts'],
   ['site', 'npx -y tsx@4.19.2 tools/site.ts'],
 ]
 

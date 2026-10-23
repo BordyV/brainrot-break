@@ -31,6 +31,7 @@ The mod is the `plugin/` folder: the marketplace's `source`, and all an install 
 | `docs/` | Two lists of 500 scored video ideas (`video-ideas.md`, `video-ideas-2.md`). The second one writes the score out as points per criterion; score new ideas the same way. Pick the next videos from there |
 | `assets/preview.png` | The README's picture of every video, written by `tools/render.ts` |
 | `assets/feed.gif` | The README's moving picture, written by `tools/gif.ts` |
+| `assets/social.png` | The social preview (1280 × 640), written by `tools/social.ts`: the project page's `og:image`, and the repository's, uploaded by hand in its GitHub settings (Social preview) |
 | `CHANGELOG.md` | What each version changed. Add an entry with each version bump |
 
 ## Commands
@@ -39,11 +40,12 @@ Run from the repository root.
 
 | Command | What it does |
 | --- | --- |
-| `npx tsx tools/check.ts` | Everything before a commit: type-check, validate, tests, render, the page's build. Stops at the first failure |
+| `npx tsx tools/check.ts` | Everything before a commit: type-check, validate, tests, render, the social preview, the page's build. Stops at the first failure |
 | `npx tsx tools/render.ts` | Runs every video 600 frames offline, prints ms per frame and SVG sizes, rewrites `assets/preview.png` |
 | `npx tsx tools/render.ts <kind>` | One video over 32 s, frames side by side in `tools/out/<kind>.png` (git-ignored). Look at it |
 | `npx tsx tools/render.ts <theme>` | Every video of a theme, one row each, in `tools/out/<theme>.png`, with each one's time and SVG size. Several kinds or themes can be given |
 | `npx tsx tools/site.ts [--serve]` | Builds the project page into `site/dist/` (git-ignored); `--serve` then serves it on http://localhost:8080 |
+| `npx tsx tools/social.ts` | Rewrites `assets/social.png`: the title, the number of videos and five clips (`CLIPS`). After a change, upload it again in the repository's settings |
 | `npx tsx tools/gif.ts [kind...]` | Rewrites `assets/feed.gif`: six videos playing side by side, or the kinds given |
 | `npx tsx tools/sync-locales.ts` | Rewrites each `plugin/hooks/locales/<lang>/videos.ts` from its theme files and lists the videos a language lacks. `--check` only lists them; `check.ts` runs it |
 | `npx tsx tools/sync-kinds.ts` | Adds the theme kinds missing from the `Kind` union. `--check` only reports them; `check.ts` runs it first |
