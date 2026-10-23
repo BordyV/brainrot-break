@@ -1,6 +1,6 @@
 import { add, disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, burst, clamp, collide, hitSeg, irand, keepSpeed, line, ring, shiny, shuffle, sparks, textWidth, wallCircle } from '../kit'
+import { DIRS, burst, clamp, collide, hitSeg, irand, keepSpeed, line, lit, ring, shiny, shuffle, slab, sparks, textWidth, wallCircle } from '../kit'
 import type { Ball, Spark } from '../kit'
 
 // Ball & marble physics: a few balls, simple rules, a tense ending.
@@ -636,7 +636,7 @@ const saws: Maker = (W, H, rng) => {
       rect(px, W, H, 0, top - 1, W, 1, 0x6a5a7a)
       rect(px, W, H, 0, bottom, W, 1, 0x6a5a7a)
       for (const s of saw) {
-        disc(px, W, H, s.x, s.y, s.r, 0x9aa2ae)
+        lit(px, W, H, s.x, s.y, s.r, s.r, 0x9aa2ae)
         disc(px, W, H, s.x, s.y, s.r * 0.35, 0x4a4e58)
         for (let k = 0; k < 8; k++) {
           const a = s.a + (k / 8) * Math.PI * 2
@@ -786,7 +786,7 @@ const elevator: Maker = (W, H) => {
         const [x, y] = at(m.d)
         shiny(px, W, H, { x, y, vx: 0, vy: 0, r: 1.2, c: m.c })
       }
-      rect(px, W, H, lx - 3, bottom + 2, 7, 2, 0x5a4a3a)
+      slab(px, W, H, lx - 3, bottom + 2, 7, 2, 0x5a4a3a)
     },
   }
 }
@@ -1168,6 +1168,10 @@ const snooker: Maker = (W, H, rng) => {
     draw(px) {
       px.fill(0x5a3418)
       rect(px, W, H, x0, y0, x1 - x0 + 1, y1 - y0 + 1, 0x1e7a3a)
+      rect(px, W, H, x0, y0, x1 - x0 + 1, 1, 0x2a9a4a)
+      rect(px, W, H, x0, y0, 1, y1 - y0 + 1, 0x2a9a4a)
+      rect(px, W, H, x0, y1, x1 - x0 + 1, 1, 0x145a28)
+      rect(px, W, H, x1, y0, 1, y1 - y0 + 1, 0x145a28)
       for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if ((x * 3 + y * 5) % 11 === 0) dot(px, W, H, x, y, 0x1c7236)
       line(px, W, H, x0, y0 + (y1 - y0) * 0.72, x1, y0 + (y1 - y0) * 0.72, 0x3a9a5a)
       for (const [px0, py0] of pockets) disc(px, W, H, px0 + (px0 < W / 2 ? 0.5 : -0.5), py0, 1.8, 0x0a0a0a)
@@ -1304,7 +1308,7 @@ const pinball: Maker = (W, H, rng) => {
       for (let y = 4; y < fy; y += 5) for (let x = 3; x < W - 3; x += 5) dot(px, W, H, x, y, 0x4a2a6a)
       for (const [x0, y0, x1, y1] of walls) line(px, W, H, x0, y0, x1, y1, 0x7ae0ff)
       for (const q of bumpers) {
-        disc(px, W, H, q.x, q.y, q.r, q.f > 0 ? 0xffffff : 0xff3a8a)
+        lit(px, W, H, q.x, q.y, q.r, q.r, q.f > 0 ? 0xffffff : 0xff3a8a)
         disc(px, W, H, q.x, q.y, q.r * 0.5, q.f > 0 ? 0xff3a8a : 0xffd0e0)
       }
       for (const q of slings) line(px, W, H, q.x0, q.y0, q.x1, q.y1, q.f > 0 ? 0xffffff : 0xffd040)
@@ -1450,8 +1454,8 @@ const pegs: Maker = (W, H, rng) => {
       }
       for (const s of bits) dot(px, W, H, s.x, s.y, s.c)
       line(px, W, H, W / 2, 3, W / 2 + Math.cos(aim) * 4, 3 + Math.sin(aim) * 4, 0xd0d8e0)
-      disc(px, W, H, W / 2, 2, 1.5, 0x8a96a8)
-      rect(px, W, H, bucket - 3, H - 4, 7, 2, 0xd0b060)
+      lit(px, W, H, W / 2, 2, 1.6, 1.6, 0x8a96a8)
+      slab(px, W, H, bucket - 3, H - 4, 7, 2, 0xd0b060)
       if (b) shiny(px, W, H, b)
       text(px, W, H, 1, 0, String(left), 0xffffff)
       if (fever > 0) for (let i = 0; i < 12; i++) dot(px, W, H, (i * 5 + fever * 3) % W, (i * 11 + fever * 2) % H, hsv(i / 12 + fever * 0.02, 0.8, 1))
@@ -1514,11 +1518,12 @@ const gates: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x22283a, 0x1a1e2a)
       rect(px, W, H, 0, beltY, W, 3, 0x3a3e48)
+      rect(px, W, H, 0, beltY, W, 1, 0x6a707c)
       for (let x = 0; x < W; x++) if ((x - Math.floor(belt)) % 4 === 0) dot(px, W, H, x, beltY + 1, 0x5a5e68)
       for (let k = 0; k < n; k++) {
         const x = tubeX(k)
-        rect(px, W, H, x - 2, tubeTop, 1, tubeBottom - tubeTop + 1, 0x8a9aba)
-        rect(px, W, H, x + 2, tubeTop, 1, tubeBottom - tubeTop + 1, 0x8a9aba)
+        rect(px, W, H, x - 2, tubeTop, 1, tubeBottom - tubeTop + 1, 0xc8d4ec)
+        rect(px, W, H, x + 2, tubeTop, 1, tubeBottom - tubeTop + 1, 0x6a7a9a)
         rect(px, W, H, x - 2, tubeBottom + 1, 5, 1, 0x8a9aba)
         const open = flap[k]!
         rect(px, W, H, x - 1, beltY + 2 + open * 2, 3, 1, COLS[k] as number)
@@ -1722,12 +1727,12 @@ const willit: Maker = (W, H, rng) => {
       sky(px, W, H, 0x6ab8ff, 0xd8f0ff, ground)
       rect(px, W, H, 0, ground, W, H - ground, 0x5aa04a)
       rect(px, W, H, 0, ground, W, 1, 0x7ac05a)
-      if (wall.h) rect(px, W, H, wall.x - 1, ground - wall.h, 2, wall.h, 0xb85a3a)
+      if (wall.h) slab(px, W, H, wall.x - 1, ground - wall.h, 2, wall.h, 0xb85a3a)
       rect(px, W, H, cup.x + 1.5, cup.y + 3, 1, ground - cup.y - 3, 0x8a8a92)
       rect(px, W, H, cup.x, cup.y, 1, 3, 0xe8e8f0)
       rect(px, W, H, cup.x + 4, cup.y, 1, 3, 0xe8e8f0)
       rect(px, W, H, cup.x, cup.y + 3, 5, 1, 0xe8e8f0)
-      rect(px, W, H, 1, ground - 3, 4, 3, 0x3a3a42)
+      slab(px, W, H, 1, ground - 3, 4, 3, 0x3a3a42)
       shiny(px, W, H, b)
       if (freeze > 0 && freeze % 8 < 5) text(px, W, H, W / 2 - 1, H * 0.3, '?', 0xffffff)
       if (phase === 1 && result === 1) for (let i = 0; i < 10; i++) dot(px, W, H, cup.x + 2 + Math.cos(i) * t * 0.3, cup.y - t * 0.2 + Math.sin(i * 3) * 2, hsv(i / 10, 0.8, 1))
@@ -1966,7 +1971,7 @@ const pendule: Maker = (W, H, rng) => {
       line(px, W, H, x1, y1, x2, y2, 0xd0d0e0)
       disc(px, W, H, ox, oy, 0.8, 0x808090)
       disc(px, W, H, x1, y1, 1.2, 0xffffff)
-      disc(px, W, H, x2, y2, 1.5, hsv(hue, 0.6, 1))
+      lit(px, W, H, x2, y2, 1.6, 1.6, hsv(hue, 0.6, 1))
     },
   }
 }

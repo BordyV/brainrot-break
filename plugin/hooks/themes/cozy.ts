@@ -1,6 +1,6 @@
-import { add, disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
+import { add, disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, ellipse, hash, irand, line, pick, ring, shuffle } from '../kit'
+import { clamp, ellipse, hash, irand, line, lit, litSprite, pick, ring, shuffle, slab } from '../kit'
 
 // Cozy & lo-fi: slow, steady motion to rest the eyes while Claude thinks.
 
@@ -56,7 +56,7 @@ const lofi: Maker = (W, H, rng) => {
       rect(px, W, H, W * 0.38, desk - 1, 8, 1, 0xf4f0e0)
       const hand = Math.sin(t * 0.3) * 1.5
       const sx = Math.round(W * 0.18)
-      sprite(px, W, H, sx, desk - 13, ['..hhh..', '.hhhhh.', 'phhhssp', 'p.hsss.', '..sss..', '.ccccc.', 'ccccccc', 'ccccccc', 'ccccccc', 'ccccccc', 'ccccccc', 'ccccccc', 'ccccccc'], {
+      litSprite(px, W, H, sx, desk - 13, ['..hhh..', '.hhhhh.', 'phhhssp', 'p.hsss.', '..sss..', '.ccccc.', 'ccccccc', 'ccccccc', 'ccccccc', 'ccccccc', 'ccccccc', 'ccccccc', 'ccccccc'], {
         h: 0x3a2a24,
         s: 0xffd0b0,
         p: 0xd04a6a,
@@ -69,7 +69,7 @@ const lofi: Maker = (W, H, rng) => {
         const s = ((t * 0.2 + k * 7) % 21) / 21
         dot(px, W, H, W * 0.6 + 1 + Math.sin(t * 0.05 + k) * 1, desk - 5 - s * 8, mix(0xe8e8f0, 0x3a2e48, s))
       }
-      sprite(px, W, H, W - 8, desk - 4, ['o...o.', 'ooooo.', 'ooooot', '.oooot'], { o: 0x5a5a62, t: 0x5a5a62 })
+      litSprite(px, W, H, W - 8, desk - 4, ['o...o.', 'ooooo.', 'ooooot', '.oooot'], { o: 0x5a5a62, t: 0x5a5a62 })
       dot(px, W, H, W - 2 + Math.sin(t * 0.08), desk - 5, 0x5a5a62)
     },
   }
@@ -102,25 +102,86 @@ const aquarium: Maker = (W, H, rng) => {
       bubbles = bubbles.filter(b => b.y > top)
     },
     draw(px) {
-      sky(px, W, H, 0x2a8ac0, 0x0a3a6a)
-      rect(px, W, H, 0, 0, W, top, 0x1a1a1e)
-      for (let x = 0; x < W; x++) if (Math.sin(x * 0.7 + t * 0.1) > 0.6) dot(px, W, H, x, top + 1, 0x8ad8ff)
-      for (let y = gravel; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = hash(x, y, 4) > 0.5 ? 0xd8b880 : hash(x, y, 5) > 0.5 ? 0xa88a60 : 0xe8d0a0
-      for (const px0 of [3, 9, 22]) for (let y = gravel; y > gravel - 14; y--) dot(px, W, H, px0 + Math.sin(y * 0.4 + t * 0.04) * 1.2, y, 0x2a9a3a)
-      sprite(px, W, H, W * 0.55, gravel - 7, ['x.x.x', 'xxxxx', 'xx.xx', 'xx.xx'], { x: 0x8a8a9a })
-      for (const b of bubbles) dot(px, W, H, b.x, b.y, 0xc8ecff)
+      // water, light rays from the surface, the lid and its lamp
+      sky(px, W, H, 0x3aa4dc, 0x0a2e5a)
+      for (let y = top; y < gravel; y++) {
+        const fade = 0.2 * (1 - (y - top) / (gravel - top))
+        for (let x = 0; x < W; x++) if ((((x + y * 0.45 + t * 0.03) % 9) + 9) % 9 < 2) px[y * W + x] = mix(px[y * W + x] as number, 0xb8ecff, fade)
+      }
+      rect(px, W, H, 0, 0, W, top, 0x1a1a22)
+      rect(px, W, H, 0, top - 1, W, 1, 0x3a3a4a)
+      rect(px, W, H, W * 0.25, top - 1, W * 0.5, 1, 0xfff0c0)
+      for (let x = 0; x < W; x++) dot(px, W, H, x, top, Math.sin(x * 0.7 + t * 0.1) > 0.6 ? 0xe0f8ff : 0x7acdf0)
+      // gravel: pebbles two pixels wide, a lit top row, darker deeper down
+      for (let y = gravel; y < H; y++)
+        for (let x = 0; x < W; x++) {
+          const h = hash(Math.floor((x + (y % 2)) / 2), y, 4)
+          const deep = (y - gravel) / (H - gravel)
+          const c = y === gravel ? 0xf0dcb0 : h > 0.66 ? 0xe0c48e : h > 0.33 ? 0xc0a070 : 0x8a7050
+          px[y * W + x] = mix(c, 0x3a2e28, deep * 0.45)
+        }
+      rect(px, W, H, 0, gravel - 1, W, 1, 0x0e3a5e)
+      // a rock, lit from the upper left
+      const rx = W * 0.2
+      ellipse(px, W, H, rx, gravel - 1, 4, 2.6, 0x4a4a5c)
+      ellipse(px, W, H, rx - 0.6, gravel - 1.6, 3, 1.8, 0x707084)
+      ellipse(px, W, H, rx - 1.6, gravel - 2.4, 1.2, 0.7, 0x9a9ab0)
+      // plants: a swaying stem with leaves, lit side and shaded side
+      for (const [i, f] of [0.1, 0.32, 0.72].entries()) {
+        const x0 = W * f
+        const h = H * (0.22 + i * 0.04)
+        for (let y = gravel; y > gravel - h; y--) {
+          const x = x0 + Math.sin(y * 0.4 + t * 0.04 + i) * 1.2
+          dot(px, W, H, x, y, 0x2a8a3a)
+          if ((y + i) % 3 === 0) {
+            const side = (y + i) % 6 === 0 ? -1 : 1
+            dot(px, W, H, x + side, y, side < 0 ? 0x6ad86a : 0x1a6a2a)
+            dot(px, W, H, x + side * 2, y - 1, side < 0 ? 0x8ae87a : 0x2a7a32)
+          }
+        }
+        dot(px, W, H, x0 + Math.sin((gravel - h) * 0.4 + t * 0.04 + i) * 1.2, gravel - h, 0x9af08a)
+      }
+      // a little castle: lit face, mid, shaded face, a dark door
+      const kx = Math.round(W * 0.52)
+      const ky = gravel - 7
+      for (let x = 0; x < 6; x++) {
+        const c = x < 2 ? 0xb4b4c4 : x < 4 ? 0x8a8a9c : 0x5a5a6c
+        rect(px, W, H, kx + x, ky + 1, 1, 6, c)
+        if (x % 2 === 0) dot(px, W, H, kx + x, ky, c)
+      }
+      rect(px, W, H, kx + 2, ky + 4, 2, 3, 0x14243a)
+      dot(px, W, H, kx + 1, ky + 2, 0x14243a)
+      dot(px, W, H, kx + 4, ky + 2, 0x14243a)
+      dot(px, W, H, kx + 2, ky - 1, 0x5a5a6c)
+      dot(px, W, H, kx + 3, ky - 1, 0xff4a4a)
+      // bubbles: some bigger, with a highlight
+      for (const [i, b] of bubbles.entries()) {
+        if (i % 3 === 0) {
+          dot(px, W, H, b.x, b.y, 0x7ac8f0)
+          dot(px, W, H, b.x + 1, b.y, 0x7ac8f0)
+          dot(px, W, H, b.x, b.y - 1, 0xffffff)
+        } else dot(px, W, H, b.x, b.y, 0xc8ecff)
+      }
+      // fish: back darker, belly lighter, a darker tail, an eye; clownfish get a stripe
       for (const f of fish) {
         const d = f.vx > 0 ? 1 : -1
         if (f.s === 2) {
-          ellipse(px, W, H, f.x, f.y, 2, 1.4, f.c)
-          dot(px, W, H, f.x - d * 3, f.y - 1, f.c)
-          dot(px, W, H, f.x - d * 3, f.y + 1, f.c)
+          ellipse(px, W, H, f.x, f.y, 2.2, 1.4, f.c)
+          rect(px, W, H, f.x - 1, f.y - 1, 3, 1, scale(f.c, 0.75))
+          rect(px, W, H, f.x - 1, f.y + 1, 3, 1, mix(f.c, 0xffffff, 0.4))
+          dot(px, W, H, f.x, f.y - 2, scale(f.c, 0.6))
+          for (const v of [-1, 0, 1]) dot(px, W, H, f.x - d * 3, f.y + v, scale(f.c, v ? 0.6 : 0.8))
+          if (f.c === 0xff8a2a) for (const v of [-1, 0, 1]) dot(px, W, H, f.x - d * 0.5, f.y + v, 0xfff4ec)
+          dot(px, W, H, f.x + d * 1.5, f.y - 0.5, 0x101018)
         } else {
+          dot(px, W, H, f.x + d, f.y, mix(f.c, 0xffffff, 0.3))
           dot(px, W, H, f.x, f.y, f.c)
-          dot(px, W, H, f.x + d, f.y, f.c)
-          dot(px, W, H, f.x - d, f.y, scale(f.c, 0.7))
+          dot(px, W, H, f.x, f.y - 1, mix(f.c, 0xffffff, 0.2))
+          dot(px, W, H, f.x - d, f.y, scale(f.c, 0.75))
+          dot(px, W, H, f.x - d * 2, f.y - 1, scale(f.c, 0.6))
+          dot(px, W, H, f.x - d * 2, f.y + 1, scale(f.c, 0.6))
+          dot(px, W, H, f.x + d, f.y - 1, 0x101018)
         }
-        dot(px, W, H, f.x + d * f.s, f.y - (f.s === 2 ? 0.5 : 0), 0x1a1a1a)
       }
     },
   }
@@ -161,8 +222,8 @@ const plant: Maker = (W, H, rng) => {
       rect(px, W, H, W / 2 - 0.5, 0, 1, sill, 0xf0ece4)
       rect(px, W, H, 0, sill, W, H - sill, 0xe8e0d0)
       rect(px, W, H, 0, sill, W, 1, 0xffffff)
-      rect(px, W, H, cx - 4, sill - 6, 9, 6, 0xc8603a)
-      rect(px, W, H, cx - 5, sill - 7, 11, 2, 0xd8704a)
+      slab(px, W, H, cx - 4, sill - 6, 9, 6, 0xc8603a)
+      slab(px, W, H, cx - 5, sill - 7, 11, 2, 0xd8704a)
       const h = Math.min(leaves.length * 3 + span(t % 45, 0, 45) * 3, 30)
       line(px, W, H, cx, sill - 7, cx + Math.sin(t * 0.02) * 0.6, sill - 7 - h, 0x3a8a2a)
       for (const l of leaves) {
@@ -225,7 +286,7 @@ const cafe: Maker = (W, H, rng) => {
       rect(px, W, H, 0, table, W, H - table, 0xa86a3a)
       rect(px, W, H, 0, table, W, 1, 0xc88a52)
       const cx = W * 0.6
-      rect(px, W, H, cx - 3, table - 5, 6, 5, 0xf8f4ec)
+      slab(px, W, H, cx - 3, table - 5, 6, 5, 0xf8f4ec)
       rect(px, W, H, cx + 3, table - 4, 2, 2, 0xf8f4ec)
       ellipse(px, W, H, cx, table, 5, 1, 0xf0ece4)
       rect(px, W, H, cx - 2, table - 5, 4, 1, 0x8a5a2a)
@@ -233,7 +294,7 @@ const cafe: Maker = (W, H, rng) => {
         const s = ((t * 0.25 + k * 8) % 24) / 24
         dot(px, W, H, cx - 1 + k + Math.sin(t * 0.05 + k * 2) * 1.2, table - 6 - s * 10, mix(0xf0f0f0, 0x3a2418, s))
       }
-      sprite(px, W, H, W * 0.15, table - 3, ['.oo.', 'oooo', 'oooo'], { o: 0xd8a860 })
+      litSprite(px, W, H, W * 0.15, table - 3, ['.oo.', 'oooo', 'oooo'], { o: 0xd8a860 })
     },
   }
 }
@@ -266,11 +327,11 @@ const trainwindow: Maker = (W, H, rng) => {
       }
       for (let k = 0; k < 3; k++) {
         const x = ((k * 23 - scroll * 0.4) % (W + 20) + W + 20) % (W + 20) - 10
-        sprite(px, W, H, x, fy1 - 9, ['.rr.', 'rrrr', 'wwww', 'wdww'], { r: 0xc84a3a, w: 0xf0e8d8, d: 0x6a4a2a })
+        litSprite(px, W, H, x, fy1 - 9, ['.rr.', 'rrrr', 'wwww', 'wdww'], { r: 0xc84a3a, w: 0xf0e8d8, d: 0x6a4a2a })
       }
       for (let k = 0; k < 4; k++) {
         const x = ((k * 17 - scroll * 1.6) % (W + 30) + W + 30) % (W + 30) - 10
-        disc(px, W, H, x, fy1 - 6, 3, 0x2a5a2a)
+        lit(px, W, H, x, fy1 - 6, 3, 3, 0x2a5a2a)
         rect(px, W, H, x, fy1 - 3, 1, 4, 0x3a2a1a)
       }
       const pole = ((-scroll * 3) % 60 + 60) % 60 - 10
@@ -349,7 +410,7 @@ const bookshelf: Maker = (W, H, rng) => {
       for (let y = 0; y < H; y += 4) rect(px, W, H, 0, y, W, 1, 0x52341f)
       rows.forEach((r, s) => {
         const base = 4 + (s + 1) * gap
-        rect(px, W, H, 0, base, W, 2, 0x8a5a36)
+        slab(px, W, H, 0, base, W, 2, 0x8a5a36)
         let x = 2
         r.forEach((b, k) => {
           let dx = 0
@@ -464,7 +525,7 @@ const knitting: Maker = (W, H, rng) => {
       line(px, W, H, sx - 4, 5, sx + sw + 3, 4, 0xb8885a)
       line(px, W, H, sx - 3 + prog * sw, 2, sx + 3 + prog * sw, 8, 0xc8985a)
       const ball = 6 - Math.min(4, rowsDone * 0.03)
-      disc(px, W, H, W - 6, H - 8, ball, stripes[0] as number)
+      lit(px, W, H, W - 6, H - 8, ball, ball, stripes[0] as number)
       line(px, W, H, W - 6 - ball * 0.5, H - 8, W - 6 + ball * 0.5, H - 8 - ball * 0.3, scale(stripes[0] as number, 0.8))
       line(px, W, H, W - 6, H - 8 - ball, sx + sw, 6, stripes[0] as number)
     },
@@ -590,9 +651,9 @@ const fishing: Maker = (W, H, rng) => {
       disc(px, W, H, W * 0.75, water - 2, 5, 0xffe080)
       for (let y = water; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = (x + y * 2 + (t >> 3)) % 9 === 0 ? 0xffb080 : mix(0x3a5a8a, 0x1a2a4a, (y - water) / (H - water))
       for (let y = water; y < H; y++) if ((y - water) % 3 === 0) dot(px, W, H, W * 0.75 + ((y * 3 + t) % 5) - 2, y, 0xffe080)
-      rect(px, W, H, 0, dock, W * 0.4, 2, 0x8a5a36)
+      slab(px, W, H, 0, dock, W * 0.4, 2, 0x8a5a36)
       for (let x = 2; x < W * 0.4; x += 5) rect(px, W, H, x, dock + 2, 1, H - dock, 0x5a3a24)
-      sprite(px, W, H, W * 0.22, dock - 7, ['.hh', 'hss', '.cc', 'ccc', 'cbb', 'b.b'], { h: 0x6a5a2a, s: 0xffd0a0, c: 0x3a6a8a, b: 0x2a2a3a })
+      litSprite(px, W, H, W * 0.22, dock - 7, ['.hh', 'hss', '.cc', 'ccc', 'cbb', 'b.b'], { h: 0x6a5a2a, s: 0xffd0a0, c: 0x3a6a8a, b: 0x2a2a3a })
       const tipX = W * 0.62
       const tipY = dock - 16 - (phase === 2 ? 4 : 0)
       line(px, W, H, W * 0.22 + 2, dock - 4, tipX, tipY, 0x6a4a2a)
@@ -607,10 +668,10 @@ const fishing: Maker = (W, H, rng) => {
         fx = floatX + (tipX - floatX) * u
         fy = water - Math.sin(u * Math.PI) * 10 + (tipY + 4 - water) * u
         line(px, W, H, tipX, tipY, fx, fy - 1, 0xe0e0e0)
-        sprite(px, W, H, fx - 1, fy, ['.x.', 'xxx', 'xxx', '.x.', 'x.x'], { x: fishC })
+        litSprite(px, W, H, fx - 1, fy, ['.x.', 'xxx', 'xxx', '.x.', 'x.x'], { x: fishC })
       }
       for (let i = 0; i < Math.min(caught, 6); i++) dot(px, W, H, 2 + i, dock - 1, 0xc0c8d0)
-      rect(px, W, H, 1, dock - 3, 8, 3, 0x4a6a8a)
+      slab(px, W, H, 1, dock - 3, 8, 3, 0x4a6a8a)
       text(px, W, H, 1, 1, String(caught), 0xffffff)
     },
   }
@@ -666,13 +727,13 @@ const farm: Maker = (W, H, rng) => {
       sky(px, W, H, 0x8ad0ff, 0xd8f0ff, 8)
       rect(px, W, H, 0, 8, W, H - 8, 0x6ac04a)
       for (let y = 8; y < H; y++) for (let x = 0; x < W; x++) if (hash(x, y, 3) > 0.9) dot(px, W, H, x, y, 0x5aa83a)
-      sprite(px, W, H, W - 9, 0, ['..rrr..', '.rrrrr.', 'rrrrrrr', '.wwdww.', '.wwdww.'], { r: 0xc84a3a, w: 0xf0e0c0, d: 0x6a4a2a })
+      litSprite(px, W, H, W - 9, 0, ['..rrr..', '.rrrrr.', 'rrrrrrr', '.wwdww.', '.wwdww.'], { r: 0xc84a3a, w: 0xf0e0c0, d: 0x6a4a2a })
       for (let k = 0; k < cols * rows; k++) {
         const x = ox + (k % cols) * cs
         const y = oy + Math.floor(k / cols) * cs
         const s = stage[k]!
         if (s === 0) continue
-        rect(px, W, H, x, y, cs - 1, cs - 1, 0x8a5a36)
+        slab(px, W, H, x, y, cs - 1, cs - 1, 0x8a5a36)
         dot(px, W, H, x, y + 1, 0x6a4026)
         const cr = CROPS[kind[k]!] as { c: number; top: number }
         if (s === 2) dot(px, W, H, x + 1, y + 1, 0xd8c890)
@@ -687,7 +748,7 @@ const farm: Maker = (W, H, rng) => {
       }
       const x = ox + fx * cs
       const y = oy + fy * cs - 3
-      sprite(px, W, H, x, y, ['.h.', 'hhh', '.s.', 'bbb', 'b.b'], { h: 0xe8c860, s: 0xffd0a0, b: 0x3a6aaa })
+      litSprite(px, W, H, x, y, ['.h.', 'hhh', '.s.', 'bbb', 'b.b'], { h: 0xe8c860, s: 0xffd0a0, b: 0x3a6aaa })
     },
   }
 }
@@ -724,7 +785,7 @@ const marshmallow: Maker = (W, H, rng) => {
         const u = f.l / 18
         dot(px, W, H, f.x, f.y, u > 0.6 ? 0xffe080 : u > 0.3 ? 0xff9a2a : 0xd03a1a)
       }
-      rect(px, W, H, W / 2 - 7, fire, 14, 2, 0x5a3a20)
+      slab(px, W, H, W / 2 - 7, fire, 14, 2, 0x5a3a20)
       line(px, W, H, W / 2 - 6, fire + 2, W / 2 + 6, fire - 1, 0x6a4428)
       // the marshmallow: golden, then on fire, blown out, black
       const toast = span(t, 0, 140)
@@ -856,6 +917,7 @@ const sailing: Maker = (W, H, rng) => {
         [W * 0.6 + (t * 0.02) % W, 16],
       ] as [number, number][]) {
         const x = (cx % (W + 12)) - 6
+        ellipse(px, W, H, x + 0.5, cy + 0.6, 5, 1.5, 0xd8e8f8)
         ellipse(px, W, H, x, cy, 5, 1.5, 0xffffff)
         ellipse(px, W, H, x + 2, cy - 1, 3, 1.5, 0xffffff)
       }
@@ -926,6 +988,7 @@ const lighthouse: Maker = (W, H, rng) => {
         const hw = 2 + ((y - top) / (sea - top)) * 2
         const band = Math.floor((y - top) / 4) % 2
         rect(px, W, H, lx - hw, y, hw * 2, 1, band ? 0xe03a3a : 0xf4f4f0)
+        rect(px, W, H, lx + hw * 0.35, y, hw * 0.65, 1, band ? 0xa82a2a : 0xc8c8d0)
       }
       rect(px, W, H, lx - 3, top - 4, 6, 4, 0x2a2a32)
       rect(px, W, H, lx - 2, top - 3, 4, 2, 0xfff4a0)
@@ -1209,7 +1272,7 @@ const neige: Maker = (W, H, rng) => {
           const half = (j % 4) + 1 + Math.floor(j / 4) * 0.5
           for (let i = -half; i <= half; i++) dot(px, W, H, tx + i, ground - 12 + j, j % 4 === 0 ? 0xf0f4ff : 0x1f4a35)
         }
-      rect(px, W, H, chX, ground - wallH, cw, wallH, 0x6b3f1f)
+      slab(px, W, H, chX, ground - wallH, cw, wallH, 0x6b3f1f)
       for (let y = ground - wallH; y < ground; y += 2) rect(px, W, H, chX, y, cw, 1, 0x5a3418)
       rect(px, W, H, chX + cw - 5, ground - wallH - roofH - 2, 2, 4, 0x4a4a52)
       for (let j = 0; j <= roofH; j++) {

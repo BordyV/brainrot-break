@@ -1,6 +1,6 @@
-import { hsv, rect, scale, sky, text } from '../draw'
+import { hsv, rect, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, sparks, textWidth } from '../kit'
+import { burst, ellipse, sparks, textWidth, tones } from '../kit'
 import type { Spark } from '../kit'
 
 // Puzzles & logic: puzzles that solve themselves, one move at a time.
@@ -88,15 +88,30 @@ const hanoi: Maker = (W, H, rng) => {
     },
     draw(px) {
       sky(px, W, H, 0x1a1428, 0x2e2240)
-      // table and pegs
+      ellipse(px, W, H, W / 2, baseY, W * 0.7, H * 0.35, 0x2a2040)
+      // a wooden table with grain, pegs with a lit side and a foot
       rect(px, W, H, 0, baseY, W, H - baseY, 0x6a4428)
-      rect(px, W, H, 0, baseY, W, 1, 0x8a5a34)
-      for (let p = 0; p < 3; p++) rect(px, W, H, pegX(p), pegTop, 1, baseY - pegTop, 0xb08a5a)
+      rect(px, W, H, 0, baseY, W, 1, 0x9a6a3e)
+      rect(px, W, H, 0, baseY + 1, W, 1, 0x56361e)
+      for (let y = baseY + 3; y < H; y += 3) rect(px, W, H, (y * 7) % 9, y, W * 0.5, 1, 0x5e3c22)
+      for (let p = 0; p < 3; p++) {
+        rect(px, W, H, pegX(p), pegTop, 1, baseY - pegTop, 0xd8b07a)
+        rect(px, W, H, pegX(p) + 1, pegTop, 1, baseY - pegTop, 0x8a6438)
+        rect(px, W, H, pegX(p) - 1, baseY - 1, 4, 1, 0x7a5430)
+      }
+      // a disc: a lit top row, the colour, a shaded bottom row, rounded ends
       const disc = (d: number, x: number, y: number) => {
         const w = width(d)
-        const c = hsv(hue0 + d / n * 0.8, 0.6, 0.95)
-        rect(px, W, H, x - (w - 1) / 2, y, w, dh, c)
-        if (dh > 1) rect(px, W, H, x - (w - 1) / 2, y + dh - 1, w, 1, scale(c, 0.75))
+        const [hi, base, sh, deep] = tones(hsv(hue0 + (d / n) * 0.8, 0.6, 0.95))
+        const x0 = Math.round(x - (w - 1) / 2)
+        rect(px, W, H, x0, y, w, dh, base)
+        if (dh > 1) {
+          rect(px, W, H, x0 + 1, y, w - 2, 1, hi)
+          rect(px, W, H, x0, y + dh - 1, w, 1, sh)
+          rect(px, W, H, x0 + w - 1, y, 1, dh, sh)
+          rect(px, W, H, x0 + 1, y + dh - 1, w - 2, 1, deep)
+          if (w > 3) rect(px, W, H, x0, y, 1, 1, sh)
+        }
       }
       for (let p = 0; p < 3; p++) pegs[p].forEach((d, i) => disc(d, pegX(p), baseY - (i + 1) * dh))
       if (held >= 0) disc(held, Math.round(hx), Math.round(hy))

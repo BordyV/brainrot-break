@@ -1,4 +1,4 @@
-import { disc, dot, mix } from './draw'
+import { disc, dot, mix, scale } from './draw'
 import type { Rng } from './draw'
 
 // Drawing and maths helpers shared by the videos in hooks/themes/.
@@ -100,6 +100,88 @@ export function shade(px: Uint32Array, W: number, H: number, x0: number, y0: num
   for (let y = ya; y < yb; y++) for (let x = xa; x < xb; x++) px[y * W + x] = mix(px[y * W + x] as number, c, t)
 }
 
+/** A colour's four tones, lit from the upper left: highlight, base, shadow, deep shadow (shadows lean purple). */
+export function tones(c: number): [number, number, number, number] {
+  return [mix(c, 0xfff8ee, 0.42), c, mix(scale(c, 0.72), 0x281436, 0.15), mix(scale(c, 0.5), 0x200a28, 0.25)]
+}
+
+/** A filled ellipse lit from the upper left, in the four tones of c, with an outline if one is given. */
+export function lit(px: Uint32Array, W: number, H: number, cx: number, cy: number, rx: number, ry: number, c: number, edge?: number) {
+  const [hi, base, sh, deep] = tones(c)
+  const inside = (x: number, y: number) => ((x - cx) / Math.max(0.5, rx)) ** 2 + ((y - cy) / Math.max(0.5, ry)) ** 2 <= 1
+  const ya = Math.max(0, Math.ceil(cy - ry))
+  const yb = Math.min(H - 1, Math.floor(cy + ry))
+  const xa = Math.max(0, Math.ceil(cx - rx))
+  const xb = Math.min(W - 1, Math.floor(cx + rx))
+  for (let y = ya; y <= yb; y++)
+    for (let x = xa; x <= xb; x++) {
+      if (!inside(x, y)) continue
+      if (edge !== undefined && (!inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1))) {
+        px[y * W + x] = edge
+        continue
+      }
+      const light = -(((x - cx) / Math.max(0.5, rx)) * 0.6 + ((y - cy) / Math.max(0.5, ry)) * 0.8)
+      px[y * W + x] = light > 0.5 ? hi : light > -0.15 ? base : light > -0.6 ? sh : deep
+    }
+}
+
+/** A box lit from the upper left: highlight on top and left, shadow on the right and the bottom, an outline if one is given. */
+export function slab(px: Uint32Array, W: number, H: number, x: number, y: number, w: number, h: number, c: number, edge?: number) {
+  x = Math.round(x)
+  y = Math.round(y)
+  w = Math.round(w)
+  h = Math.round(h)
+  if (w <= 0 || h <= 0) return
+  const fill = (x0: number, y0: number, ww: number, hh: number, cc: number) => {
+    for (let yy = Math.max(0, y0); yy < Math.min(H, y0 + hh); yy++) for (let xx = Math.max(0, x0); xx < Math.min(W, x0 + ww); xx++) px[yy * W + xx] = cc
+  }
+  if (edge !== undefined) {
+    fill(x, y, w, h, edge)
+    if (w > 2 && h > 2) slab(px, W, H, x + 1, y + 1, w - 2, h - 2, c)
+    return
+  }
+  const [hi, base, sh, deep] = tones(c)
+  fill(x, y, w, h, base)
+  if (w > 1 && h > 1) {
+    fill(x, y + h - 1, w, 1, sh)
+    fill(x + w - 1, y, 1, h, sh)
+    fill(x, y, w, 1, hi)
+    fill(x, y, 1, h - 1, mix(base, hi, 0.5))
+    if (w > 2 && h > 2) fill(x + w - 1, y + h - 1, 1, 1, deep)
+  }
+}
+
+/** A bar three pixels thick from (x0, y0) to (x1, y1): its upper-left side lit, the other side in shadow. */
+export function beam(px: Uint32Array, W: number, H: number, x0: number, y0: number, x1: number, y1: number, c: number) {
+  const [hi, base, sh] = tones(c)
+  const len = Math.max(0.001, Math.hypot(x1 - x0, y1 - y0))
+  let nx = -(y1 - y0) / len
+  let ny = (x1 - x0) / len
+  if (nx + ny > 0) {
+    nx = -nx
+    ny = -ny
+  }
+  line(px, W, H, x0 - nx, y0 - ny, x1 - nx, y1 - ny, sh)
+  line(px, W, H, x0 + nx, y0 + ny, x1 + nx, y1 + ny, hi)
+  line(px, W, H, x0, y0, x1, y1, base)
+}
+
+/** sprite() lit from the upper left: a pixel with nothing above or to its left is lighter, one with nothing below or to its right darker. */
+export function litSprite(px: Uint32Array, W: number, H: number, x: number, y: number, rows: string[], colors: Record<string, number>) {
+  const at = (i: number, j: number) => colors[(rows[j] ?? '')[i] as string] !== undefined
+  rows.forEach((row, j) => {
+    for (let i = 0; i < row.length; i++) {
+      const c = colors[row[i] as string]
+      if (c === undefined) continue
+      const open = !at(i, j - 1) || !at(i - 1, j)
+      const shut = !at(i, j + 1) || !at(i + 1, j)
+      const xx = Math.round(x + i)
+      const yy = Math.round(y + j)
+      if (xx >= 0 && xx < W && yy >= 0 && yy < H) px[yy * W + xx] = open && !shut ? mix(c, 0xfff8ee, 0.3) : shut && !open ? mix(scale(c, 0.72), 0x281436, 0.12) : c
+    }
+  })
+}
+
 /** Width in pixels of a string drawn with text(). */
 export const textWidth = (s: string) => Math.max(0, s.length * 4 - 1)
 
@@ -199,8 +281,10 @@ export function keepSpeed(b: Ball, min: number, max = Infinity) {
   }
 }
 
+/** A ball: from 1.5 pixels of radius a sphere lit from the upper left, smaller a disc with a glint. */
 export function shiny(px: Uint32Array, W: number, H: number, b: Ball) {
-  disc(px, W, H, b.x, b.y, b.r, b.c)
+  if (b.r >= 1.5) lit(px, W, H, b.x, b.y, b.r, b.r, b.c)
+  else disc(px, W, H, b.x, b.y, b.r, b.c)
   if (b.r >= 1.2) dot(px, W, H, b.x - b.r * 0.4, b.y - b.r * 0.4, mix(b.c, 0xffffff, 0.6))
 }
 

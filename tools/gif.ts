@@ -29,7 +29,7 @@ if (unknown.length) {
   console.error(`Unknown kind: ${unknown.join(', ')}`)
   process.exit(1)
 }
-const kinds = (args.length ? args : ['tetris', 'feux', 'lava', 'sable', 'rings', 'aurore']) as Kind[]
+const kinds = (args.length ? args : ['ramen', 'aquarium', 'volcano', 'suika', 'rings', 'lava']) as Kind[]
 
 const OW = kinds.length * (W * SCALE + GAP) + GAP
 const OH = H * SCALE + GAP * 2

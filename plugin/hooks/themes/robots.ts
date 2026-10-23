@@ -1,6 +1,6 @@
 import { disc, dot, mix, rect, text } from '../draw'
 import type { Maker } from '../draw'
-import { hash, irand, textWidth } from '../kit'
+import { hash, irand, lit, slab, textWidth } from '../kit'
 
 // Sci-fi, robots & mecha: machines that act alive.
 
@@ -199,33 +199,52 @@ const robovac: Maker = (W, H, rng) => {
       clean()
     },
     draw(px) {
-      // a wooden floor and a rug
-      for (let j = 0; j < H; j++)
-        for (let i = 0; i < W; i++) px[j * W + i] = Math.floor(j / 3) % 2 ? 0xb88a5a : 0xc4966a
+      // a wooden floor: planks three pixels wide, staggered seams, two tones
+      for (let j = 0; j < H; j++) {
+        const row = Math.floor(j / 3)
+        for (let i = 0; i < W; i++) {
+          const seam = (i + row * 7) % 11 === 0
+          px[j * W + i] = j % 3 === 2 || seam ? 0xa47a4c : hash(Math.floor((i + row * 7) / 11), row, 9) > 0.5 ? 0xc4966a : 0xbc8e60
+        }
+      }
+      // a rug with a border and a fringe
       const rug = { x: Math.round(W * 0.15), y: Math.round(H * 0.68), w: Math.round(W * 0.6), h: Math.round(H * 0.16) }
-      rect(px, W, H, rug.x, rug.y, rug.w, rug.h, 0x5a7aa8)
+      rect(px, W, H, rug.x, rug.y, rug.w, rug.h, 0x3e5a88)
       rect(px, W, H, rug.x + 1, rug.y + 1, rug.w - 2, rug.h - 2, 0x6a8ab8)
-      for (let k = 0; k < dust.length; k++) if (dust[k]) px[k] = dust[k] === 2 ? 0x6a5a48 : mix(px[k], 0x4a3a2a, 0.55)
-      // walls, sofa, plant
-      rect(px, W, H, 0, 0, W, top, 0xe8dcc8)
-      rect(px, W, H, 0, top - 1, W, 1, 0xc8b8a0)
+      rect(px, W, H, rug.x + 2, rug.y + 2, rug.w - 4, rug.h - 4, 0x5a7aa8)
+      for (let i = rug.x; i < rug.x + rug.w; i += 2) {
+        dot(px, W, H, i, rug.y - 1, 0xe8e0d0)
+        dot(px, W, H, i, rug.y + rug.h, 0xe8e0d0)
+      }
+      for (let k = 0; k < dust.length; k++) if (dust[k]) px[k] = dust[k] === 2 ? 0x5a4a3a : mix(px[k], 0x4a3a2a, 0.55)
+      // walls, lit on top, a baseboard shadow along the floor
+      rect(px, W, H, 0, 0, W, top, 0xece2d0)
+      rect(px, W, H, 0, top - 2, W, 1, 0xd8ccb6)
+      rect(px, W, H, 0, top - 1, W, 1, 0xa89880)
       rect(px, W, H, 0, 0, wall, H, 0xd8ccb8)
-      rect(px, W, H, W - wall, 0, wall, H, 0xd8ccb8)
-      rect(px, W, H, 0, H - wall, W, wall, 0xd8ccb8)
-      rect(px, W, H, sofa.x, sofa.y, sofa.w, sofa.h, 0x8a3a4a)
-      rect(px, W, H, sofa.x, sofa.y + sofa.h - 2, sofa.w, 2, 0xa84a5a)
-      disc(px, W, H, plant.x, plant.y, plant.r, 0xa8603a)
-      disc(px, W, H, plant.x, plant.y, plant.r - 0.6, 0x3a8a3a)
+      rect(px, W, H, wall - 1, top, 1, H, 0xb4a690)
+      rect(px, W, H, W - wall, 0, wall, H, 0xc8bca8)
+      rect(px, W, H, 0, H - wall, W, wall, 0xc8bca8)
+      // the sofa: a back, two cushions, armrests
+      slab(px, W, H, sofa.x, sofa.y, sofa.w, sofa.h, 0x8a3a4a, 0x4a1a24)
+      const half = Math.round(sofa.w / 2)
+      slab(px, W, H, sofa.x + 2, sofa.y + 2, half - 2, sofa.h - 3, 0xa84a5a)
+      slab(px, W, H, sofa.x + half, sofa.y + 2, sofa.w - half - 2, sofa.h - 3, 0xa84a5a)
+      // the plant: a lit pot, leaves with a highlight
+      lit(px, W, H, plant.x, plant.y, plant.r, plant.r, 0xa8603a, 0x5a2a14)
+      lit(px, W, H, plant.x, plant.y, plant.r - 0.6, plant.r - 0.6, 0x3a9a3a)
+      dot(px, W, H, plant.x - 1, plant.y - 1, 0x8ae07a)
       // the dock
-      rect(px, W, H, dock.x - 2, H - wall - 1, 5, 1, 0x2a2a30)
+      slab(px, W, H, dock.x - 2, H - wall - 1, 5, 1, 0x2a2a30)
       dot(px, W, H, dock.x, H - wall - 1, mode === 'docked' ? 0x40e060 : 0xe0a020)
-      // the robot, under the table when it's there
-      disc(px, W, H, x, y, R, 0x2a2a34)
-      disc(px, W, H, x, y, Math.max(0.5, R - 1), 0x4a4a58)
+      // the robot: a shadow, an outlined lit body, a sensor; under the table when it's there
+      lit(px, W, H, x + 0.6, y + 0.8, R, R, 0x6a4a30)
+      lit(px, W, H, x, y, R, R, 0x4a4a58, 0x16161c)
+      dot(px, W, H, x - R * 0.3, y - R * 0.3, 0x9a9aa8)
       dot(px, W, H, x + Math.cos(head) * (R - 0.5), y + Math.sin(head) * (R - 0.5), t % 10 < 6 ? 0x40d0ff : 0x2080a0)
       for (let j = table.y; j < table.y + table.h; j++)
         for (let i = table.x; i < table.x + table.w; i++)
-          if (i >= 0 && i < W && j >= 0 && j < H) px[j * W + i] = mix(px[j * W + i], 0x6a4428, 0.8)
+          if (i >= 0 && i < W && j >= 0 && j < H) px[j * W + i] = mix(px[j * W + i], j === table.y ? 0x9a6c44 : i === table.x + table.w - 1 || j === table.y + table.h - 1 ? 0x4a2e18 : 0x6a4428, 0.8)
       // how clean the floor is
       const pct = `${Math.round((1 - left() / Math.max(1, total)) * 100)}%`
       text(px, W, H, 1, 1, pct, 0x3a3a48)

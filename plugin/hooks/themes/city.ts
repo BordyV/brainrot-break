@@ -1,20 +1,25 @@
 import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, clamp, ellipse, hash, irand, line, pick, poly, ring, sparks } from '../kit'
+import { burst, clamp, ellipse, hash, irand, line, lit, pick, poly, ring, slab, sparks, tint } from '../kit'
 import type { Spark } from '../kit'
 
 // Vehicles & city: busy little worlds to watch from above.
 
 const span = (t: number, a: number, b: number) => clamp((t - a) / (b - a), 0, 1)
 
+// A car seen from above: a shadow down and right, a body lit on its top-left edge and shaded on the other, a windscreen.
 function car(px: Uint32Array, W: number, H: number, x: number, y: number, horiz: boolean, c: number) {
-  if (horiz) {
-    rect(px, W, H, x - 2, y - 1, 5, 3, c)
-    dot(px, W, H, x, y, 0xa8d8ff)
-  } else {
-    rect(px, W, H, x - 1, y - 2, 3, 5, c)
-    dot(px, W, H, x, y, 0xa8d8ff)
-  }
+  const w = horiz ? 5 : 3
+  const h = horiz ? 3 : 5
+  const x0 = Math.round(x - (horiz ? 2 : 1))
+  const y0 = Math.round(y - (horiz ? 1 : 2))
+  for (let k = 0; k < w; k++) tint(px, W, H, x0 + 1 + k, y0 + h, 0x000000, 0.35)
+  for (let k = 0; k < h; k++) tint(px, W, H, x0 + w, y0 + 1 + k, 0x000000, 0.35)
+  rect(px, W, H, x0, y0, w, h, c)
+  rect(px, W, H, x0, y0, w, 1, mix(c, 0xffffff, 0.35))
+  rect(px, W, H, x0, y0 + h - 1, w, 1, scale(c, 0.7))
+  rect(px, W, H, x0 + w - 1, y0, 1, h, scale(c, 0.8))
+  dot(px, W, H, x, y, 0xa8d8ff)
 }
 
 // --- traffic lights ---------------------------------------------------------------
@@ -382,7 +387,7 @@ const carwash: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x8ac8f0, 0xd8f0ff, floor)
       rect(px, W, H, 0, floor, W, H - floor, 0x6a6a72)
-      rect(px, W, H, W * 0.18, floor - 22, W * 0.62, 22, 0x2a5a8a)
+      slab(px, W, H, W * 0.18, floor - 22, W * 0.62, 22, 0x2a5a8a)
       rect(px, W, H, W * 0.18, floor - 23, W * 0.62, 2, 0xffd040)
       rect(px, W, H, W * 0.2, floor - 20, W * 0.58, 20, 0x3a6a9a)
       for (const bxr of [0.32, 0.45]) {
@@ -393,11 +398,12 @@ const carwash: Maker = (W, H, rng) => {
       if (x > W * 0.5) for (let k = 0; k < 6; k++) dot(px, W, H, W * 0.58 + (k % 3), floor - 18 + ((t * 2 + k * 3) % 16), 0x8ad0ff)
       const clean = span(x, W * 0.45, W * 0.6)
       const body = mix(mix(c, 0x6a5a3a, 0.6), c, clean)
-      rect(px, W, H, x, floor - 5, 12, 3, body)
-      rect(px, W, H, x + 2, floor - 8, 7, 3, body)
+      ellipse(px, W, H, x + 6.5, floor, 7, 0.8, 0x4a4a52)
+      slab(px, W, H, x, floor - 5, 12, 3, body)
+      slab(px, W, H, x + 2, floor - 8, 7, 3, body)
       rect(px, W, H, x + 3, floor - 7, 5, 1, 0xa8d8ff)
-      disc(px, W, H, x + 2.5, floor - 1.5, 1.4, 0x1a1a1a)
-      disc(px, W, H, x + 9.5, floor - 1.5, 1.4, 0x1a1a1a)
+      lit(px, W, H, x + 2.5, floor - 1.5, 1.5, 1.5, 0x3a3a3e)
+      lit(px, W, H, x + 9.5, floor - 1.5, 1.5, 1.5, 0x3a3a3e)
       if (clean < 1) for (let k = 0; k < 6; k++) dot(px, W, H, x + 1 + ((k * 5) % 11), floor - 4 - (k % 3), 0x5a4a2a)
       for (const f of foam) disc(px, W, H, f.x, f.y, 1, 0xf8fcff)
       for (const s of sparkle) dot(px, W, H, s.x, s.y, 0xffffff)
@@ -456,12 +462,14 @@ const crane: Maker = (W, H, rng) => {
       }
       rect(px, W, H, mast - 6, jibY, W - mast + 4, 1, 0xffc020)
       for (let x = mast - 6; x < W - 2; x += 3) dot(px, W, H, x, jibY + 1, 0xd8a010)
-      rect(px, W, H, mast - 7, jibY + 1, 4, 3, 0x7a7a82)
-      rect(px, W, H, mast - 1, jibY - 3, 3, 3, 0x3a6aaa)
+      slab(px, W, H, mast - 7, jibY + 1, 4, 3, 0x7a7a82)
+      slab(px, W, H, mast - 1, jibY - 3, 3, 3, 0x3a6aaa)
       for (let f = 0; f < floors; f++) {
         const y = ground - (f + 1) * 3
         rect(px, W, H, bx, y, bw, 3, colour)
         rect(px, W, H, bx, y, bw, 1, scale(colour, 0.8))
+        rect(px, W, H, bx, y + 1, 1, 2, mix(colour, 0xffffff, 0.2))
+        rect(px, W, H, bx + bw - 1, y + 1, 1, 2, scale(colour, 0.7))
         for (let wx = bx + 1; wx < bx + bw - 1; wx += 3) dot(px, W, H, wx, y + 1, f % 2 ? 0x3a5a8a : 0x5a8aba)
       }
       line(px, W, H, trolley, jibY + 1, trolley, hook, 0x3a3a3a)
@@ -801,16 +809,16 @@ const monstertruck: Maker = (W, H, rng) => {
       cars.forEach((cx, k) => {
         if (crushed.has(k)) rect(px, W, H, cx - 2, ground - 1, 5, 1, carC[k] as number)
         else {
-          rect(px, W, H, cx - 2, ground - 3, 5, 3, carC[k] as number)
+          slab(px, W, H, cx - 2, ground - 3, 5, 3, carC[k] as number)
           dot(px, W, H, cx, ground - 3, 0xa8d8ff)
         }
       })
       const ty = y
-      rect(px, W, H, x, ty - 9, 10, 4, 0x3aa03a)
-      rect(px, W, H, x + 5, ty - 12, 4, 3, 0x3aa03a)
+      slab(px, W, H, x, ty - 9, 10, 4, 0x3aa03a)
+      slab(px, W, H, x + 5, ty - 12, 4, 3, 0x3aa03a)
       dot(px, W, H, x + 7, ty - 11, 0xa8d8ff)
-      disc(px, W, H, x + 2, ty - 3, 3, 0x1a1a1a)
-      disc(px, W, H, x + 8, ty - 3, 3, 0x1a1a1a)
+      lit(px, W, H, x + 2, ty - 3, 3, 3, 0x2e2e32, 0x0e0e10)
+      lit(px, W, H, x + 8, ty - 3, 3, 3, 0x2e2e32, 0x0e0e10)
       dot(px, W, H, x + 2, ty - 3, 0x8a8a8a)
       dot(px, W, H, x + 8, ty - 3, 0x8a8a8a)
       for (const d of dust) dot(px, W, H, d.x, d.y, d.c)
@@ -888,16 +896,17 @@ const port: Maker = (W, H, rng) => {
       for (let y = sea; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = (x + y * 3) % 11 === 0 ? 0x5a9ad0 : 0x2a6aa8
       rect(px, W, H, W * 0.55, quay, W * 0.45, H - quay, 0x8a8a92)
       rect(px, W, H, W * 0.55, quay, W * 0.45, 1, 0xb0b0b8)
-      yard.forEach((c, i) => rect(px, W, H, W * 0.62 + (i % 2) * 4, quay - 3 - Math.floor(i / 2) * 3, 4, 3, c))
+      yard.forEach((c, i) => slab(px, W, H, W * 0.62 + (i % 2) * 4, quay - 3 - Math.floor(i / 2) * 3, 4, 3, c))
       rect(px, W, H, shipX, sea - 3, 24, 4, 0x2a2a3a)
       rect(px, W, H, shipX, sea + 1, 24, 2, 0xc83a2a)
       rect(px, W, H, shipX + 20, sea - 8, 4, 5, 0xf0f0f0)
-      ship.forEach((c, i) => rect(px, W, H, shipX + 3 + (i % slots) * 3.5 - 1.5, sea - 6 - Math.floor(i / slots) * 3, 3, 3, c))
+      rect(px, W, H, shipX, sea - 3, 24, 1, 0x4a4a5c)
+      ship.forEach((c, i) => slab(px, W, H, shipX + 3 + (i % slots) * 3.5 - 1.5, sea - 6 - Math.floor(i / slots) * 3, 3, 3, c))
       rect(px, W, H, W * 0.15, 4, W * 0.8, 2, 0xf0b020)
       rect(px, W, H, W * 0.9, 4, 2, quay - 4, 0xf0b020)
       rect(px, W, H, gx - 2, 5, 4, 2, 0x3a3a3a)
       line(px, W, H, gx, 7, gx, hook, 0x3a3a3a)
-      if (carry >= 0) rect(px, W, H, gx - 2, hook, 4, 3, carry)
+      if (carry >= 0) slab(px, W, H, gx - 2, hook, 4, 3, carry)
     },
   }
 }
@@ -944,11 +953,11 @@ const drawbridge: Maker = (W, H, rng) => {
       line(px, W, H, pivotL, road + 1, pivotL + Math.cos(a) * half, road + 1 - Math.sin(a) * half, 0x3a3a42)
       line(px, W, H, pivotR, road, pivotR - Math.cos(a) * half, road - Math.sin(a) * half, 0x5a5a62)
       line(px, W, H, pivotR, road + 1, pivotR - Math.cos(a) * half, road + 1 - Math.sin(a) * half, 0x3a3a42)
-      rect(px, W, H, pivotL - 4, road - 12, 3, 12, 0x9a8a7a)
-      rect(px, W, H, pivotR + 1, road - 12, 3, 12, 0x9a8a7a)
+      slab(px, W, H, pivotL - 4, road - 12, 3, 12, 0x9a8a7a)
+      slab(px, W, H, pivotR + 1, road - 12, 3, 12, 0x9a8a7a)
       if (ship > -16) {
         rect(px, W, H, ship, water - 2, 14, 3, 0xf0f0f0)
-        rect(px, W, H, ship + 2, water - 6, 6, 4, 0xe0e0e0)
+        slab(px, W, H, ship + 2, water - 6, 6, 4, 0xe0e0e0)
         rect(px, W, H, ship + 4, water - 12, 1, 6, 0x5a5a5a)
         rect(px, W, H, ship, water + 1, 14, 1, 0x2a5a8a)
       }
@@ -1073,7 +1082,7 @@ const coaster: Maker = (W, H, rng) => {
         dot(px, W, H, x, y, 0xe03a3a)
         if (i % 2) dot(px, W, H, x, y + 1, 0x8a2a2a)
       }
-      rect(px, W, H, W * 0.06, base, 8, 4, 0x8a5a3a)
+      slab(px, W, H, W * 0.06, base, 8, 4, 0x8a5a3a)
       for (let k = 0; k < 3; k++) {
         const i = Math.floor(s - k * 7 + N * 10) % N
         const [x, y] = pts[i] as [number, number]
@@ -1118,19 +1127,39 @@ const demolition: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x8ab8e0, 0xe0ecf4, ground)
       rect(px, W, H, 0, ground, W, H - ground, 0x7a6a5a)
-      for (let k = 0; k < 4; k++) rect(px, W, H, k * 9 - 2, ground - 8 - (k % 2) * 4, 6, 8 + (k % 2) * 4, 0x9aa0b0)
+      rect(px, W, H, 0, ground, W, 1, 0x9a8a78)
+      // the skyline behind: lit left faces, shaded right faces
+      for (let k = 0; k < 4; k++) {
+        const x = k * 9 - 2
+        const h = 8 + (k % 2) * 4
+        rect(px, W, H, x, ground - h, 6, h, 0x9aa0b0)
+        rect(px, W, H, x, ground - h, 1, h, 0xb4bac8)
+        rect(px, W, H, x + 5, ground - h, 1, h, 0x7a8090)
+      }
       const fall = Math.max(0, t - 90)
       const gone = Math.min(floors, fall * fall * 0.004)
       const standing = t > 260 ? Math.min(floors, (t - 260) * 0.4) : floors - gone
+      // the tower: a lit left edge, a shaded right edge, a cornice line per floor, windows with a glint
       for (let f = 0; f < Math.floor(standing); f++) {
-        const y = ground - (f + 1) * 3 + (t > 90 && t < 260 ? gone * 0 : 0)
+        const y = ground - (f + 1) * 3
         const tilt = t > 90 && t < 260 ? (f / floors) * Math.sin(fall * 0.05) * 1.5 : 0
         rect(px, W, H, bx + tilt, y, bw, 3, 0xc8b8a0)
-        for (let wx = bx + 2; wx < bx + bw - 1; wx += 3) dot(px, W, H, wx + tilt, y + 1, 0x4a5a7a)
+        rect(px, W, H, bx + tilt, y, bw, 1, 0xd8caa4)
+        rect(px, W, H, bx + tilt, y, 1, 3, 0xe0d4bc)
+        rect(px, W, H, bx + tilt + bw - 2, y, 2, 3, 0x9a8a76)
+        for (let wx = bx + 2; wx < bx + bw - 2; wx += 3) {
+          dot(px, W, H, wx + tilt, y + 1, 0x3a4a6a)
+          dot(px, W, H, wx + tilt + 1, y + 1, (f + wx) % 5 === 0 ? 0xc8e0f8 : 0x5a6a8a)
+        }
       }
-      if (t > 90 && t < 260) rect(px, W, H, bx - 2, ground - 3, bw + 4, 3, 0x9a8a78)
-      for (const [x, y] of flashes) disc(px, W, H, x, y, 1.5, 0xffe080)
-      for (const d of dust) disc(px, W, H, d.x, d.y, d.r, 0xd8ccb8)
+      if (t > 90 && t < 260) slab(px, W, H, bx - 2, ground - 3, bw + 4, 3, 0x9a8a78)
+      for (const [x, y] of flashes) {
+        disc(px, W, H, x, y, 2, 0xff9a2a)
+        disc(px, W, H, x, y, 1, 0xfff0a0)
+      }
+      // dust: a shaded body, a lit cap
+      for (const d of dust) disc(px, W, H, d.x + 0.4, d.y + 0.4, d.r, 0xb8ac98)
+      for (const d of dust) disc(px, W, H, d.x - d.r * 0.2, d.y - d.r * 0.25, d.r * 0.75, 0xe0d6c4)
       if (t < 90) text(px, W, H, 1, 1, String(Math.max(0, 3 - Math.floor(t / 30))), 0xe03a3a)
     },
   }

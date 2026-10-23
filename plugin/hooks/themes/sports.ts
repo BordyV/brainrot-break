@@ -1,6 +1,6 @@
-import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
+import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, ellipse, irand, line, pick, poly, textWidth } from '../kit'
+import { clamp, ellipse, irand, line, lit, litSprite, pick, poly, slab, textWidth } from '../kit'
 
 // Sports: a clear goal and a decisive moment.
 
@@ -75,8 +75,8 @@ const trickshots: Maker = (W, H, rng) => {
       rect(px, W, H, W - 3, hoop.y - 8, 1, 8, 0xffffff)
       rect(px, W, H, hoop.x - 2, hoop.y, 5, 1, 0xff5a1a)
       for (let k = 0; k < 4; k++) line(px, W, H, hoop.x - 2 + k * 1.3, hoop.y + 1, hoop.x - 1 + k * 1 + (net > 0 ? Math.sin(net) : 0), hoop.y + 4 + (net > 0 ? 1 : 0), 0xf0f0f0)
-      sprite(px, W, H, shooter - 1, floor - 8, ['.s.', 'jjj', 'jjj', '.j.', 'b.b', 'b.b', 'k.k'], { s: 0x8a5a3a, j: 0xe03a3a, b: 0x2a2a6a, k: 0xffffff })
-      disc(px, W, H, ball.x, ball.y, 1.3, 0xf07a1a)
+      litSprite(px, W, H, shooter - 1, floor - 8, ['.s.', 'jjj', 'jjj', '.j.', 'b.b', 'b.b', 'k.k'], { s: 0x8a5a3a, j: 0xe03a3a, b: 0x2a2a6a, k: 0xffffff })
+      lit(px, W, H, ball.x, ball.y, 1.5, 1.5, 0xf07a1a)
       dot(px, W, H, ball.x, ball.y, 0x8a3a0a)
       text(px, W, H, 1, 1, `${made}/${shots}`, 0xffffff)
     },
@@ -146,9 +146,9 @@ const penalty: Maker = (W, H, rng) => {
       dot(px, W, H, W / 2, H * 0.78 + 1, 0xffffff)
       const kx = W / 2 + keeper.dir * keeper.dive * gw * 0.38
       const lean = keeper.dive * keeper.dir
-      sprite(px, W, H, kx - 2, goalY + 2 - keeper.dive * 2, Math.abs(lean) > 0.5 ? ['g...g', 'ggggg', '.yyy.', '.y.y.'] : ['.g.', 'ggg', 'gyg', '.y.', 'y.y'], { g: 0x2ae0a0, y: 0x2a2a2a })
-      if (t < 32) sprite(px, W, H, W / 2 - 3, H * 0.78 + 1, ['.s.', 'rrr', '.r.', 'w.w'], { s: 0xffd0a0, r: 0xe03a3a, w: 0xffffff })
-      disc(px, W, H, ball.x, ball.y, ball.sz, 0xffffff)
+      litSprite(px, W, H, kx - 2, goalY + 2 - keeper.dive * 2, Math.abs(lean) > 0.5 ? ['g...g', 'ggggg', '.yyy.', '.y.y.'] : ['.g.', 'ggg', 'gyg', '.y.', 'y.y'], { g: 0x2ae0a0, y: 0x2a2a2a })
+      if (t < 32) litSprite(px, W, H, W / 2 - 3, H * 0.78 + 1, ['.s.', 'rrr', '.r.', 'w.w'], { s: 0xffd0a0, r: 0xe03a3a, w: 0xffffff })
+      lit(px, W, H, ball.x, ball.y, ball.sz, ball.sz, 0xf4f4f8)
       dot(px, W, H, ball.x, ball.y, 0x2a2a2a)
       text(px, W, H, 1, H - 7, String(goals), 0xffffff)
       text(px, W, H, W - 4, H - 7, String(saves % 10), 0x2ae0a0)
@@ -226,10 +226,11 @@ const bowling: Maker = (W, H, rng) => {
           dot(px, W, H, p.x, p.y, 0xe03a3a)
         } else {
           rect(px, W, H, p.x - 0.5, p.y - 2, 1.5, 3, 0xf8f8f8)
+          dot(px, W, H, p.x + 0.5, p.y, 0xb8b8c4)
           dot(px, W, H, p.x, p.y - 1, 0xe03a3a)
         }
       }
-      disc(px, W, H, ball.x, ball.y, 1.8, 0x3a3ac8)
+      lit(px, W, H, ball.x, ball.y, 1.8, 1.8, 0x3a3ac8)
       dot(px, W, H, ball.x - 0.5, ball.y - 0.5, 0x8a8aff)
       if (downs === 10 && t > 90 && t % 10 < 6) text(px, W, H, W / 2 - 1, H * 0.45, 'x', 0xffe040)
       text(px, W, H, 1, 1, String(downs), 0xffffff)
@@ -291,6 +292,7 @@ const holeinone: Maker = (W, H, rng) => {
     draw(px) {
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = Math.floor((x + y * 0.5) / 4) % 2 ? 0x4ab84a : 0x52c252
       ellipse(px, W, H, hole.x, hole.y, W * 0.4, H * 0.18, 0x6ad86a)
+      ellipse(px, W, H, hole.x - W * 0.08, hole.y - H * 0.04, W * 0.25, H * 0.09, 0x80e480)
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (Math.hypot(x - hole.x, (y - hole.y) * 1.2) < W * 0.42 && Math.floor((x - y) / 4) % 2) px[y * W + x] = 0x62d062
       disc(px, W, H, hole.x, hole.y, 1.2, 0x1a1a1a)
       line(px, W, H, hole.x, hole.y, hole.x, hole.y - 10, 0xe0e0e0)
@@ -345,7 +347,7 @@ const slalom: Maker = (W, H, rng) => {
       const sy = H * 0.3
       const prev = trail[trail.length - 3] ?? [sx, 0]
       const lean = clamp((sx - prev[0]) * 2, -1, 1)
-      sprite(px, W, H, sx - 1, sy - 4, ['.h.', 'jjj', '.j.', 'p.p'], { h: 0xffd040, j: 0xe03aa0, p: 0x2a2a3a })
+      litSprite(px, W, H, sx - 1, sy - 4, ['.h.', 'jjj', '.j.', 'p.p'], { h: 0xffd040, j: 0xe03aa0, p: 0x2a2a3a })
       line(px, W, H, sx - 2 + lean, sy, sx - 1 + lean, sy + 2, 0x2a2a3a)
       line(px, W, H, sx + 1 + lean, sy, sx + 2 + lean, sy + 2, 0x2a2a3a)
       text(px, W, H, 1, H - 7, (t / 15).toFixed(1), 0x3a3a5a)
@@ -417,7 +419,7 @@ const halfpipe: Maker = (W, H, rng) => {
       let [x, y] = pos(a)
       if (air) y = bottom - R + ay
       if (fall) {
-        sprite(px, W, H, x - 2, y - 2, ['sbb', 'jjj'], { s: 0xffd0a0, b: 0x2a2a6a, j: 0xe0a03a })
+        litSprite(px, W, H, x - 2, y - 2, ['sbb', 'jjj'], { s: 0xffd0a0, b: 0x2a2a6a, j: 0xe0a03a })
       } else {
         const rot = air ? Math.floor(spin / 1.57) % 4 : 0
         const body = [
@@ -426,7 +428,7 @@ const halfpipe: Maker = (W, H, rng) => {
           ['b.b', '.j.', 'jjj', '.s.'],
           ['...', 'bjs', '.jj', 'b..'],
         ][rot] as string[]
-        sprite(px, W, H, x - 1, y - 5, body, { s: 0xffd0a0, j: 0xe0a03a, b: 0x2a2a6a })
+        litSprite(px, W, H, x - 1, y - 5, body, { s: 0xffd0a0, j: 0xe0a03a, b: 0x2a2a6a })
         line(px, W, H, x - 2, y - 1, x + 2, y - 1, 0x3a3a3a)
       }
       text(px, W, H, 1, 1, String(tricks), 0x2a3a6a)
@@ -468,9 +470,9 @@ const pitstop: Maker = (W, H, rng) => {
       rect(px, W, H, W * 0.2, box + 10, W * 0.6, 1, 0xffd040)
       const cx = W / 2
       const y = car
-      rect(px, W, H, cx - 2, y - 7, 5, 14, 0xd02020)
-      rect(px, W, H, cx - 4, y - 8, 9, 2, 0xd02020)
-      rect(px, W, H, cx - 4, y + 6, 9, 2, 0xd02020)
+      slab(px, W, H, cx - 2, y - 7, 5, 14, 0xd02020)
+      slab(px, W, H, cx - 4, y - 8, 9, 2, 0xd02020)
+      slab(px, W, H, cx - 4, y + 6, 9, 2, 0xd02020)
       dot(px, W, H, cx, y - 1, 0xffd040)
       const working = t > 60 && t < 100
       const phase = span(t, 62, 96)
@@ -482,11 +484,11 @@ const pitstop: Maker = (W, H, rng) => {
         if (swapped) dot(px, W, H, wx - 1, wy - 1, 0xffe040)
         if (working) {
           const mx = cx + dx * (7 + (phase < 0.5 ? phase * 6 : (1 - phase) * 6))
-          sprite(px, W, H, mx - 1, wy - 1, ['.h.', 'ccc'], { h: 0xffffff, c: 0x3a6aff })
+          litSprite(px, W, H, mx - 1, wy - 1, ['.h.', 'ccc'], { h: 0xffffff, c: 0x3a6aff })
           if (phase > 0.25 && phase < 0.75) rect(px, W, H, mx + dx * 2 - 1, wy - 1.5, 2, 3, phase < 0.5 ? 0x3a3a3a : 0x1a1a1a)
         }
       }
-      if (working) sprite(px, W, H, cx - 1, y - 12, ['.h.', 'ccc'], { h: 0xffffff, c: 0x3a6aff })
+      if (working) litSprite(px, W, H, cx - 1, y - 12, ['.h.', 'ccc'], { h: 0xffffff, c: 0x3a6aff })
       text(px, W, H, 1, 1, time.toFixed(1), 0xffe040)
     },
   }
@@ -569,8 +571,8 @@ const tabletennis: Maker = (W, H, rng) => {
       rect(px, W, H, tx0 - 2, H / 2, tx1 - tx0 + 4, 1, 0xe8e8f0)
       dot(px, W, H, ball.x, ball.y, 0x0a2a4a)
       disc(px, W, H, ball.x, ball.y - ball.z * 2, 0.8, 0xffffff)
-      ellipse(px, W, H, pa, ty0 - 3, 2, 1.2, 0xe02a2a)
-      ellipse(px, W, H, pb, ty1 + 3, 2, 1.2, 0x2a2a2a)
+      lit(px, W, H, pa, ty0 - 3, 2, 1.4, 0xe02a2a)
+      lit(px, W, H, pb, ty1 + 3, 2, 1.4, 0x3a3a3a)
       text(px, W, H, 1, 1, String(sa), 0xffffff)
       text(px, W, H, 1, H - 6, String(sb), 0xffffff)
     },
@@ -651,7 +653,7 @@ const curling: Maker = (W, H, rng) => {
       rect(px, W, H, 0, house.y, W, 1, 0x8ab0e0)
       rect(px, W, H, W / 2, 0, 1, H, 0x8ab0e0)
       const draw = (s: S) => {
-        disc(px, W, H, s.x, s.y, 1.5, 0x8a8a92)
+        lit(px, W, H, s.x, s.y, 1.6, 1.6, 0x8a8a92)
         dot(px, W, H, s.x, s.y - 1, s.red ? 0xe03a3a : 0xffd040)
         dot(px, W, H, s.x, s.y, s.red ? 0xe03a3a : 0xffd040)
       }
@@ -660,8 +662,8 @@ const curling: Maker = (W, H, rng) => {
         draw(cur)
         if (cur.y < H * 0.8 && cur.y > house.y + 6) {
           const sweep = Math.sin(t * 0.8) * 2
-          sprite(px, W, H, cur.x - 4 + sweep, cur.y - 7, ['.s', 'jj', 'p.'], { s: 0xffd0a0, j: cur.red ? 0xe03a3a : 0xe0b020, p: 0x2a2a3a })
-          sprite(px, W, H, cur.x + 3 - sweep, cur.y - 7, ['s.', 'jj', '.p'], { s: 0xffd0a0, j: cur.red ? 0xe03a3a : 0xe0b020, p: 0x2a2a3a })
+          litSprite(px, W, H, cur.x - 4 + sweep, cur.y - 7, ['.s', 'jj', 'p.'], { s: 0xffd0a0, j: cur.red ? 0xe03a3a : 0xe0b020, p: 0x2a2a3a })
+          litSprite(px, W, H, cur.x + 3 - sweep, cur.y - 7, ['s.', 'jj', '.p'], { s: 0xffd0a0, j: cur.red ? 0xe03a3a : 0xe0b020, p: 0x2a2a3a })
           line(px, W, H, cur.x - 3 + sweep, cur.y - 4, cur.x - 1 + sweep, cur.y - 3, 0x8a6a4a)
         }
       }
@@ -721,6 +723,7 @@ const archery: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x8ac8f0, 0xe0f4ff, ground)
       rect(px, W, H, 0, ground, W, H - ground, 0x5aa03a)
+      rect(px, W, H, 0, ground, W, 1, 0x7ac05a)
       for (const [r, c] of [
         [8, 0xf0f0f0],
         [6, 0x2a2a2a],
@@ -730,7 +733,7 @@ const archery: Maker = (W, H, rng) => {
       ] as [number, number][])
         ellipse(px, W, H, target.x, target.y, 2, r, c)
       line(px, W, H, target.x, target.y + 8, target.x - 2, ground, 0x8a5a2a)
-      sprite(px, W, H, 2, H * 0.5 - 3, ['.s.', 'ggg', '.g.', 'b.b', 'b.b'], { s: 0xffd0a0, g: 0x3a7a3a, b: 0x5a3a2a })
+      litSprite(px, W, H, 2, H * 0.5 - 3, ['.s.', 'ggg', '.g.', 'b.b', 'b.b'], { s: 0xffd0a0, g: 0x3a7a3a, b: 0x5a3a2a })
       line(px, W, H, 5, H * 0.5 - 4, 5, H * 0.5 + 3, 0x8a5a2a)
       for (const [hx, hy] of hits) line(px, W, H, hx - 4, hy, hx, hy, 0x8a6a4a)
       const a = Math.atan2(arrow.vy, arrow.vx)
@@ -815,14 +818,15 @@ const volleyball: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x5ab0f0, 0xffe8b0, floor)
       rect(px, W, H, 0, floor, W, H - floor, 0xf0d890)
+      rect(px, W, H, 0, floor, W, 1, 0xfff0b8)
       for (let x = 0; x < W; x += 3) dot(px, W, H, x, floor + 2, 0xd8c070)
       rect(px, W, H, net, netTop, 1, floor - netTop, 0x8a8a8a)
       for (let y = netTop; y < netTop + 5; y++) for (let x = net - 2; x <= net + 2; x++) if ((x + y) % 2) dot(px, W, H, x, y, 0xf0f0f0)
       players.forEach((p, i) => {
         const y = floor - 7 - (jump[i]! > 4 ? 8 - jump[i]! : jump[i]!) * 0.6
-        sprite(px, W, H, p - 1, y, ['.s.', 'jjj', 'sjs', '.b.', 'b.b', 'b.b', 'k.k'], { s: 0xd8a070, j: i < 2 ? 0xe03a3a : 0x3a6ae0, b: 0x2a2a2a, k: 0xf0f0f0 })
+        litSprite(px, W, H, p - 1, y, ['.s.', 'jjj', 'sjs', '.b.', 'b.b', 'b.b', 'k.k'], { s: 0xd8a070, j: i < 2 ? 0xe03a3a : 0x3a6ae0, b: 0x2a2a2a, k: 0xf0f0f0 })
       })
-      disc(px, W, H, ball.x, ball.y, 1.2, 0xffffff)
+      lit(px, W, H, ball.x, ball.y, 1.5, 1.5, 0xf4f4f8)
       dot(px, W, H, ball.x, ball.y, 0xffd040)
       text(px, W, H, 1, 1, String(score[0]), 0xe03a3a)
       text(px, W, H, W - 4, 1, String(score[1]), 0x3a6ae0)
@@ -888,7 +892,7 @@ const skijump: Maker = (W, H, rng) => {
       }
       for (let k = 0; k < 5; k++) rect(px, W, H, W * 0.6 + k * 3, H - 8, 2, 4, hsv(k * 0.2, 0.6, 0.8))
       const v = phase === 1
-      sprite(px, W, H, x - 2, y - 3, v ? ['..s', 'jjj', '.jj'] : ['.s.', 'jjj', '.j.'], { s: 0xffd0a0, j: 0x3a6ae0 })
+      litSprite(px, W, H, x - 2, y - 3, v ? ['..s', 'jjj', '.jj'] : ['.s.', 'jjj', '.j.'], { s: 0xffd0a0, j: 0x3a6ae0 })
       if (v) {
         line(px, W, H, x - 3, y + 1, x + 2, y - 1, 0xe03a3a)
         line(px, W, H, x - 3, y + 2, x + 2, y + 1, 0xe03a3a)
@@ -948,7 +952,7 @@ const horserace: Maker = (W, H, rng) => {
         const x = h.x - cam
         const y = top + i * lh + lh - 3
         const g = Math.floor(t * 0.4 + h.ph) % 2
-        sprite(px, W, H, x - 3, y - 4, ['....jj', '...jj.', 'bbbbbh', 'bbbbb.', g ? 'b..b..' : '.b..b.'], { b: 0x6a3a1a, h: 0x6a3a1a, j: h.c })
+        litSprite(px, W, H, x - 3, y - 4, ['....jj', '...jj.', 'bbbbbh', 'bbbbb.', g ? 'b..b..' : '.b..b.'], { b: 0x6a3a1a, h: 0x6a3a1a, j: h.c })
       })
       if (done && order[0]) {
         const i = horses.indexOf(order[0])
@@ -982,6 +986,7 @@ const cupstack: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x3a4a6a, 0x5a6a8a, table)
       rect(px, W, H, 0, table, W, H - table, 0x2a6ac0)
+      rect(px, W, H, 0, table + 2, W, H - table - 2, 0x1e54a0)
       rect(px, W, H, 0, table, W, 1, 0x4a8ae0)
       const cup = (x: number, y: number, c: number) => {
         rect(px, W, H, x - 1, y - 3, 3, 3, c)
@@ -1182,13 +1187,14 @@ const keepyuppy: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x6ab8f0, 0xd8f0ff, floor)
       rect(px, W, H, 0, floor, W, H - floor, 0x4aa03a)
+      rect(px, W, H, 0, floor, W, 1, 0x6ac05a)
       for (let x = 0; x < W; x += 2) dot(px, W, H, x, floor, 0x6ac04a)
       rect(px, W, H, 2, floor - 16, 1, 16, 0xffffff)
       rect(px, W, H, 2, floor - 16, 8, 1, 0xffffff)
       const kick = part === 0 && ball.y > floor - 6
       const knee = part === 1 && ball.y > floor - 9
-      sprite(px, W, H, px0 - 2, floor - 13, ['.ss.', '.ss.', 'jjjj', 'jjjj', '.jj.', '.bb.', '.b.b', knee ? '.bb.' : '.b.b', '.b.b', kick ? '.b.k' : '.b.b', 'k..k'], { s: 0x8a5a3a, j: 0xffd040, b: 0x2a2a6a, k: 0xffffff })
-      disc(px, W, H, ball.x, ball.y, 1.3, 0xffffff)
+      litSprite(px, W, H, px0 - 2, floor - 13, ['.ss.', '.ss.', 'jjjj', 'jjjj', '.jj.', '.bb.', '.b.b', knee ? '.bb.' : '.b.b', '.b.b', kick ? '.b.k' : '.b.b', 'k..k'], { s: 0x8a5a3a, j: 0xffd040, b: 0x2a2a6a, k: 0xffffff })
+      lit(px, W, H, ball.x, ball.y, 1.5, 1.5, 0xf4f4f8)
       dot(px, W, H, ball.x, ball.y, 0x2a2a2a)
       text(px, W, H, 1, 1, String(count), 0x1a2a4a)
       const b = String(best)
@@ -1267,12 +1273,14 @@ const parkour: Maker = (W, H, rng) => {
       for (const r of roofs) {
         const x = r.x - cam
         rect(px, W, H, x, H - r.h, r.w, r.h, 0x4a3a4a)
+        rect(px, W, H, x, H - r.h, 1, r.h, 0x5e4e60)
+        rect(px, W, H, x + r.w - 1, H - r.h, 1, r.h, 0x342834)
         rect(px, W, H, x, H - r.h, r.w, 1, 0x7a6a7a)
         for (let wy = H - r.h + 3; wy < H; wy += 4) for (let wx = x + 2; wx < x + r.w - 1; wx += 3) dot(px, W, H, wx, wy, 0xffd070)
       }
       const run = Math.floor(t * 0.4) % 2
       const rows = roll > 0 ? ['.s.', 'jjj', 'pp.'] : air ? ['.s..', 'jjjj', '.j..', 'p..p'] : ['.s.', 'jjj', '.j.', run ? 'p.p' : '.p.']
-      sprite(px, W, H, rx - 1, y - rows.length, rows, { s: 0xffd0a0, j: 0x2a2a2a, p: 0x3a6ae0 })
+      litSprite(px, W, H, rx - 1, y - rows.length, rows, { s: 0xffd0a0, j: 0x2a2a2a, p: 0x3a6ae0 })
       text(px, W, H, 1, 1, String(score), 0xffffff)
     },
   }

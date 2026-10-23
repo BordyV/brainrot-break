@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, clamp, ellipse, hash, irand, line, pick, ring, sparks } from '../kit'
+import { burst, clamp, ellipse, hash, irand, line, lit, pick, ring, slab, sparks } from '../kit'
 import type { Spark } from '../kit'
 
 // Space & sci-fi: black skies are cheap to draw and easy to read.
@@ -50,8 +50,10 @@ const rocket: Maker = (W, H, rng) => {
       sky(px, W, H, mix(0x4a8ad0, 0x05051a, alt), mix(0xb8d8f0, 0x2a3a6a, alt))
       if (alt > 0.4) stars(px, W, H, 11, t, 0.03 * alt)
       rect(px, W, H, 0, pad, W, H - pad, 0x5a5a62)
-      rect(px, W, H, cx - 6, pad - 1, 12, 1, 0x8a8a92)
+      rect(px, W, H, 0, pad, W, 1, 0x7a7a84)
+      slab(px, W, H, cx - 6, pad - 1, 12, 2, 0x8a8a92)
       rect(px, W, H, cx + 5, pad - 22, 2, 22, 0x9a3a2a)
+      rect(px, W, H, cx + 5, pad - 22, 1, 22, 0xc85a42)
       for (let y = pad - 22; y < pad; y += 3) dot(px, W, H, cx + 6, y, 0x6a2a1a)
       if (t < 200) {
         const y = rocketY(t)
@@ -70,7 +72,8 @@ const rocket: Maker = (W, H, rng) => {
         }
       }
       for (const f of flames) dot(px, W, H, f.x, f.y, f.c)
-      for (const s of smoke) disc(px, W, H, s.x, s.y, s.r, 0xe8e8ec)
+      for (const s of smoke) disc(px, W, H, s.x + 0.4, s.y + 0.4, s.r, 0xb8bcc8)
+      for (const s of smoke) disc(px, W, H, s.x - s.r * 0.2, s.y - s.r * 0.25, s.r * 0.75, 0xf4f4f8)
       if (t < 75) {
         const n = String(Math.max(0, 10 - Math.floor(t / 7)))
         text(px, W, H, 2, 2, n, 0xffffff)
@@ -135,7 +138,7 @@ const solarsystem: Maker = (W, H, rng) => {
           if (front !== z >= 0) return
           const x = cx + Math.cos(p.a) * p.r * R
           const y = cy + Math.sin(p.a) * p.r * R * sq
-          disc(px, W, H, x, y, p.s, p.c)
+          lit(px, W, H, x, y, p.s, p.s, p.c)
           if (i === 5) line(px, W, H, x - 3, y + 0.5, x + 3, y - 0.5, 0xc8b890)
           if (i === 2) dot(px, W, H, x + Math.cos(t * 0.15) * 2, y + Math.sin(t * 0.15) * 2, 0xd0d0d0)
         })
@@ -285,8 +288,11 @@ const ufo: Maker = (W, H, rng) => {
       disc(px, W, H, W * 0.8, 6, 2.5, 0xf0f0e0)
       rect(px, W, H, 0, ground, W, H - ground, 0x1a3a1a)
       for (let x = 0; x < W; x += 2) dot(px, W, H, x, ground, 0x2a5a2a)
-      rect(px, W, H, 2, ground - 7, 7, 7, 0x6a2a1a)
-      for (let k = 0; k < 4; k++) rect(px, W, H, 1 + k, ground - 8 - k, 9 - k * 2, 1, 0x4a1a10)
+      slab(px, W, H, 2, ground - 7, 7, 7, 0x7a301e)
+      for (let k = 0; k < 4; k++) {
+        rect(px, W, H, 1 + k, ground - 8 - k, 9 - k * 2, 1, 0x4a1a10)
+        dot(px, W, H, 1 + k, ground - 8 - k, 0x6a2a1a)
+      }
       dot(px, W, H, 5, ground - 4, 0xffe080)
       const beaming = target?.up
       if (beaming) {
@@ -306,8 +312,8 @@ const ufo: Maker = (W, H, rng) => {
         dot(px, W, H, c.x + 4, c.y + (flip ? 2 : 0), 0xffa0b0)
       }
       const wob = Math.sin(t * 0.1) * 0.6
-      ellipse(px, W, H, ux, uy + wob, 6, 1.6, 0x9aa0b0)
-      ellipse(px, W, H, ux, uy - 1.5 + wob, 3, 1.5, 0x8ad0ff)
+      lit(px, W, H, ux, uy + wob, 6, 1.6, 0x9aa0b0, 0x3a3e4a)
+      lit(px, W, H, ux, uy - 1.5 + wob, 3, 1.5, 0x8ad0ff)
       for (let k = 0; k < 4; k++) dot(px, W, H, ux - 4.5 + k * 3, uy + 1 + wob, (t >> 2) % 4 === k ? 0xffe040 : 0xff4a4a)
       text(px, W, H, W - 1 - 3 * String(count).length - (String(count).length - 1), 1, String(count), 0x8aff8a)
     },
@@ -359,8 +365,7 @@ const planetform: Maker = (W, H, rng) => {
       for (const d of dust) dot(px, W, H, cx + Math.cos(d.a) * d.r, cy + Math.sin(d.a) * d.r * 0.55, d.c)
       const x = cx + Math.cos(planet.a) * planet.orbit
       const y = cy + Math.sin(planet.a) * planet.orbit * 0.55
-      disc(px, W, H, x, y, planet.r, planet.r > 3 ? 0x5a8aaa : 0xa86a3a)
-      if (planet.r > 1) dot(px, W, H, x - planet.r * 0.4, y - planet.r * 0.4, 0xffffff)
+      lit(px, W, H, x, y, planet.r, planet.r, planet.r > 3 ? 0x5a8aaa : 0xa86a3a)
     },
   }
 }
@@ -395,18 +400,20 @@ const rover: Maker = (W, H, rng) => {
       for (let x = 0; x < W; x++) {
         const s = surface(x + scroll)
         rect(px, W, H, x, s, 1, H - s, 0xc87a4a)
+        dot(px, W, H, x, s, 0xe0966a)
         if (hash(Math.floor(x + scroll), 2, 5) > 0.9) dot(px, W, H, x, s + 3, 0x9a5a34)
       }
       for (const d of dust) dot(px, W, H, d.x, d.y, d.c)
       const rx = W * 0.32
       const ry = surface(rx + 4 + scroll) - 5
-      rect(px, W, H, rx, ry, 9, 3, 0xd8d8d8)
+      slab(px, W, H, rx, ry, 9, 3, 0xd8d8d8)
       rect(px, W, H, rx - 1, ry - 1, 11, 1, 0x3a4a8a)
+      rect(px, W, H, rx - 1, ry - 1, 4, 1, 0x6a7ac0)
       rect(px, W, H, rx + 7, ry - 4, 1, 3, 0xa0a0a0)
       rect(px, W, H, rx + 6, ry - 5, 3, 1, 0xd8d8d8)
       for (let k = 0; k < 3; k++) {
         const wx = rx + 1 + k * 3.5
-        disc(px, W, H, wx, surface(wx + scroll) - 1.2, 1.2, 0x3a3a3a)
+        lit(px, W, H, wx, surface(wx + scroll) - 1.2, 1.3, 1.3, 0x4a4a4a)
       }
       if (heli.on) {
         const u = 1 - heli.on / 160
@@ -467,14 +474,14 @@ const docking: Maker = (W, H, rng) => {
           const d = Math.hypot(x - W / 2, y - H * 1.8)
           if (d < H) px[y * W + x] = d > H - 1.5 ? 0x8ac8ff : mix(0x2a6ab0, 0x3a9a5a, hash(x >> 2, y >> 2, 2) > 0.6 ? 0.6 : 0)
         }
-      rect(px, W, H, 0, port.y - 4, W, 3, 0xc8c8d0)
+      slab(px, W, H, 0, port.y - 4, W, 3, 0xc8c8d0)
       rect(px, W, H, 2, port.y - 10, W * 0.3, 14, 0x2a3a8a)
       rect(px, W, H, W * 0.68, port.y - 10, W * 0.3, 14, 0x2a3a8a)
       for (let x = 3; x < W * 0.3; x += 3) rect(px, W, H, x, port.y - 10, 1, 14, 0x4a5aaa)
       for (let x = W * 0.69; x < W - 2; x += 3) rect(px, W, H, x, port.y - 10, 1, 14, 0x4a5aaa)
-      rect(px, W, H, port.x - 3, port.y - 6, 7, 7, 0xe0e0e8)
+      slab(px, W, H, port.x - 3, port.y - 6, 7, 7, 0xe0e0e8, 0x5a5a66)
       rect(px, W, H, port.x - 1, port.y + 1, 3, 1, docked && docked % 10 < 5 ? 0x6aff6a : 0xffd040)
-      ellipse(px, W, H, cap.x, cap.y + 2, 2.5, 3.5, 0xf0f0f4)
+      lit(px, W, H, cap.x, cap.y + 2, 2.5, 3.5, 0xf0f0f4)
       rect(px, W, H, cap.x - 1, cap.y - 2, 3, 1, 0x8a8a92)
       dot(px, W, H, cap.x, cap.y + 1, 0x2a2a3a)
       for (const p of puffs) dot(px, W, H, p.x, p.y, p.c)
@@ -513,7 +520,7 @@ const meteors: Maker = (W, H, rng) => {
         const h = 4 + Math.abs(Math.sin(x * 0.2)) * 6
         rect(px, W, H, x, ground - h, 1, h + H, 0x05050c)
       }
-      sprite(px, W, H, W * 0.6, ground - 5, ['..x..', '.xxx.', 'xxxxx'], { x: 0xd87a2a })
+      sprite(px, W, H, W * 0.6, ground - 5, ['..x..', '.xxd.', 'xxxdd'], { x: 0xd87a2a, d: 0x8a4a1a })
       dot(px, W, H, W * 0.6 + 2, ground - 3, 0xffd060)
       sprite(px, W, H, W * 0.3, ground - 2, ['.s', 'bb'], { s: 0xffd0a0, b: 0x3a5aaa })
       text(px, W, H, 1, 1, String(wishes), 0xffe080)
@@ -553,12 +560,19 @@ const rud: Maker = (W, H, rng) => {
       if (t < 160) {
         const y = rY(t)
         rect(px, W, H, cx - 1 + wob, y - 16, 3, 16, 0xd8d8e0)
+        rect(px, W, H, cx + 1 + wob, y - 16, 1, 16, 0xa8a8b4)
         rect(px, W, H, cx + wob, y - 18, 1, 2, 0xd8d8e0)
         rect(px, W, H, cx - 1 + wob, y - 10, 3, 1, 0x2a2a30)
         if (t > 40) for (let k = 0; k < 3; k++) dot(px, W, H, cx + wob + (k - 1), y + 1 + ((t + k) % 3), k === 1 ? 0xffe080 : 0xff8020)
         if (t > 110 && t % 6 < 3) dot(px, W, H, cx + 2 + wob, y - 6, 0xff4020)
       }
-      for (const f of fire) disc(px, W, H, f.x, f.y, f.r, f.r < 3 ? 0xffe060 : f.r < 5 ? 0xff7a20 : 0x5a5a60)
+      for (const f of fire) {
+        if (f.r < 5) disc(px, W, H, f.x, f.y, f.r, f.r < 3 ? 0xffe060 : 0xff7a20)
+        else {
+          disc(px, W, H, f.x + 0.4, f.y + 0.4, f.r, 0x44444c)
+          disc(px, W, H, f.x - f.r * 0.2, f.y - f.r * 0.25, f.r * 0.7, 0x6a6a74)
+        }
+      }
       for (const b of bits) dot(px, W, H, b.x, b.y, b.c)
       if (t > 170 && t < 260) for (let i = 0; i < 4; i++) sprite(px, W, H, 2 + i * 4, pad + 1, ['.s.', 'bbb'], { s: 0xffd0a0, b: hsv(i * 0.2, 0.6, 0.9) })
     },

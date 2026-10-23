@@ -1,6 +1,6 @@
-import { disc, dot, hsv, mix, rect, sky } from '../draw'
+import { disc, dot, hsv, mix, rect, scale, sky } from '../draw'
 import type { Maker } from '../draw'
-import { burst, hash, line, sparks } from '../kit'
+import { burst, hash, line, lit, slab, sparks } from '../kit'
 import type { Spark } from '../kit'
 
 // Destruction: things breaking, debris for free.
@@ -134,33 +134,41 @@ const wreckingball: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x8ab8e0, 0xd8e4ec, gy)
       rect(px, W, H, 0, gy, W, H - gy, 0x5a5048)
+      rect(px, W, H, 0, gy, W, 1, 0x7a6e62)
       for (let y = 0; y < gy; y++)
         for (let x = 0; x < W; x++) {
           const c = rubble[y * W + x]
           if (c) px[y * W + x] = c
         }
-      // the building, raised row by row after a reset
+      // the building, raised row by row after a reset: bricks with a lit top and a mortar corner
       for (let r = rows - built; r < rows; r++)
         for (let c = 0; c < cols; c++) {
           if (!intact[r * cols + c]) continue
           const x = bx0 + c * BW
           const y = top + r * BH
-          rect(px, W, H, x, y, BW, BH, tint[r * cols + c])
-          dot(px, W, H, x + BW - 1, y + BH - 1, 0x7a3424)
+          const col = tint[r * cols + c] as number
+          rect(px, W, H, x, y, BW, BH, col)
+          rect(px, W, H, x, y, BW - 1, 1, mix(col, 0xfff0e0, 0.25))
+          dot(px, W, H, x + BW - 1, y + BH - 1, 0x6a2c1e)
         }
       for (const ch of chunks) {
         rect(px, W, H, ch.x, ch.y, BW, BH, ch.c)
+        dot(px, W, H, ch.x, ch.y, mix(ch.c, 0xfff0e0, 0.3))
       }
-      // the crane
+      // the crane: a lattice mast, a boom with a lit top, a cabin
       rect(px, W, H, 1, pvy - 1, 2, gy - pvy + 1, 0xe0a020)
+      rect(px, W, H, 1, pvy - 1, 1, gy - pvy + 1, 0xf8c850)
       for (let y = pvy + 1; y < gy; y += 3) dot(px, W, H, 2, y, 0x8a6010)
-      rect(px, W, H, 0, pvy - 2, Math.round(pvx) + 2, 2, 0xe0a020)
-      rect(px, W, H, 2, gy - 4, 4, 4, 0x3a4a5a)
+      rect(px, W, H, 0, pvy - 2, Math.round(pvx) + 2, 2, 0xc88a18)
+      rect(px, W, H, 0, pvy - 2, Math.round(pvx) + 2, 1, 0xf8c850)
+      for (let x = 3; x < pvx; x += 3) dot(px, W, H, x, pvy - 1, 0x8a6010)
+      slab(px, W, H, 2, gy - 4, 4, 4, 0x3a4a5a)
+      dot(px, W, H, 3, gy - 3, 0x9ad0f0)
+      // the ball: a chain, an outlined lit sphere
       const bx = pvx + Math.sin(a) * L
       const by = pvy + Math.cos(a) * L
       line(px, W, H, pvx, pvy, bx, by, 0x2a2a2a)
-      disc(px, W, H, bx, by, R, 0x2a2a30)
-      dot(px, W, H, bx - R * 0.4, by - R * 0.4, 0x6a6a78)
+      lit(px, W, H, bx, by, R, R, 0x4a4a56, 0x121216)
       for (const s of dust) dot(px, W, H, s.x, s.y, s.l > 10 ? s.c : 0xd8d0c8)
     },
   }
@@ -304,7 +312,9 @@ const presse: Maker = (W, H, rng) => {
       for (let y = 3; y < pressY - 4; y++)
         for (let x = Math.round(cx - 2); x < cx + 2; x++) px[y * W + x] = mix(0x9aa0aa, 0xe0e4ea, (x - cx + 2) / 4)
       rect(px, W, H, 3 + sx, pressY - 4, W - 6, 4, 0x7a808c)
+      rect(px, W, H, 3 + sx, pressY - 3, W - 6, 1, 0x9aa0ac)
       rect(px, W, H, 3 + sx, pressY - 1, W - 6, 1, 0x555a64)
+      rect(px, W, H, W - 4 + sx, pressY - 4, 1, 4, 0x4a4e58)
       for (let x = 3; x < W - 3; x++) if ((x + Math.floor(pressY)) % 4 < 2) dot(px, W, H, x + sx, pressY - 4, 0xf0c020)
       for (let y = anvilY; y < H; y++)
         for (let x = 4; x < W - 4; x++) px[y * W + x] = y === anvilY ? 0xa0a6b0 : (x + y) % 4 < 2 ? 0xf0c020 : 0x1a1a1a
@@ -312,8 +322,13 @@ const presse: Maker = (W, H, rng) => {
       const top = anvilY - h
       for (let y = Math.floor(top); y < anvilY; y++)
         for (let x = Math.floor(x0); x < x0 + w; x++) {
-          const c = colorAt((x - x0 + 0.5) / w, (y - top + 0.5) / h)
-          if (c !== undefined) dot(px, W, H, x + sx, y, c)
+          const u = (x - x0 + 0.5) / w
+          const v = (y - top + 0.5) / h
+          const c = colorAt(u, v)
+          if (c === undefined) continue
+          // light from the upper left over whatever is being crushed
+          const light = obj === 'cube' ? 0 : -((u - 0.5) * 1.2 + (v - 0.5) * 1.6)
+          dot(px, W, H, x + sx, y, light > 0.45 ? mix(c, 0xfff8ee, 0.3) : light < -0.45 ? mix(scale(c, 0.72), 0x281436, 0.12) : c)
         }
       for (const p of parts) dot(px, W, H, p.x, p.y, p.c)
     },

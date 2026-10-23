@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, burst, clamp, collide, irand, line, ring, shiny, shuffle, sparks, textWidth, wallCircle } from '../kit'
+import { DIRS, burst, clamp, collide, ellipse, hash, irand, line, lit, ring, shiny, shuffle, slab, sparks, textWidth, wallCircle } from '../kit'
 import type { Ball, Spark } from '../kit'
 
 // Versus & battles: who wins? Rules everyone gets, endings nobody can call.
@@ -198,8 +198,10 @@ const flagballs: Maker = (W, H, rng) => {
         for (let dy = -2; dy <= 2; dy++)
           for (let dx = -2; dx <= 2; dx++) {
             if (dx * dx + dy * dy > 5.2) continue
-            dot(px, W, H, b.x + dx, b.y + dy, f[clamp(dx + 2, 0, 4) <= 1 ? 0 : dx + 2 >= 3 ? 2 : 1] as number)
+            const fc = f[clamp(dx + 2, 0, 4) <= 1 ? 0 : dx + 2 >= 3 ? 2 : 1] as number
+            dot(px, W, H, b.x + dx, b.y + dy, dx + dy >= 2 ? scale(fc, 0.72) : fc)
           }
+        dot(px, W, H, b.x - 1, b.y - 1, 0xffffff)
         if (b.out) ring(px, W, H, b.x, b.y, 3, 0xff3a3a)
       }
       const left = balls.filter(b => !b.out)
@@ -264,7 +266,7 @@ const pongwars: Maker = (W, H, rng) => {
     draw(px) {
       px.fill(0x0a2028)
       for (let k = 0; k < GW * GH; k++) rect(px, W, H, (k % GW) * c, top + Math.floor(k / GW) * c, c, c, grid[k] ? NIGHT : DAY)
-      for (const b of balls) disc(px, W, H, b.x * c, top + b.y * c, 1.2, b.side ? DAY : NIGHT)
+      for (const b of balls) lit(px, W, H, b.x * c, top + b.y * c, 1.4, 1.4, b.side ? DAY : NIGHT)
       const day = grid.filter(v => v === 0).length
       text(px, W, H, 1, 0, String(day), DAY)
       const n = String(GW * GH - day)
@@ -373,10 +375,10 @@ const antwar: Maker = (W, H, rng) => {
     draw(px) {
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = (x * 7 + y * 13) % 17 === 0 ? 0xa0784a : (x * 3 + y * 5) % 11 === 0 ? 0xc49a68 : 0xb88a58
       for (const n of nests) {
-        disc(px, W, H, n.x, n.y, 3, 0x7a5430)
+        lit(px, W, H, n.x, n.y, 3, 3, 0x8a6038)
         disc(px, W, H, n.x, n.y, 1.5, 0x2a1a0a)
       }
-      for (const f of food) disc(px, W, H, f.x, f.y, 1 + f.n / 8, 0x6ad04a)
+      for (const f of food) lit(px, W, H, f.x, f.y, 1 + f.n / 8, 1 + f.n / 8, 0x6ad04a)
       for (const a of ants) {
         dot(px, W, H, a.x, a.y, COLS[a.side] as number)
         dot(px, W, H, a.x - Math.cos(a.a), a.y - Math.sin(a.a), scale(COLS[a.side] as number, 0.7))
@@ -470,6 +472,7 @@ const armies: Maker = (W, H, rng) => {
       for (const a of arrows) line(px, W, H, a.x, a.y, a.x - a.vx, a.y - a.vy, 0xe0d0a0)
       for (const s of army) {
         const c = COLS[s.side] as number
+        dot(px, W, H, s.x + 1, s.y + 1, 0x46702c)
         dot(px, W, H, s.x, s.y - 1, 0xffd0a0)
         dot(px, W, H, s.x, s.y, c)
         dot(px, W, H, s.x + (s.side ? -1 : 1) * 0, s.y + 1, scale(c, 0.6))
@@ -633,13 +636,12 @@ const snakevs: Maker = (W, H, rng) => {
       px.fill(0x101a14)
       for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++) if ((x + y) % 2) rect(px, W, H, x * cs, top + y * cs, cs, cs, 0x14221a)
       for (const [ax, ay] of apples) {
-        rect(px, W, H, ax * cs, top + ay * cs, cs, cs, 0xff3a3a)
-        dot(px, W, H, ax * cs, top + ay * cs, 0xffa0a0)
+        slab(px, W, H, ax * cs, top + ay * cs, cs, cs, 0xff3a3a)
       }
       snakes.forEach((sn, i) =>
         sn.body.forEach(([x, y], k) => {
           const c = !sn.alive && hold % 6 < 3 ? 0xffffff : k === 0 ? mix(COLS[i] as number, 0xffffff, 0.4) : (COLS[i] as number)
-          rect(px, W, H, x * cs, top + y * cs, cs, cs, k % 2 ? scale(c, 0.85) : c)
+          slab(px, W, H, x * cs, top + y * cs, cs, cs, k % 2 ? scale(c, 0.9) : c)
         }),
       )
       text(px, W, H, 1, 0, String(wins[0]), COLS[0] as number)
@@ -740,7 +742,7 @@ const stickduel: Maker = (W, H, rng) => {
       sky(px, W, H, 0x2a1a3a, 0xff8a4a, floor)
       disc(px, W, H, W * 0.7, floor - 10, 5, 0xffd08a)
       rect(px, W, H, 0, floor, W, H - floor, 0x1a1020)
-      rect(px, W, H, edgeL, floor, edgeR - edgeL + 1, 2, 0x5a4a6a)
+      slab(px, W, H, edgeL, floor, edgeR - edgeL + 1, 2, 0x5a4a6a)
       f.forEach((p, i) => {
         const c = COLS[i] as number
         const x = p.x
@@ -849,6 +851,8 @@ const bigfish: Maker = (W, H, rng) => {
         for (let k = -s * 1.4; k <= s * 1.4; k += 0.5) {
           const h = s * 0.8 * Math.sqrt(Math.max(0, 1 - (k / (s * 1.4)) ** 2))
           line(px, W, H, f.x + k * dir, f.y - h, f.x + k * dir, f.y + h, f.c)
+          line(px, W, H, f.x + k * dir, f.y - h, f.x + k * dir, f.y - h * 0.4, mix(f.c, 0xffffff, 0.25))
+          line(px, W, H, f.x + k * dir, f.y + h * 0.5, f.x + k * dir, f.y + h, scale(f.c, 0.72))
         }
         const tx = f.x - dir * s * 1.4
         line(px, W, H, tx, f.y, tx - dir * s * 0.8, f.y - s * 0.7 + Math.sin(f.wob) * 0.5, scale(f.c, 0.8))
@@ -914,10 +918,15 @@ const zombies: Maker = (W, H, rng) => {
       if (as.every(a => a.k === 1) || t > 1500) hold = 60
     },
     draw(px) {
-      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = (Math.floor(x / 8) + Math.floor(y / 8)) % 2 ? 0x3a3a42 : 0x34343c
+      // a tiled floor, each tile lit on its top edge
+      for (let y = 0; y < H; y++)
+        for (let x = 0; x < W; x++) px[y * W + x] = y % 8 === 0 ? 0x44444e : x % 8 === 7 ? 0x2c2c34 : (Math.floor(x / 8) + Math.floor(y / 8)) % 2 ? 0x3a3a42 : 0x34343c
+      // people and zombies: a shadow, a body, a head lit on the left
       for (const a of as) {
-        dot(px, W, H, a.x, a.y - 1, a.k ? 0x8ad06a : 0xffd0a0)
-        dot(px, W, H, a.x, a.y, a.k ? 0x4a6a3a : 0x3a6ae0)
+        dot(px, W, H, a.x + 1, a.y + 1, 0x24242a)
+        dot(px, W, H, a.x, a.y, a.k ? 0x3e5a32 : 0x2e5ad0)
+        dot(px, W, H, a.x, a.y - 1, a.k ? 0x9ae07a : 0xffd8b0)
+        dot(px, W, H, a.x + 1, a.y, a.k ? 0x2a3e22 : 0x1e3a90)
       }
       const z = as.filter(a => a.k).length
       shares(px, W, H, [as.length - z, z], [0x3a6ae0, 0x6ad04a], 0, 3)
@@ -1009,13 +1018,14 @@ const tankduel: Maker = (W, H, rng) => {
       for (let x = 0; x < W; x++) {
         const g = Math.round(ground[x] as number)
         rect(px, W, H, x, g, 1, H - g, 0x6a5030)
+        rect(px, W, H, x, g + 4, 1, H - g - 4, 0x54401f)
         dot(px, W, H, x, g, 0x8ac04a)
       }
       tanks.forEach((tk, i) => {
         const y = gy(tk.x)
         const c = i ? 0x5ab0ff : 0xff6a4a
-        rect(px, W, H, tk.x - 2, y - 2, 5, 2, c)
-        rect(px, W, H, tk.x - 1, y - 3, 3, 1, c)
+        slab(px, W, H, tk.x - 2, y - 2, 5, 2, c)
+        rect(px, W, H, tk.x - 1, y - 3, 3, 1, mix(c, 0xffffff, 0.3))
         line(px, W, H, tk.x, y - 3, tk.x + Math.cos(tk.angle) * 3, y - 3 + Math.sin(tk.angle) * 3, 0xd0d0d0)
         for (let k = 0; k < tk.hp; k++) dot(px, W, H, tk.x - 1 + k, y - 6, 0x6aff6a)
       })
@@ -1171,7 +1181,7 @@ const viruses: Maker = (W, H, rng) => {
     draw(px) {
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = mix(0x8a1a2a, 0xb83a4a, 0.5 + 0.5 * Math.sin(x * 0.3 + y * 0.1 + t * 0.02))
       for (const [x, y, a] of reds) {
-        disc(px, W, H, x, y, 1.8, 0xd02030)
+        lit(px, W, H, x, y, 1.8, 1.8, 0xd02030)
         dot(px, W, H, x + Math.cos(a) * 0.5, y, 0x9a1020)
       }
       for (const v of vir) {
@@ -1179,7 +1189,7 @@ const viruses: Maker = (W, H, rng) => {
         for (const [dx, dy] of DIRS) dot(px, W, H, v.x + dx, v.y + dy, (t >> 2) % 2 ? 0x3a9a2a : 0x8aff6a)
       }
       for (const c of cells) {
-        disc(px, W, H, c.x, c.y, 2.8 + (c.full ? 0.4 : 0), 0xf0f0f8)
+        lit(px, W, H, c.x, c.y, 2.8 + (c.full ? 0.4 : 0), 2.8 + (c.full ? 0.4 : 0), 0xf0f0f8)
         disc(px, W, H, c.x + 0.5, c.y - 0.3, 1, 0xc0a8e0)
       }
       text(px, W, H, 1, 1, String(vir.length), 0x8aff6a)
@@ -1314,14 +1324,18 @@ const towerdef: Maker = (W, H, rng) => {
         const [x, y] = at(d)
         rect(px, W, H, x - 1.5, y - 1.5, 3, 3, 0xc8a870)
       }
+      for (let d = 0; d < total; d += 0.5) {
+        const [x, y] = at(d)
+        dot(px, W, H, x - 1.5, y - 1.5, 0xdcc08a)
+      }
       for (const t of towers) {
-        rect(px, W, H, t.x - 1, t.y - 1, 3, 3, 0x7a7a8a)
+        slab(px, W, H, t.x - 1, t.y - 1, 3, 3, 0x8a8a9a)
         dot(px, W, H, t.x, t.y - 1, 0x3a6aff)
       }
       for (const s of shots) line(px, W, H, s.x, s.y - 1, s.tx, s.ty, 0x8ad0ff)
       for (const c of creeps) {
         const [x, y] = at(c.d)
-        disc(px, W, H, x, y, 1, 0xe04a3a)
+        lit(px, W, H, x, y, 1.3, 1.3, 0xe04a3a)
         rect(px, W, H, x - 1, y - 3, 3, 1, 0x3a0a0a)
         rect(px, W, H, x - 1, y - 3, Math.ceil((c.hp / c.max) * 3), 1, 0x6aff4a)
       }
@@ -1426,7 +1440,7 @@ const tournament: Maker = (W, H, rng) => {
         }
       else {
         const w = history[history.length - 1]?.[0] ?? 0
-        disc(px, W, H, W / 2, ay, 4 + (hold % 10 < 5 ? 1 : 0), COLS[w] as number)
+        lit(px, W, H, W / 2, ay, 4 + (hold % 10 < 5 ? 1 : 0), 4 + (hold % 10 < 5 ? 1 : 0), COLS[w] as number)
         sprite(px, W, H, W / 2 - 2, ay - 9, ['x.x.x', 'xxxxx', 'xxxxx'], { x: 0xffd040 })
       }
       for (const s of bits) dot(px, W, H, s.x, s.y, s.c)
@@ -1498,17 +1512,27 @@ const sumo: Maker = (W, H, rng) => {
       })
     },
     draw(px) {
-      sky(px, W, H, 0x2a1a10, 0x4a2a1a)
-      disc(px, W, H, cx, cy, R + 2, 0xd8b880)
-      disc(px, W, H, cx, cy, R, 0xe8d0a0)
-      ring(px, W, H, cx, cy, R, 0xffffff)
-      rect(px, W, H, cx - 3, cy - 1, 1, 3, 0x6a4a2a)
-      rect(px, W, H, cx + 3, cy - 1, 1, 3, 0x6a4a2a)
+      // a dark hall, a spotlight on the raised clay ring
+      sky(px, W, H, 0x1a100c, 0x3a2216)
+      ellipse(px, W, H, cx, cy, R + 6, R + 8, 0x4a2c1c)
+      lit(px, W, H, cx + 0.5, cy + 1.5, R + 2.5, R + 2.5, 0xa8844e, 0x3a2416)
+      disc(px, W, H, cx, cy, R + 1, 0xe2c896)
+      disc(px, W, H, cx - R * 0.2, cy - R * 0.2, R * 0.6, 0xecd6a8)
+      ring(px, W, H, cx + 0.5, cy + 0.5, R, 0xb89a6a)
+      ring(px, W, H, cx, cy, R, 0xfffaf0)
+      for (const s of [-1, 1]) {
+        rect(px, W, H, cx + s * 3, cy - 1, 1, 3, 0x6a4a2a)
+        dot(px, W, H, cx + s * 3, cy - 1, 0x8a6a46)
+      }
       bots.forEach((b, i) => {
         const c = COLS[i] as number
-        rect(px, W, H, b.x - 2, b.y - 2, 5, 5, c)
-        rect(px, W, H, b.x - 1, b.y - 1, 3, 3, scale(c, 0.6))
-        dot(px, W, H, b.x + Math.cos(b.a) * 3, b.y + Math.sin(b.a) * 3, 0xe0e0e0)
+        // a shadow, a lit round body, a steel plough in front, an eye
+        ellipse(px, W, H, b.x + 0.8, b.y + 1.8, 2.6, 1, 0xb0946a)
+        lit(px, W, H, b.x, b.y, 2.7, 2.7, c, scale(c, 0.4))
+        const fx = Math.cos(b.a)
+        const fy = Math.sin(b.a)
+        for (const k of [-1.5, -0.5, 0.5, 1.5]) dot(px, W, H, b.x + fx * 3.2 - fy * k, b.y + fy * 3.2 + fx * k, k < 0 ? 0xf0f4fa : 0x9aa2ae)
+        dot(px, W, H, b.x + fx * 1.2, b.y + fy * 1.2, 0xffffff)
       })
       text(px, W, H, 1, 1, String(wins[0]), COLS[0] as number)
       const w1 = String(wins[1])
@@ -1663,18 +1687,30 @@ const foxrabbit: Maker = (W, H, rng) => {
       }
     },
     draw(px) {
+      // grass in three tones, with a little texture; the chart on a dark band
       for (let y = 0; y < H; y++)
-        for (let x = 0; x < W; x++) px[y * W + x] = y < top ? 0x101820 : grass[y * W + x]! > 0.5 ? 0x5ab040 : grass[y * W + x]! > 0.2 ? 0x8a9a4a : 0x9a8a5a
+        for (let x = 0; x < W; x++) {
+          const g = grass[y * W + x]!
+          const c = g > 0.5 ? 0x5ab040 : g > 0.2 ? 0x8a9a4a : 0x9a8a5a
+          px[y * W + x] = y < top ? 0x101820 : hash(x, y, 3) > 0.85 ? mix(c, 0xffffff, 0.15) : hash(x, y, 4) > 0.85 ? scale(c, 0.85) : c
+        }
+      rect(px, W, H, 0, top - 1, W, 1, 0x26323e)
       const max = Math.max(10, ...hist.flat())
       hist.forEach(([r, f], i) => {
         dot(px, W, H, i, top - 2 - (r / max) * (top - 3), 0xf0f0f0)
         dot(px, W, H, i, top - 2 - (f / max) * (top - 3), 0xff8a2a)
       })
+      // rabbits: a white body with an ear; foxes: orange with a white tail tip; each with a shadow
       for (const a of ans) {
+        dot(px, W, H, a.x + 1, a.y + 1, 0x3a5a2a)
         if (a.fox) {
           dot(px, W, H, a.x, a.y, 0xff7a1a)
+          dot(px, W, H, a.x + Math.cos(a.a), a.y + Math.sin(a.a), 0xc8501a)
           dot(px, W, H, a.x - Math.cos(a.a), a.y - Math.sin(a.a), 0xffffff)
-        } else dot(px, W, H, a.x, a.y, 0xf4f0e8)
+        } else {
+          dot(px, W, H, a.x, a.y, 0xf4f0e8)
+          dot(px, W, H, a.x, a.y - 1, 0xd8d0c4)
+        }
       }
     },
   }
@@ -1746,8 +1782,7 @@ const lastball: Maker = (W, H, rng) => {
       rect(px, W, H, x0 - 1, y0 - 1, x1 - x0 + 3, 1, 0x5a5a7a)
       rect(px, W, H, x0 - 1, y1 + 1, x1 - x0 + 3, 1, 0x5a5a7a)
       for (const b of balls) {
-        disc(px, W, H, b.x, b.y, b.r, b.c)
-        ring(px, W, H, b.x, b.y, b.r, scale(b.c, 0.6))
+        lit(px, W, H, b.x, b.y, b.r, b.r, b.c, scale(b.c, 0.55))
         text(px, W, H, b.x - 1, b.y - 2, String(Math.max(0, b.hp)), 0xffffff)
       }
       for (const s of bits) dot(px, W, H, s.x, s.y, s.c)

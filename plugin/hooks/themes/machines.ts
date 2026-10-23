@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, burst, clamp, ellipse, irand, line, pick, poly, sparks } from '../kit'
+import { DIRS, beam, burst, clamp, ellipse, irand, line, lit, pick, poly, slab, sparks } from '../kit'
 import type { Spark } from '../kit'
 
 // Machines & how it's made: input, process, output, again.
@@ -9,8 +9,10 @@ const span = (t: number, a: number, b: number) => clamp((t - a) / (b - a), 0, 1)
 
 function belt(px: Uint32Array, W: number, H: number, y: number, t: number, speed: number) {
   rect(px, W, H, 0, y, W, 3, 0x3a3e46)
-  for (let x = 0; x < W; x++) if ((x - Math.floor(t * speed)) % 4 === 0) dot(px, W, H, x, y + 1, 0x5a5e66)
-  rect(px, W, H, 0, y + 3, W, 1, 0x2a2e36)
+  rect(px, W, H, 0, y, W, 1, 0x6a707c)
+  for (let x = 0; x < W; x++) if ((x - Math.floor(t * speed)) % 4 === 0) dot(px, W, H, x, y + 1, 0x24282e)
+  rect(px, W, H, 0, y + 3, W, 1, 0x1e2228)
+  for (let x = 1; x < W; x += 4) dot(px, W, H, x, y + 3, 0x5a5e68)
 }
 
 // --- claw machine -----------------------------------------------------------------
@@ -96,12 +98,12 @@ const claw: Maker = (W, H, rng) => {
       rect(px, W, H, chuteX - 2, pile - 6, 7, 10, 0x1a1a2a)
       rect(px, W, H, chuteX - 2, pile - 6, 7, 1, 0xd0d0d8)
       for (const p of toys) {
-        disc(px, W, H, p.x, p.y, 2, p.c)
+        lit(px, W, H, p.x, p.y, 2, 2, p.c)
         dot(px, W, H, p.x - 1, p.y - 1, 0x1a1a1a)
         dot(px, W, H, p.x + 1, p.y - 1, 0x1a1a1a)
       }
       if (held) {
-        disc(px, W, H, held.x, held.y, 2, held.c)
+        lit(px, W, H, held.x, held.y, 2, 2, held.c)
         dot(px, W, H, held.x - 1, held.y - 1, 0x1a1a1a)
       }
       rect(px, W, H, 1, glassTop - 1, W - 2, 1, 0x8a8a92)
@@ -110,7 +112,7 @@ const claw: Maker = (W, H, rng) => {
       const spread = 1 + open * 2
       line(px, W, H, cx - 1, cy + 2, cx - spread, cy + 5, 0xd0d0d8)
       line(px, W, H, cx + 1, cy + 2, cx + spread, cy + 5, 0xd0d0d8)
-      rect(px, W, H, 0, H - 6, W, 6, 0xb82a5a)
+      slab(px, W, H, 0, H - 6, W, 6, 0xb82a5a)
       disc(px, W, H, W - 6, H - 3, 1.5, 0xff3a3a)
       text(px, W, H, 2, H - 6, String(wins), 0xffe040)
       for (let x = 2; x < W - 2; x += 3) dot(px, W, H, x, 1, (x + (t >> 2)) % 6 < 3 ? 0xffe040 : 0xff8ad0)
@@ -169,7 +171,7 @@ const vending: Maker = (W, H, rng) => {
     draw(px) {
       const sx = shake > 0 ? Math.sin(shake * 2) : 0
       px.fill(0x2a2a34)
-      rect(px, W, H, 1 + sx, 2, W - 2, H - 4, 0xc83a3a)
+      slab(px, W, H, 1 + sx, 2, W - 2, H - 4, 0xc83a3a, 0x5a1414)
       rect(px, W, H, gx + sx, gy, cols * cw, rows * rh, 0x1a1e2a)
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
@@ -187,7 +189,7 @@ const vending: Maker = (W, H, rng) => {
       }
       rect(px, W, H, gx + sx, H * 0.75, cols * cw, H * 0.12, 0x101016)
       const kx = W * 0.78 + sx
-      rect(px, W, H, kx, gy + 2, 5, 12, 0x2a2a2a)
+      slab(px, W, H, kx, gy + 2, 5, 12, 0x2e2e34)
       for (let k = 0; k < 9; k++) dot(px, W, H, kx + 1 + (k % 3), gy + 3 + Math.floor(k / 3) * 2, phase === 1 && k === sel % 9 ? 0x3aff6a : 0xb0b0b8)
       rect(px, W, H, kx, gy + 18, 5, 2, 0x101010)
       if (phase === 2 || phase === 3) rect(px, W, H, fall.x - 2 + sx, fall.y, 4, 3, fall.c)
@@ -225,7 +227,7 @@ const assembly: Maker = (W, H, rng) => {
       stations.forEach((sx, s) => {
         const busy = cars.some(c => Math.abs(c.x + 6 - sx) < 4)
         const swing = busy ? Math.sin(t * 0.4) * 2 : 0
-        rect(px, W, H, sx - 1, 4, 3, 4, 0xe08a20)
+        slab(px, W, H, sx - 1, 4, 3, 4, 0xe08a20)
         line(px, W, H, sx, 8, sx + swing, lineY - 12, 0xe08a20)
         line(px, W, H, sx + swing, lineY - 12, sx + swing * 1.5, lineY - 8, 0xf0a030)
         if (busy && t % 4 < 2) dot(px, W, H, sx + swing * 1.5, lineY - 7, s === 1 ? 0xffffff : 0xffe080)
@@ -233,10 +235,10 @@ const assembly: Maker = (W, H, rng) => {
       for (const c of cars) {
         const x = c.x
         const y = lineY - 1
-        rect(px, W, H, x, y - 2, 12, 2, 0x5a5a62)
+        slab(px, W, H, x, y - 2, 12, 2, 0x5a5a62)
         if (c.stage >= 1) {
-          disc(px, W, H, x + 2.5, y, 1.4, 0x1a1a1a)
-          disc(px, W, H, x + 9.5, y, 1.4, 0x1a1a1a)
+          lit(px, W, H, x + 2.5, y, 1.5, 1.5, 0x3a3a3e)
+          lit(px, W, H, x + 9.5, y, 1.5, 1.5, 0x3a3a3e)
         }
         if (c.stage >= 2) {
           rect(px, W, H, x, y - 5, 12, 3, c.stage >= 3 ? c.c : 0xb0b0b8)
@@ -280,12 +282,12 @@ const bottling: Maker = (W, H, rng) => {
       sky(px, W, H, 0xe8ecf0, 0xc8ccd4, lineY)
       belt(px, W, H, lineY, t, 0.3)
       rect(px, W, H, 0, lineY + 4, W, H - lineY - 4, 0x8a8e98)
-      rect(px, W, H, filler - 3, 2, 6, 6, 0x8a8e98)
+      slab(px, W, H, filler - 3, 2, 6, 6, 0x8a8e98)
       rect(px, W, H, filler - 1, 8, 2, lineY - 22, 0xa0a4ac)
       const filling = bs.some(b => Math.abs(b.x - filler) < 0.3 && b.fill < 1)
       if (filling) line(px, W, H, filler, lineY - 14, filler, lineY - 10, drink)
       const press = Math.abs(Math.sin(t * 0.2)) * 2
-      rect(px, W, H, capper - 2, lineY - 20 + press, 4, 4, 0x6a6e78)
+      slab(px, W, H, capper - 2, lineY - 20 + press, 4, 4, 0x6a6e78)
       rect(px, W, H, capper - 0.5, 2, 1, lineY - 20 + press, 0x8a8e98)
       rect(px, W, H, labeler - 3, lineY - 14, 1, 10, 0xf0f0f0)
       disc(px, W, H, labeler - 5, lineY - 10, 2, 0xf0f0f0)
@@ -293,6 +295,8 @@ const bottling: Maker = (W, H, rng) => {
         const x = b.x
         const y = lineY
         rect(px, W, H, x - 1, y - 9, 3, 9, 0xd8ecf4)
+        rect(px, W, H, x - 1, y - 9, 1, 9, 0xffffff)
+        rect(px, W, H, x + 1, y - 9, 1, 9, 0x9ab4c4)
         rect(px, W, H, x, y - 11, 1, 2, 0xd8ecf4)
         const h = Math.round(b.fill * 8)
         if (h > 0) rect(px, W, H, x - 1, y - h, 3, h, drink)
@@ -380,13 +384,13 @@ const rube: Maker = (W, H, rng) => {
       line(px, W, H, W * 0.86 + 3, H * 0.4, W * 0.86 + 3, H * 0.4 - 6, 0x8a8a92)
       line(px, W, H, W * 0.86, H * 0.4, W * 0.86, H * 0.24, 0xd0d0d8)
       if (!popped) {
-        ellipse(px, W, H, W * 0.86, H * 0.18, 3, 4, 0xff3a6a)
+        lit(px, W, H, W * 0.86, H * 0.18, 3, 4, 0xff3a6a)
         dot(px, W, H, W * 0.86 - 1, H * 0.18 - 2, 0xffb0c0)
         line(px, W, H, W * 0.86, H * 0.18 + 4, W * 0.86, H * 0.24, 0x5a5a5a)
       }
       for (const p of pop) dot(px, W, H, p.x, p.y, p.c)
-      disc(px, W, H, ball.x, ball.y, 1.2, 0x3a6ae0)
-      disc(px, W, H, ball2.on ? ball2.x : pv + 5, ball2.on ? ball2.y : floor - 4 + tilt * 6 - 1.5, 1.2, 0xe03a3a)
+      lit(px, W, H, ball.x, ball.y, 1.4, 1.4, 0x3a6ae0)
+      lit(px, W, H, ball2.on ? ball2.x : pv + 5, ball2.on ? ball2.y : floor - 4 + tilt * 6 - 1.5, 1.4, 1.4, 0xe03a3a)
       if (popped && t % 10 < 6) text(px, W, H, W / 2 - 1, 4, '!', 0xe03a3a)
     },
   }
@@ -454,6 +458,8 @@ const coinpusher: Maker = (W, H, rng) => {
       rect(px, W, H, 1, shelf - 10, 3 + push, 1, 0xe0e0f0)
       for (const c of coins) {
         rect(px, W, H, c.x - 1, c.y, 3, 1, 0xf0c030)
+        dot(px, W, H, c.x - 1, c.y, 0xfff0a0)
+        dot(px, W, H, c.x + 1, c.y, 0xb08a18)
         dot(px, W, H, c.x, c.y, 0xfff0a0)
       }
       rect(px, W, H, 1, H - 8, W - 2, 6, flash > 0 ? 0x5a3a7a : 0x1a1a2a)
@@ -500,22 +506,23 @@ const gumball: Maker = (W, H, rng) => {
       sky(px, W, H, 0xffe8f0, 0xf0d8e8)
       disc(px, W, H, cx, gy, R + 1, 0xd0e8f8)
       disc(px, W, H, cx, gy, R, 0xe8f4fc)
-      for (const b of balls) disc(px, W, H, b.x, b.y, 1.3, b.c)
+      for (const b of balls) lit(px, W, H, b.x, b.y, 1.4, 1.4, b.c)
+      for (let k = 0; k < 3; k++) dot(px, W, H, cx - R * 0.55 + k * 0.6, gy - R * 0.55 + k, 0xffffff)
       dot(px, W, H, cx - R * 0.5, gy - R * 0.5, 0xffffff)
       dot(px, W, H, cx - R * 0.5 + 1, gy - R * 0.5 + 1, 0xffffff)
       rect(px, W, H, cx - 3, gy - R - 2, 6, 2, 0xe02a3a)
       const by = gy + R
       poly(px, W, H, [[cx - R * 0.6, by], [cx + R * 0.6, by], [cx + R * 0.5, H - 4], [cx - R * 0.5, H - 4]], 0xe02a3a)
-      rect(px, W, H, cx - R * 0.7, H - 4, R * 1.4, 3, 0xb01a2a)
+      slab(px, W, H, cx - R * 0.7, H - 4, R * 1.4, 3, 0xb01a2a)
       disc(px, W, H, cx, by + 6, 2.5, 0xd0d0d8)
       line(px, W, H, cx, by + 6, cx + Math.cos(crank) * 2.5, by + 6 + Math.sin(crank) * 2.5, 0x6a6a72)
       rect(px, W, H, cx - 2, H - 12, 5, 4, 0x5a1a2a)
       if (rolling) {
         const u = rolling.u
         const a = u * Math.PI * 4
-        disc(px, W, H, cx + Math.cos(a) * R * 0.35, by + 3 + u * (H - 16 - by), 1.2, rolling.c)
+        lit(px, W, H, cx + Math.cos(a) * R * 0.35, by + 3 + u * (H - 16 - by), 1.4, 1.4, rolling.c)
       }
-      if (out) disc(px, W, H, cx, H - 10, 1.4, out.c)
+      if (out) lit(px, W, H, cx, H - 10, 1.5, 1.5, out.c)
     },
   }
 }
@@ -601,7 +608,7 @@ const lasercut: Maker = (W, H, rng) => {
       const cur = path[Math.min(pi, path.length - 1)] as [number, number]
       if (pi < path.length) {
         rect(px, W, H, 0, cur[1] - 1, W, 1, 0x5a5a62)
-        rect(px, W, H, cur[0] - 2, cur[1] - 3, 4, 3, 0x8a8a92)
+        slab(px, W, H, cur[0] - 2, cur[1] - 3, 4, 3, 0x8a8a92)
         dot(px, W, H, cur[0], cur[1], 0xffffff)
       }
       for (const s of sparksL) dot(px, W, H, s.x, s.y, s.c)
@@ -665,7 +672,7 @@ const printer3d: Maker = (W, H, rng) => {
         const y = bed - 1 - layer
         rect(px, W, H, cx - hw, y, nx + hw + 1, 1, mix(col, 0xffffff, 0.3))
         rect(px, W, H, 2, y - 6, W - 4, 1, 0x8a8e98)
-        rect(px, W, H, cx + nx - 2, y - 6, 5, 4, 0xd0d0d8)
+        slab(px, W, H, cx + nx - 2, y - 6, 5, 4, 0xd0d0d8)
         rect(px, W, H, cx + nx - 0.5, y - 2, 1, 1, 0xff8a20)
       }
       text(px, W, H, 1, H - 6, `${Math.round((layer / maxLayers) * 100)}%`, 0x8ae0b0)
@@ -721,9 +728,9 @@ const colorsorter: Maker = (W, H, rng) => {
       rect(px, W, H, 2, 2, 5, 4, 0x3a3a42)
       dot(px, W, H, 4, 4, t % 6 < 3 ? 0xff3a3a : 0x3aff6a)
       gates.forEach((g, k) => {
-        rect(px, W, H, g - 1, lineY - 10 + (kick[k]! > 0 ? 4 : 0), 3, 4, 0x6a6e78)
+        slab(px, W, H, g - 1, lineY - 10 + (kick[k]! > 0 ? 4 : 0), 3, 4, 0x6a6e78)
         rect(px, W, H, g - 0.5, 2, 1, lineY - 10 + (kick[k]! > 0 ? 4 : 0), 0x8a8e98)
-        rect(px, W, H, g - 3, H - 9, 7, 8, 0x5a5e68)
+        slab(px, W, H, g - 3, H - 9, 7, 8, 0x5a5e68)
         rect(px, W, H, g - 2, H - 9, 5, 7, 0x2a2e36)
         const n = Math.min(7, Math.floor(bins[k]! / 5))
         if (n) rect(px, W, H, g - 2, H - 2 - n, 5, n, COLS[k] as number)
@@ -755,7 +762,7 @@ const crayons: Maker = (W, H, rng) => {
     },
     draw(px) {
       sky(px, W, H, 0xf0e8d8, 0xd8c8b0)
-      rect(px, W, H, W / 2 - 6, 2, 12, 8, 0xa0a4ac)
+      slab(px, W, H, W / 2 - 6, 2, 12, 8, 0xa0a4ac)
       rect(px, W, H, W / 2 - 5, 3, 10, 5, col)
       const pour = span(t, 20, 120)
       const pourX = 2 + pour * (W - 4)
@@ -815,21 +822,32 @@ const chipper: Maker = (W, H, rng) => {
     },
     draw(px) {
       sky(px, W, H, 0x8ac8f0, 0xe0f0e0, ground)
-      rect(px, W, H, 0, ground, W, H - ground, 0x6a8a3a)
-      for (let x = 0; x < W; x++) if (pile[x]! > 0) rect(px, W, H, x, ground - pile[x]!, 1, pile[x]!, (x % 3) ? 0xc89050 : 0xd8a868)
-      rect(px, W, H, mx - 3, H * 0.4, 10, 12, 0xe08a20)
-      rect(px, W, H, mx - 3, H * 0.4, 10, 1, 0xf0b040)
-      poly(px, W, H, [[mx - 3, H * 0.4], [mx - 8, H * 0.32], [mx - 8, H * 0.5], [mx - 3, H * 0.48]], 0xc87010)
-      line(px, W, H, mx + 7, H * 0.45, mx + 10, H * 0.42, 0x3a3a3a)
-      disc(px, W, H, mx, ground - 1, 2, 0x1a1a1a)
-      disc(px, W, H, mx + 5, ground - 1, 2, 0x1a1a1a)
-      rect(px, W, H, mx - 1, H * 0.4 + 12, 8, ground - H * 0.4 - 13, 0x5a5a62)
+      rect(px, W, H, 0, ground, W, H - ground, 0x5a7a32)
+      rect(px, W, H, 0, ground, W, 1, 0x8ab04a)
+      // the chip pile: lit tops, two tones of wood
+      for (let x = 0; x < W; x++)
+        if (pile[x]! > 0) {
+          rect(px, W, H, x, ground - pile[x]!, 1, pile[x]!, x % 3 ? 0xb07a40 : 0xc89050)
+          dot(px, W, H, x, ground - pile[x]!, 0xe8c080)
+        }
+      // the machine: legs, wheels, an outlined body, a shaded hopper, a chute
+      slab(px, W, H, mx - 1, H * 0.4 + 12, 8, ground - H * 0.4 - 13, 0x5a5a62)
+      lit(px, W, H, mx, ground - 1, 2, 2, 0x3a3a40, 0x101012)
+      lit(px, W, H, mx + 5, ground - 1, 2, 2, 0x3a3a40, 0x101012)
+      poly(px, W, H, [[mx - 3, H * 0.4], [mx - 8, H * 0.32], [mx - 8, H * 0.5], [mx - 3, H * 0.48]], 0xb86410)
+      line(px, W, H, mx - 8, H * 0.32, mx - 3, H * 0.4, 0xf0a040)
+      rect(px, W, H, mx - 8, H * 0.33, 1, H * 0.17, 0x7a3c08)
+      slab(px, W, H, mx - 3, H * 0.4, 10, 12, 0xe08a20, 0x6a3408)
+      rect(px, W, H, mx - 1, H * 0.4 + 4, 6, 1, 0x2a2a2e)
+      beam(px, W, H, mx + 7, H * 0.45, mx + 10, H * 0.42, 0x4a4a52)
+      // the branch: bark with a lit top, a twig, two leaves
       if (branch.len > 0) {
         const bx = Math.min(branch.x, mx - 8)
         line(px, W, H, bx, H * 0.42, bx + branch.len, H * 0.42, 0x6a4a2a)
+        line(px, W, H, bx, H * 0.42 - 1, bx + branch.len, H * 0.42 - 1, 0x9a744a)
         line(px, W, H, bx + 3, H * 0.42, bx + 1, H * 0.38, 0x6a4a2a)
-        dot(px, W, H, bx + 1, H * 0.37, 0x4a9a3a)
-        dot(px, W, H, bx, H * 0.38, 0x4a9a3a)
+        dot(px, W, H, bx + 1, H * 0.37, 0x6ac04a)
+        dot(px, W, H, bx, H * 0.38, 0x3a8a2a)
       }
       for (const c of chips) dot(px, W, H, c.x, c.y, c.c)
     },
@@ -882,10 +900,10 @@ const shredder: Maker = (W, H, rng) => {
           if (y < slot) rect(px, W, H, x0 + 3, y, w, 1, 0x9aa0b0)
         })
       }
-      rect(px, W, H, x0 - 2, slot, x1 - x0 + 4, 6, 0x3a3e46)
+      slab(px, W, H, x0 - 2, slot, x1 - x0 + 4, 6, 0x3a3e46)
       rect(px, W, H, x0, slot + 1, x1 - x0, 1, 0x1a1a1e)
       dot(px, W, H, x1, slot + 3, t % 10 < 5 ? 0x3aff6a : 0x1a6a2a)
-      rect(px, W, H, x0 - 2, slot + 6, x1 - x0 + 4, H - slot - 8, 0x5a5e68)
+      slab(px, W, H, x0 - 2, slot + 6, x1 - x0 + 4, H - slot - 8, 0x5a5e68)
       rect(px, W, H, x0, slot + 7, x1 - x0, H - slot - 10, 0x2a2e36)
       for (const s of strips) rect(px, W, H, s.x, s.y, 1, s.len, 0xf0f0f0)
       const fill = Math.round(bin * 10)
@@ -924,8 +942,8 @@ const gacha: Maker = (W, H, rng) => {
       sky(px, W, H, 0xfff0f6, 0xf0e0ff)
       rect(px, W, H, cx - 10, top, 20, 20, 0xe8f4fc)
       rect(px, W, H, cx - 11, top - 1, 22, 1, 0xff6aa0)
-      for (let k = 0; k < 14; k++) disc(px, W, H, cx - 7 + (k % 5) * 3.5, top + 6 + Math.floor(k / 5) * 4, 1.5, hsv(k * 0.13, 0.6, 1))
-      rect(px, W, H, cx - 11, top + 20, 22, 16, 0xff6aa0)
+      for (let k = 0; k < 14; k++) lit(px, W, H, cx - 7 + (k % 5) * 3.5, top + 6 + Math.floor(k / 5) * 4, 1.6, 1.6, hsv(k * 0.13, 0.6, 1))
+      slab(px, W, H, cx - 11, top + 20, 22, 16, 0xff6aa0)
       const knob = span(t, 20, 50) * Math.PI * 2
       disc(px, W, H, cx, top + 26, 3, 0xffffff)
       line(px, W, H, cx - Math.cos(knob) * 3, top + 26 - Math.sin(knob) * 3, cx + Math.cos(knob) * 3, top + 26 + Math.sin(knob) * 3, 0xc84a7a)
@@ -938,7 +956,7 @@ const gacha: Maker = (W, H, rng) => {
       if (t > 50) {
         const y = top + 30 + drop * (H - top - 36)
         const opened = span(t, 90, 110)
-        disc(px, W, H, cx, y - opened * 3, 3, cap)
+        lit(px, W, H, cx, y - opened * 3, 3, 3, cap)
         dot(px, W, H, cx - 1, y - 1 - opened * 3, 0xffffff)
         if (opened < 1) disc(px, W, H, cx, y + opened * 2, 3, 0xf8f8f8)
         else rect(px, W, H, cx - 3, y + 2, 6, 1, 0xf8f8f8)
@@ -1007,25 +1025,36 @@ const robotarm: Maker = (W, H, rng) => {
       hand.y += clamp(tgt.y - hand.y, -0.8, 0.8)
     },
     draw(px) {
-      sky(px, W, H, 0x9aa0ac, 0x6a707c, lineY)
+      // a factory wall: panels, a lit window strip, a hazard band
+      sky(px, W, H, 0xa8aeba, 0x6a707c, lineY)
+      for (let x = 0; x < W; x += 8) rect(px, W, H, x, 0, 1, lineY, 0x8a909c)
+      rect(px, W, H, 0, Math.round(H * 0.12), W, 3, 0xd8e8f4)
+      rect(px, W, H, 0, Math.round(H * 0.12) + 3, W, 1, 0x7a808c)
+      for (let x = 0; x < W; x++) dot(px, W, H, x, lineY - 1, (x + 0) % 4 < 2 ? 0xf0c020 : 0x2a2a2e)
       belt(px, W, H, lineY, t, 0.35)
       rect(px, W, H, 0, lineY + 4, W, H - lineY - 4, 0x4a4e58)
-      rect(px, W, H, W * 0.8 - 5, lineY - 1, 10, 2, 0x8a6a3a)
-      pallet.forEach((c, i) => {
-        rect(px, W, H, W * 0.8 - 2, lineY - 4 - i * 3, 5, 3, c)
-        rect(px, W, H, W * 0.8 - 2, lineY - 4 - i * 3, 5, 1, mix(c, 0xffffff, 0.3))
-      })
+      rect(px, W, H, 0, lineY + 4, W, 1, 0x5e6270)
+      // the pallet and its stack of boxes
+      const palX = W * 0.8
+      slab(px, W, H, palX - 5, lineY - 1, 10, 2, 0x9a7444)
+      for (let x = -4; x < 5; x += 3) dot(px, W, H, palX + x, lineY, 0x4a3420)
+      const drawBox = (x: number, y: number, c: number) => {
+        slab(px, W, H, x - 2, y, 5, 3, c, scale(c, 0.5))
+        dot(px, W, H, x, y + 1, mix(c, 0xfff4e0, 0.5))
+      }
+      pallet.forEach((c, i) => drawBox(palX, lineY - 4 - i * 3, c))
+      // the arm: a base, two lit beams, joints, a gripper
       const { ex, ey, hx, hy } = ik(hand.x, hand.y)
-      rect(px, W, H, base.x - 3, base.y, 7, 3, 0x3a3a42)
-      line(px, W, H, base.x, base.y, ex, ey, 0xf0a020)
-      line(px, W, H, base.x + 1, base.y, ex + 1, ey, 0xd08010)
-      line(px, W, H, ex, ey, hx, hy, 0xf0a020)
-      disc(px, W, H, ex, ey, 1.2, 0x3a3a42)
-      rect(px, W, H, hx - 2, hy, 5, 1, 0x3a3a42)
-      const bx = held ? hx : box.x
-      const by = held ? hy + 1 : lineY - 3
-      rect(px, W, H, bx - 2, by, 5, 3, box.c)
-      rect(px, W, H, bx - 2, by, 5, 1, mix(box.c, 0xffffff, 0.3))
+      slab(px, W, H, base.x - 4, base.y, 9, 3, 0x3a3a44)
+      for (let x = -3; x <= 3; x += 2) dot(px, W, H, base.x + x, base.y + 2, 0xf0c020)
+      beam(px, W, H, base.x, base.y, ex, ey, 0xf0a020)
+      beam(px, W, H, ex, ey, hx, hy, 0xf0a020)
+      lit(px, W, H, base.x, base.y, 1.6, 1.6, 0x4a4a54)
+      lit(px, W, H, ex, ey, 1.6, 1.6, 0x4a4a54)
+      rect(px, W, H, hx - 3, hy, 7, 1, 0x2e2e36)
+      rect(px, W, H, hx - 3, hy, 3, 1, 0x5a5a66)
+      for (const s of [-3, 3]) rect(px, W, H, hx + s, hy + 1, 1, 2, 0x2e2e36)
+      drawBox(held ? hx : box.x, held ? hy + 1 : lineY - 3, box.c)
     },
   }
 }
@@ -1179,16 +1208,36 @@ const warehouse: Maker = (W, H, rng) => {
       }
     },
     draw(px) {
-      px.fill(0xb8bcc4)
-      for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++) rect(px, W, H, x * cs, oy + y * cs, cs - 1, cs - 1, 0xc8ccd4)
-      rect(px, W, H, station[0] * cs - 1, oy + station[1] * cs - 1, cs + 1, cs + 1, 0x3ac06a)
-      for (const [k, c] of shelves) rect(px, W, H, (k % GW) * cs, oy + Math.floor(k / GW) * cs, cs - 1, cs - 1, c)
-      for (const r of robots) {
-        rect(px, W, H, r.px * cs, oy + r.py * cs, cs - 1, cs - 1, 0xf08a20)
-        if (r.carry >= 0) rect(px, W, H, r.px * cs, oy + r.py * cs - 1, cs - 1, cs - 2, r.carry)
-        dot(px, W, H, r.px * cs + 1, oy + r.py * cs + 2, 0x3a3a3a)
+      // concrete floor seen from above, cells marked by seams, a lit header
+      px.fill(0xb4b8c0)
+      rect(px, W, H, 0, 0, W, oy - 1, 0x3a3e48)
+      rect(px, W, H, 0, oy - 1, W, 1, 0x24262e)
+      for (let y = 0; y < GH; y++)
+        for (let x = 0; x < GW; x++) {
+          rect(px, W, H, x * cs, oy + y * cs, cs - 1, cs - 1, (x + y) % 2 ? 0xc4c8d0 : 0xbec2ca)
+          rect(px, W, H, x * cs, oy + y * cs, cs - 1, 1, 0xccd0d8)
+        }
+      // the station: a green pad in a hazard frame
+      const sx = station[0] * cs
+      const sy = oy + station[1] * cs
+      for (let k = -1; k < cs; k++) {
+        dot(px, W, H, sx + k, sy - 1, k % 2 ? 0xf0c020 : 0x2a2a2e)
+        dot(px, W, H, sx - 1, sy + k, k % 2 ? 0x2a2a2e : 0xf0c020)
       }
-      text(px, W, H, 1, 0, String(picked), 0x3a3a42)
+      slab(px, W, H, sx, sy, cs - 1, cs - 1, 0x3ac06a)
+      // shelves cast a shadow down and right, then their lit tops
+      for (const [k] of shelves) rect(px, W, H, (k % GW) * cs + 1, oy + Math.floor(k / GW) * cs + 1, cs - 1, cs - 1, 0x8a8e98)
+      for (const [k, c] of shelves) slab(px, W, H, (k % GW) * cs, oy + Math.floor(k / GW) * cs, cs - 1, cs - 1, c)
+      // robots: a shadow, a lit orange body, a lit shelf on top when carrying, a sensor
+      for (const r of robots) {
+        const x = r.px * cs
+        const y = oy + r.py * cs
+        rect(px, W, H, x + 1, y + 1, cs - 1, cs - 1, 0x7a7e88)
+        slab(px, W, H, x, y, cs - 1, cs - 1, 0xf08a20)
+        if (r.carry >= 0) slab(px, W, H, x, y - 1, cs - 1, cs - 2, r.carry)
+        dot(px, W, H, x + 1, y + cs - 2, 0x3af0ff)
+      }
+      text(px, W, H, 1, 0, String(picked), 0xe0e4ec)
     },
   }
 }

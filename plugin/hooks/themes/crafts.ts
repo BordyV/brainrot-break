@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, sprite } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, ellipse, hash, line, pick, shuffle } from '../kit'
+import { clamp, ellipse, hash, line, lit, pick, shuffle, slab, tones } from '../kit'
 
 // Crafts & makers: watching something get built, piece by piece.
 
@@ -81,8 +81,12 @@ const brickbuild: Maker = (W, H, rng) => {
     },
     draw(px) {
       sky(px, W, H, 0xd8e8f8, 0xf8f0e0, ground)
-      rect(px, W, H, 0, ground, W, H - ground, 0x3ac04a)
-      for (let x = 1; x < W; x += 3) dot(px, W, H, x, ground, 0x5ae06a)
+      rect(px, W, H, 0, ground, W, H - ground, 0x2e9a3c)
+      rect(px, W, H, 0, ground + 1, W, 1, 0x258030)
+      for (let x = 1; x < W; x += 3) {
+        dot(px, W, H, x, ground, 0x6ae07a)
+        dot(px, W, H, x + 1, ground, 0x3ab04a)
+      }
       const bh = 3
       for (let i = 0; i < placed; i++) {
         const b = plan[i] as B
@@ -90,8 +94,12 @@ const brickbuild: Maker = (W, H, rng) => {
         const drop = i === placed - 1 ? Math.max(0, 5 - (t % 6)) : 0
         rect(px, W, H, b.x, y - drop, b.w * unit, bh, b.c)
         rect(px, W, H, b.x, y - drop, b.w * unit, 1, mix(b.c, 0xffffff, 0.35))
-        rect(px, W, H, b.x + b.w * unit - 1, y - drop, 1, bh, scale(b.c, 0.75))
-        for (let s = 0; s < b.w; s++) dot(px, W, H, b.x + s * unit + 1, y - drop - 1, mix(b.c, 0xffffff, 0.2))
+        rect(px, W, H, b.x, y - drop + bh - 1, b.w * unit, 1, scale(b.c, 0.82))
+        rect(px, W, H, b.x + b.w * unit - 1, y - drop, 1, bh, scale(b.c, 0.7))
+        for (let s = 0; s < b.w; s++) {
+          dot(px, W, H, b.x + s * unit, y - drop - 1, mix(b.c, 0xffffff, 0.45))
+          dot(px, W, H, b.x + s * unit + 1, y - drop - 1, mix(b.c, 0xffffff, 0.15))
+        }
       }
     },
   }
@@ -146,11 +154,12 @@ const pixeldraw: Maker = (W, H, rng) => {
       }
       if (!hold) {
         const [cx, cy] = cur as [number, number]
-        line(px, W, H, cx, cy, cx + 5, cy - 7, 0xf0c040)
+        line(px, W, H, cx + 1, cy, cx + 6, cy - 7, 0xc8901a)
+        line(px, W, H, cx, cy, cx + 5, cy - 7, 0xf8d050)
         dot(px, W, H, cx, cy, 0x3a3a3a)
         dot(px, W, H, cx + 5, cy - 7, 0xff8aa0)
       }
-      for (const [i, c] of Object.values(p.pal).entries()) rect(px, W, H, 2 + i * 4, H - 5, 3, 3, c)
+      for (const [i, c] of Object.values(p.pal).entries()) slab(px, W, H, 2 + i * 4, H - 5, 3, 3, c)
     },
   }
 }
@@ -185,9 +194,11 @@ const pottery: Maker = (W, H, rng) => {
       }
     },
     draw(px) {
-      sky(px, W, H, 0xe8dcc8, 0xc8b8a0)
-      rect(px, W, H, 0, wheel + 2, W, H - wheel - 2, 0x6a5a4a)
-      ellipse(px, W, H, cx, wheel + 1, W * 0.38, 2, 0x8a8a92)
+      sky(px, W, H, 0xece0cc, 0xc4b49c)
+      rect(px, W, H, 0, wheel + 2, W, H - wheel - 2, 0x5e4e40)
+      rect(px, W, H, 0, wheel + 2, W, 1, 0x7a6a58)
+      slab(px, W, H, cx - 3, wheel + 2, 7, H - wheel - 2, 0x6a6a74)
+      lit(px, W, H, cx, wheel + 1, W * 0.38, 2, 0x9a9aa4, 0x4a4a54)
       const f = span(t, 30, 220)
       const height = 8 + f * H * 0.32
       for (let y = 0; y < height; y++) {
@@ -196,7 +207,9 @@ const pottery: Maker = (W, H, rng) => {
         const yy = wheel - y
         for (let x = -r; x <= r; x++) {
           const k = x / r
-          let c = mix(clay, scale(clay, 0.7), Math.abs(k))
+          const [hi, base, sh, deep] = tones(clay)
+          let c = k < -0.55 ? hi : k < 0.15 ? base : k < 0.7 ? sh : deep
+          if (y >= Math.floor(height) - 1) c = mix(c, 0xffffff, 0.25)
           if (Math.sin(k * 3 + t * 0.6) > 0.95) c = mix(c, 0xffffff, 0.2)
           dot(px, W, H, cx + x, yy, c)
         }
@@ -204,8 +217,8 @@ const pottery: Maker = (W, H, rng) => {
       if (t < 240) {
         const hy = wheel - height * (0.3 + 0.4 * Math.sin(t * 0.03) ** 2)
         const r = profile((wheel - hy) / height, f)
-        rect(px, W, H, cx - r - 4, hy - 1, 3, 3, 0xf0c8a0)
-        rect(px, W, H, cx + r + 1, hy - 1, 3, 3, 0xf0c8a0)
+        slab(px, W, H, cx - r - 4, hy - 1, 3, 3, 0xf0c8a0)
+        slab(px, W, H, cx + r + 1, hy - 1, 3, 3, 0xe0b48c)
       }
       for (let k = 0; k < 4; k++) dot(px, W, H, cx + Math.cos(t * 0.6 + k * 1.6) * W * 0.36, wheel + 1 + Math.sin(t * 0.6 + k * 1.6), 0x5a5a62)
     },
@@ -244,12 +257,18 @@ const crossstitch: Maker = (W, H) => {
     draw(px) {
       px.fill(0xf4efe0)
       for (let y = 0; y < H; y += cs) for (let x = 0; x < W; x += cs) dot(px, W, H, x, y, 0xd8d0b8)
-      rect(px, W, H, 0, 0, W, 2, 0xc89a5a)
-      rect(px, W, H, 0, H - 2, W, 2, 0xc89a5a)
       const p = PICS[pi] as { rows: string[]; pal: Record<string, number> }
       const cols = (p.rows[0] as string).length
       const ox = Math.floor((W - cols * cs) / 2)
       const oy = Math.floor((H - p.rows.length * cs) / 2)
+      // the hoop: two rings of wood, lit on the upper left, and its screw
+      const hr = Math.min(W / 2 - 1, Math.max(cols, p.rows.length) * cs * 0.75 + 2)
+      for (let a = 0; a < 6.283; a += 0.02) {
+        const up = Math.cos(a + 2.4) > 0.2
+        dot(px, W, H, W / 2 + Math.cos(a) * hr, H / 2 + Math.sin(a) * hr, up ? 0xe0b070 : 0xa87a40)
+        dot(px, W, H, W / 2 + Math.cos(a) * (hr - 1), H / 2 + Math.sin(a) * (hr - 1), up ? 0xc89a5a : 0x8a6232)
+      }
+      slab(px, W, H, W / 2 - 1, H / 2 - hr - 3, 3, 3, 0x9aa0ac)
       const done = Math.floor(k / 4)
       for (let i = 0; i < Math.min(done + 1, order.length); i++) {
         const idx = order[i] as number
@@ -258,6 +277,7 @@ const crossstitch: Maker = (W, H) => {
         const c = p.pal[(p.rows[Math.floor(idx / cols)] as string)[idx % cols] as string] as number
         const half = i === done ? k % 4 : 4
         if (half >= 1) {
+          dot(px, W, H, x + 1, y + 2, 0xc8bea4)
           dot(px, W, H, x, y, c)
           dot(px, W, H, x + 1, y + 1, c)
           dot(px, W, H, x + 2, y + 2, c)
@@ -321,7 +341,8 @@ const fusebeads: Maker = (W, H, rng) => {
       const cols = (p.rows[0] as string).length
       const ox = Math.floor((W - cols * pitch) / 2)
       const oy = Math.floor((H - p.rows.length * pitch) / 2)
-      rect(px, W, H, ox - 2, oy - 2, cols * pitch + 3, p.rows.length * pitch + 3, 0xd0c8e0)
+      rect(px, W, H, ox - 1, oy - 1, cols * pitch + 3, p.rows.length * pitch + 3, 0xb8b0c8)
+      slab(px, W, H, ox - 2, oy - 2, cols * pitch + 3, p.rows.length * pitch + 3, 0xd4cce4)
       for (let y = 0; y < p.rows.length; y++) for (let x = 0; x < cols; x++) dot(px, W, H, ox + x * pitch + 1, oy + y * pitch + 1, 0xb8b0c8)
       for (let i = 0; i < Math.floor(k); i++) {
         const idx = order[i] as number
@@ -332,13 +353,13 @@ const fusebeads: Maker = (W, H, rng) => {
         if (fused) rect(px, W, H, x, y, pitch, pitch, c)
         else {
           rect(px, W, H, x, y, 2, 2, c)
-          dot(px, W, H, x + 1, y + 1, 0xe8e0f0)
+          dot(px, W, H, x, y, mix(c, 0xffffff, 0.4))
+          dot(px, W, H, x + 1, y + 1, scale(c, 0.55))
         }
       }
       if (iron >= 0 && iron < H + 6) {
-        rect(px, W, H, 1, iron - 6, W - 2, 6, 0xe0e4ec)
-        rect(px, W, H, 1, iron - 6, W - 2, 1, 0xffffff)
-        rect(px, W, H, W / 2 - 3, iron - 10, 6, 4, 0x3a8ae0)
+        slab(px, W, H, 1, iron - 6, W - 2, 6, 0xd8dce6)
+        slab(px, W, H, W / 2 - 3, iron - 10, 6, 4, 0x3a8ae0, 0x1a4a8a)
         for (let x = 3; x < W - 3; x += 4) dot(px, W, H, x, iron - 8 - ((iron | 0) % 3), 0xf0f4f8)
       }
     },
@@ -397,11 +418,14 @@ const mosaic: Maker = (W, H, rng) => {
       if (k >= tiles.length) hold = 70
     },
     draw(px) {
-      px.fill(0xd8d0c4)
+      px.fill(0xc8bfb2)
       for (let i = 0; i < Math.min(k, tiles.length); i++) {
         const tl = tiles[i] as T
         const c = mix(tl.c, hash(tl.x, tl.y, 3) > 0.5 ? 0xffffff : 0x000000, 0.08)
-        rect(px, W, H, tl.x, tl.y, Math.min(tl.w, W - 1 - tl.x), tl.h, c)
+        const w = Math.min(tl.w, W - 1 - tl.x)
+        rect(px, W, H, tl.x, tl.y, w, tl.h, c)
+        rect(px, W, H, tl.x, tl.y + tl.h - 1, w, 1, scale(c, 0.82))
+        dot(px, W, H, tl.x, tl.y, mix(c, 0xffffff, 0.4))
       }
     },
   }
@@ -437,18 +461,23 @@ const loom: Maker = (W, H, rng) => {
       }
     },
     draw(px) {
-      px.fill(0x6a4a2a)
-      rect(px, W, H, 0, top - 4, W, 2, 0x8a6a3a)
-      for (let x = 1; x < W - 1; x += 2) line(px, W, H, x, top - 2, x, H - 3, 0xe8e0d0)
+      px.fill(0x5a3e22)
+      slab(px, W, H, 0, top - 5, W, 3, 0x9a7444)
+      for (let x = 1; x < W - 1; x += 2) {
+        line(px, W, H, x, top - 2, x, H - 3, 0xe8e0d0)
+        line(px, W, H, x + 1, top - 2, x + 1, H - 3, 0x4a321a)
+      }
       rows.forEach((r, i) => {
         const y = top + rows.length - 1 - i
         for (let x = 1; x < W - 1; x++) dot(px, W, H, x, y, (x + i) % 2 ? (r[x] as number) : scale(r[x] as number, 0.85))
       })
       const y = top + rows.length
       line(px, W, H, 1, y, W - 2, y, 0x9a8a7a)
-      rect(px, W, H, shuttle - 3, y - 1, 6, 2, 0xb88a4a)
+      slab(px, W, H, shuttle - 3, y - 1, 6, 2, 0xc8964e)
+      dot(px, W, H, shuttle - 4, y, 0x8a6030)
+      dot(px, W, H, shuttle + 3, y, 0x8a6030)
       line(px, W, H, dir > 0 ? 1 : W - 2, y, shuttle, y, pal[Math.floor(rows.length / 4) % pal.length] as number)
-      rect(px, W, H, 0, H - 3, W, 3, 0x8a6a3a)
+      slab(px, W, H, 0, H - 3, W, 3, 0x9a7444)
     },
   }
 }
@@ -505,9 +534,12 @@ const mural: Maker = (W, H, rng) => {
     },
     draw(px) {
       px.set(paint)
+      for (let y = 3; y < H; y += 4) for (let x = 0; x < W; x++) px[y * W + x] = scale(px[y * W + x] as number, 0.93)
+      for (let y = 0; y < H; y++) for (let x = Math.floor(y / 4) % 2 ? 3 : 7; x < W; x += 8) px[y * W + x] = scale(px[y * W + x] as number, 0.93)
       if (!hold) {
-        rect(px, W, H, 0, row - 1, W, 1, 0xd8d8e0)
-        rect(px, W, H, W / 2 - 1, row - 1, 3, 8, 0xc89a5a)
+        slab(px, W, H, 1, row - 2, W - 2, 2, 0xe0e0e8)
+        rect(px, W, H, W / 2, row, 1, 9, 0xc89a5a)
+        rect(px, W, H, W / 2 + 1, row, 1, 9, 0x8a6232)
       }
     },
   }
@@ -539,7 +571,9 @@ const sandcastle: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x6ac0f0, 0xd8f0ff, beach - 6)
       for (let y = beach - 6; y < beach; y++) rect(px, W, H, 0, y, W, 1, (y + Math.floor(t / 8)) % 3 ? 0x3a90d0 : 0x6ab8f0)
+      disc(px, W, H, W * 0.8, H * 0.12, 2.5, 0xfff0a0)
       rect(px, W, H, 0, beach, W, H - beach, 0xf0d898)
+      rect(px, W, H, 0, beach, W, 1, 0xf8e8b8)
       for (let x = 0; x < W; x++) if (hash(x, 1, 2) > 0.8) dot(px, W, H, x, beach + 3 + (x % 5), 0xd8c080)
       const wash = tide * (H - beach + 10)
       for (const tw of towers) {
@@ -548,11 +582,15 @@ const sandcastle: Maker = (W, H, rng) => {
         const h = tw.h * g * (1 - span(wash, 4, 14))
         if (h <= 0.5) continue
         rect(px, W, H, tw.x - 2, beach - h, 5, h, 0xe8c880)
-        for (let k = 0; k < 3; k++) dot(px, W, H, tw.x - 2 + k * 2, beach - h - 1, 0xe8c880)
-        dot(px, W, H, tw.x, beach - h + 2, 0x8a6a3a)
+        rect(px, W, H, tw.x - 2, beach - h, 1, h, 0xf8e0a0)
+        rect(px, W, H, tw.x + 2, beach - h, 1, h, 0xc8a460)
+        for (let k = 0; k < 3; k++) dot(px, W, H, tw.x - 2 + k * 2, beach - h - 1, k === 2 ? 0xc8a460 : 0xf4d898)
+        dot(px, W, H, tw.x, beach - h + 2, 0x6a4a2a)
+        dot(px, W, H, tw.x, beach - h + 3, 0x6a4a2a)
         if (h > 8) {
           line(px, W, H, tw.x, beach - h - 1, tw.x, beach - h - 5, 0x8a6a3a)
           rect(px, W, H, tw.x + 1, beach - h - 5, 2, 2, 0xe03a3a)
+          dot(px, W, H, tw.x + 1, beach - h - 5, 0xff7a6a)
         }
       }
       if (towers.length > 1 && t > 200) for (let i = 0; i + 1 < towers.length; i++) rect(px, W, H, towers[i]!.x + 2, beach - 3 * (1 - tide), towers[i + 1]!.x - towers[i]!.x - 4, 3 * (1 - tide), 0xdcbc74)
@@ -619,6 +657,7 @@ const blockhouse: Maker = (W, H) => {
       for (let y = ground; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = y < ground + 2 ? ((x + y) % 3 ? 0x5ab03a : 0x4a9a2a) : (hash(x >> 1, y >> 1, 4) > 0.8 ? 0x6a4a2a : 0x8a5a3a)
       disc(px, W, H, W * 0.8, 6, 3, 0xffffa0)
       rect(px, W, H, W * 0.1, 8, 7, 2, 0xffffff)
+      rect(px, W, H, W * 0.1 + 1, 10, 7, 1, 0xd0e4f8)
       const block = (bx: number, by: number, k: number) => {
         const [a, b] = COL[k] as [number, number]
         const x = bx * cs
@@ -626,6 +665,8 @@ const blockhouse: Maker = (W, H) => {
         rect(px, W, H, x, y, cs, cs, a)
         dot(px, W, H, x + 1, y + 1, b)
         if (k === 0) rect(px, W, H, x, y + cs - 1, cs, 1, b)
+        dot(px, W, H, x, y, mix(a, 0xffffff, 0.35))
+        dot(px, W, H, x + cs - 1, y + cs - 1, scale(a, 0.7))
       }
       for (let i = 0; i < Math.min(placed, plan.length); i++) {
         const b = plan[i] as Bl
@@ -710,11 +751,17 @@ const cardtower: Maker = (W, H, rng) => {
       }
     },
     draw(px) {
-      px.fill(0x1a5a3a)
-      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (hash(x, y, 7) > 0.92) px[y * W + x] = 0x14502f
+      // green felt, lighter under the lamp, then a wooden table edge
+      px.fill(0x16502f)
+      ellipse(px, W, H, W / 2, floor - levels * ch * 0.5, W * 0.7, levels * ch, 0x1a5a3a)
+      ellipse(px, W, H, W / 2, floor - levels * ch * 0.5, W * 0.45, levels * ch * 0.65, 0x1e6442)
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (hash(x, y, 7) > 0.92) px[y * W + x] = scale(px[y * W + x] as number, 0.85)
       rect(px, W, H, 0, floor + 1, W, H - floor - 1, 0x6a4026)
+      rect(px, W, H, 0, floor + 1, W, 1, 0x9a6a40)
+      // cards two pixels thick: a white face, a grey edge in shadow, a red pip
       for (const c of cards) {
-        line(px, W, H, c.x0, c.y0, c.x1, c.y1, 0xf8f8f8)
+        line(px, W, H, c.x0 + 1, c.y0, c.x1 + 1, c.y1, 0xa8acb8)
+        line(px, W, H, c.x0, c.y0, c.x1, c.y1, 0xfafaf6)
         dot(px, W, H, (c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2, 0xe03a3a)
       }
       if (gust > 0 && gust < 30) for (let k = 0; k < 5; k++) line(px, W, H, (gust * 2 + k * 9) % W, 10 + k * 7, (gust * 2 + k * 9) % W + 4, 10 + k * 7, 0x8ad0ff)
@@ -797,23 +844,30 @@ const jenga: Maker = (W, H, rng) => {
       }
     },
     draw(px) {
-      sky(px, W, H, 0x3a2a3a, 0x5a4048, floor)
+      sky(px, W, H, 0x2e2030, 0x5a4048, floor)
+      ellipse(px, W, H, W / 2, floor, W * 0.6, H * 0.55, 0x4a3442)
       rect(px, W, H, 0, floor, W, H - floor, 0x8a5a36)
+      rect(px, W, H, 0, floor, W, 1, 0xb07a4a)
+      ellipse(px, W, H, W / 2 + 1, floor + 1, bw * 0.6, 1, 0x5a3a22)
       const sway = collapse === 0 ? Math.sin(t * 0.05) * pulls * 0.04 : 0
       for (const b of blocks) {
         if (b.gone) continue
         const [x, y, w] = pos(b)
         let dx = sway * (b.layer / layers) * 3
         if (b === pull) dx += (pullT / 20) * (b.slot === 0 ? -bw : bw)
+        // a block: a lit top row, the wood, a shaded right end, end grain on the long ones
         const c = (b.layer + b.slot) % 2 ? 0xe8c890 : 0xd8b070
-        rect(px, W, H, x + dx + b.x, y + b.y, w, bh, c)
-        rect(px, W, H, x + dx + b.x, y + b.y, w, 1, mix(c, 0xffffff, 0.3))
-        if (b.layer % 2 === 0) for (let k = 1; k < 3; k++) dot(px, W, H, x + dx + b.x + (w * k) / 3, y + b.y + 1, scale(c, 0.8))
+        const bx = x + dx + b.x
+        const by = y + b.y
+        rect(px, W, H, bx, by, w, bh, scale(c, 0.86))
+        rect(px, W, H, bx, by, w, 1, mix(c, 0xfff4e0, 0.35))
+        rect(px, W, H, bx + w - 1, by, 1, bh, scale(c, 0.7))
+        if (b.layer % 2 === 0) for (let k = 1; k < 3; k++) dot(px, W, H, bx + (w * k) / 3, by + 1, scale(c, 0.7))
       }
       if (pull) {
         const [x, y] = pos(pull)
         const hx = pull.slot === 0 ? x - 2 - (pullT / 20) * bw : x + bw / 3 + 1 + (pullT / 20) * bw
-        rect(px, W, H, hx, y - 1, 3, 3, 0xf0c8a0)
+        slab(px, W, H, hx, y - 1, 3, 3, 0xf0c8a0)
       }
     },
   }

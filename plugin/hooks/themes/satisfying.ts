@@ -1,6 +1,6 @@
-import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
+import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, hash, irand, line, shuffle } from '../kit'
+import { clamp, ellipse, hash, irand, line, lit, litSprite, shuffle, slab } from '../kit'
 
 // Satisfying & ASMR: one motion that turns a mess into order.
 
@@ -563,16 +563,16 @@ const perfect: Maker = (W, H, rng) => {
       rect(px, W, H, 1, by + rows * (n + 4) + 2, W - 2, 1, 0xa87c4c)
       for (const [i, h] of holes.entries()) {
         const rows7 = SHAPES[h.s] as string[]
-        sprite(px, W, H, h.x, h.y, rows7, { x: h.filled ? h.c : 0x5a3e22 })
-        if (!h.filled) sprite(px, W, H, h.x, h.y, [rows7[0] as string], { x: 0x3a2814 })
-        else if (flash > 0 && i === cur - 1) sprite(px, W, H, h.x, h.y, rows7, { x: mix(h.c, 0xffffff, flash / 7) })
+        litSprite(px, W, H, h.x, h.y, rows7, { x: h.filled ? h.c : 0x5a3e22 })
+        if (!h.filled) litSprite(px, W, H, h.x, h.y, [rows7[0] as string], { x: 0x3a2814 })
+        else if (flash > 0 && i === cur - 1) litSprite(px, W, H, h.x, h.y, rows7, { x: mix(h.c, 0xffffff, flash / 7) })
       }
       const h = holes[cur]
       if (h) {
         const rows7 = SHAPES[h.s] as string[]
-        sprite(px, W, H, sx, sy + 1, rows7, { x: 0x1a2030 })
-        sprite(px, W, H, sx, sy, rows7, { x: h.c })
-        sprite(px, W, H, sx, sy, [rows7[0] as string, rows7[1] as string], { x: mix(h.c, 0xffffff, 0.3) })
+        litSprite(px, W, H, sx, sy + 1, rows7, { x: 0x1a2030 })
+        litSprite(px, W, H, sx, sy, rows7, { x: h.c })
+        litSprite(px, W, H, sx, sy, [rows7[0] as string, rows7[1] as string], { x: mix(h.c, 0xffffff, 0.3) })
       }
       text(px, W, H, 1, 1, String(holes.filter(q => q.filled).length), 0xffffff)
     },
@@ -772,19 +772,21 @@ const ballsort: Maker = (W, H, rng) => {
       }
     },
     draw(px) {
-      sky(px, W, H, 0x2a1f4a, 0x5a3a7a)
+      // a soft glow behind the tubes
+      sky(px, W, H, 0x22183e, 0x4a2e6a)
+      ellipse(px, W, H, W / 2, bottom - cap * ball * 0.4, W * 0.6, cap * ball + 6, 0x3a2a5e)
       for (let i = 0; i < T; i++) {
         const x = tx(i)
-        rect(px, W, H, x - 2, tubeTop, 1, cap * ball + 2, 0xc8d8ff)
-        rect(px, W, H, x + 2, tubeTop, 1, cap * ball + 2, 0xc8d8ff)
-        rect(px, W, H, x - 1, bottom, 3, 1, 0xc8d8ff)
+        // the glass: a faint back, a bright left wall, a dimmer right wall, a rounded base
+        for (let y = tubeTop; y < bottom; y++) for (let k = -1; k <= 1; k++) px[y * W + Math.round(x + k)] = mix(px[y * W + Math.round(x + k)] as number, 0xc8d8ff, 0.12)
+        rect(px, W, H, x - 2, tubeTop, 1, cap * ball + 2, 0xe8f0ff)
+        rect(px, W, H, x + 2, tubeTop, 1, cap * ball + 2, 0x8a9ac8)
+        rect(px, W, H, x - 1, bottom, 3, 1, 0xa8b8e8)
+        dot(px, W, H, x - 2, tubeTop - 1, 0xffffff)
+        dot(px, W, H, x + 2, tubeTop - 1, 0xb8c8f0)
         const tube = tubes[i] as number[]
         const full = tube.length === cap && tube.every(c => c === tube[0])
-        tube.forEach((c, n) => {
-          const col = colours[c] as number
-          disc(px, W, H, x, slotY(n), 1, full && done % 10 < 5 && done > 0 ? 0xffffff : col)
-          dot(px, W, H, x - 1, slotY(n) - 1, mix(col, 0xffffff, 0.5))
-        })
+        tube.forEach((c, n) => lit(px, W, H, x, slotY(n), 1.4, 1.4, full && done % 10 < 5 && done > 0 ? 0xffffff : (colours[c] as number)))
       }
       if (anim) {
         const lift = tubeTop - 4
@@ -801,8 +803,7 @@ const ballsort: Maker = (W, H, rng) => {
           x = tx(anim.to)
           y = lift + (toY - lift) * ((t - 15) / 7)
         }
-        disc(px, W, H, x, y, 1, colours[anim.c] as number)
-        dot(px, W, H, x - 1, y - 1, 0xffffff)
+        lit(px, W, H, x, y, 1.4, 1.4, colours[anim.c] as number)
       }
       text(px, W, H, 1, 1, String(count), 0xffffff)
     },
@@ -992,7 +993,7 @@ const bucket: Maker = (W, H, rng) => {
       if (hold > 0 && hold % 12 < 6) for (let x = 0; x < W; x += 5) dot(px, W, H, x + (hold % 5), 2, 0xffffff)
       if (cur && fill < 0) {
         const [x, y] = cursor as [number, number]
-        sprite(px, W, H, x - 1, y - 4, ['.xxx.', 'xccc.', 'xcccx', '.xxx.'], { x: 0x22243a, c: colours[cur.id] as number })
+        litSprite(px, W, H, x - 1, y - 4, ['.xxx.', 'xccc.', 'xcccx', '.xxx.'], { x: 0x22243a, c: colours[cur.id] as number })
         dot(px, W, H, x, y, 0x22243a)
       }
     },
@@ -1166,8 +1167,7 @@ const planer: Maker = (W, H, rng) => {
       px.fill(0x7a5a40)
       for (let y = 2; y < benchY; y += 4) for (let x = 2; x < W; x += 4) dot(px, W, H, x, y, 0x5a4230)
       rect(px, W, H, 0, floorY, W, H - floorY, 0x4a3628)
-      rect(px, W, H, 0, benchY, W, 3, 0x8a5a32)
-      rect(px, W, H, 0, benchY, W, 1, 0xa87444)
+      slab(px, W, H, 0, benchY, W, 3, 0x8a5a32)
       rect(px, W, H, 1, benchY + 3, 3, floorY - benchY - 3, 0x6a4426)
       rect(px, W, H, W - 4, benchY + 3, 3, floorY - benchY - 3, 0x6a4426)
       for (let x = 0; x < W; x++) {
@@ -1183,7 +1183,7 @@ const planer: Maker = (W, H, rng) => {
       }
       if (!back && hold === 0) {
         const y = top0 + pass - 4
-        rect(px, W, H, bx, y + 1, 13, 3, 0x3e5266)
+        slab(px, W, H, bx, y + 1, 13, 3, 0x3e5266)
         rect(px, W, H, bx, y + 3, 13, 1, 0x26323e)
         rect(px, W, H, bx + 1, y + 1, 11, 1, 0x5a7288)
         rect(px, W, H, bx + 1, y - 3, 3, 4, 0x8a3a1e)
@@ -1259,7 +1259,7 @@ const bubblewrap: Maker = (W, H, rng) => {
         const cy = oy + Math.floor(i / cols) * pitch + off
         const p = popped[i]!
         if (p === 0) {
-          disc(px, W, H, cx, cy, 1.8, 0xeef7ff)
+          lit(px, W, H, cx, cy, 1.8, 1.8, 0xe4f0fc)
           dot(px, W, H, cx + 1, cy + 1, 0xb8d4ea)
           dot(px, W, H, cx - 1, cy - 1, 0xffffff)
         } else {
@@ -1479,7 +1479,7 @@ const lawn: Maker = (W, H, rng) => {
         const across = lane * mw
         const x = vertical ? across : along - (dir ? 0 : mw - 1)
         const y = vertical ? fence + along - (dir ? 0 : mw - 1) : fence + across
-        rect(px, W, H, x, y, mw, mw, 0xd8382a)
+        slab(px, W, H, x, y, mw, mw, 0xd8382a)
         rect(px, W, H, x + 1, y + 1, mw - 2, mw - 2, 0x2a2a2a)
         if (vertical) line(px, W, H, x + mw / 2, dir ? y + mw : y - 1, x + mw / 2, dir ? y + mw + 3 : y - 4, 0x3a3a3a)
         else line(px, W, H, dir ? x + mw : x - 1, y + mw / 2, dir ? x + mw + 3 : x - 4, y + mw / 2, 0x3a3a3a)
@@ -1866,8 +1866,7 @@ const zen: Maker = (W, H, rng) => {
         }
       for (const s of stones) {
         disc(px, W, H, s.x + 1, s.y + 1, s.r, 0xb8a47e)
-        disc(px, W, H, s.x, s.y, s.r, 0x7a7a80)
-        disc(px, W, H, s.x - s.r * 0.3, s.y - s.r * 0.3, s.r * 0.5, 0x9a9aa0)
+        lit(px, W, H, s.x, s.y, s.r, s.r, 0x7a7a80)
         dot(px, W, H, s.x - s.r * 0.5, s.y - s.r * 0.6, 0x6a9a4a)
       }
       if (phase === 0) {
@@ -1981,6 +1980,8 @@ const sable: Maker = (W, H, rng) => {
         wood(y)
         wood(H - 1 - y)
       }
+      for (const y of [0, H - 1 - cap]) for (let x = 1; x < W - 1; x++) px[y * W + x] = 0xb07a44
+      for (const y of [cap, H - 1]) for (let x = 1; x < W - 1; x++) px[y * W + x] = 0x5a3518
       for (let y = cap; y < H - cap; y++) {
         px[y * W + 2] = 0x5a3518
         px[y * W + W - 3] = 0x5a3518
@@ -2200,10 +2201,14 @@ const dominos: Maker = (W, H, rng) => {
     },
     draw(px) {
       sky(px, W, H, 0x2a2238, 0x16121e)
-      for (let r = 0; r < rows; r++) rect(px, W, H, 1, top + (r + 1) * rowH + 1, W - 2, 1, 0x4a3a58)
+      for (let r = 0; r < rows; r++) {
+        rect(px, W, H, 1, top + (r + 1) * rowH + 1, W - 2, 1, 0x6a5a7c)
+        rect(px, W, H, 1, top + (r + 1) * rowH + 2, W - 2, 1, 0x241c30)
+      }
       for (const d of list) {
         const ex = d.x + Math.sin(d.a) * len * d.dir
         const ey = d.base - Math.cos(d.a) * len
+        line(px, W, H, d.x + 1, d.base, ex + 1, ey, scale(d.c, 0.65))
         line(px, W, H, d.x, d.base, ex, ey, d.c)
         dot(px, W, H, ex, ey, mix(d.c, 0xffffff, 0.5))
       }

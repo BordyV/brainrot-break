@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, clamp, irand, line, pick, ring, shuffle } from '../kit'
+import { DIRS, clamp, ellipse, irand, line, lit, pick, ring, shuffle } from '../kit'
 
 // Generative art & maths: rules on a grid, endless variety, no art to draw.
 
@@ -49,9 +49,15 @@ const life: Maker = (W, H, rng) => {
       if (still > 40 || t > 1800) seed()
     },
     draw(px) {
+      // live cells as little lit tiles: brighter where nothing lives above or to the left, darker below and right
       for (let k = 0; k < W * H; k++) {
-        if (a[k]) px[k] = hsv(hue + Math.min(age[k]!, 30) * 0.012, 0.75, age[k]! < 2 ? 1 : 0.85)
-        else px[k] = ghost[k]! > 0.5 ? hsv(hue + 0.5, 0.6, 0.25) : 0x07070e
+        if (a[k]) {
+          const x = k % W
+          const c = hsv(hue + Math.min(age[k]!, 30) * 0.012, 0.75, age[k]! < 2 ? 1 : 0.85)
+          const open = k < W || !a[k - W] || x === 0 || !a[k - 1]
+          const shut = k + W >= W * H || !a[k + W] || x === W - 1 || !a[k + 1]
+          px[k] = open && !shut ? mix(c, 0xffffff, 0.3) : shut && !open ? scale(c, 0.7) : c
+        } else px[k] = ghost[k]! > 0.5 ? hsv(hue + 0.5, 0.6, 0.25) : 0x07070e
       }
     },
   }
@@ -99,8 +105,18 @@ const langton: Maker = (W, H, rng) => {
       if (t > 700) reset()
     },
     draw(px) {
-      for (let k = 0; k < W * H; k++) px[k] = pal[grid[k] as number] as number
+      // each coloured trail cell lit on its top edge, shaded on its bottom edge
+      for (let k = 0; k < W * H; k++) {
+        const g = grid[k] as number
+        const c = pal[g] as number
+        if (!g) {
+          px[k] = c
+          continue
+        }
+        px[k] = k >= W && grid[k - W] !== g ? mix(c, 0xffffff, 0.3) : k + W < W * H && grid[k + W] !== g ? scale(c, 0.72) : c
+      }
       dot(px, W, H, x, y, 0xff3a3a)
+      dot(px, W, H, x - 1, y - 1, 0xffa0a0)
     },
   }
 }
@@ -197,18 +213,21 @@ const boids: Maker = (W, H, rng) => {
       }
     },
     draw(px) {
+      // dusk: a low sun, its glow, lit rocks, birds with a wing
       sky(px, W, H, 0x2a3a6a, 0xe8a06a)
-      for (const r of rocks) {
-        disc(px, W, H, r.x, r.y, r.r, 0x3a2a3a)
-        dot(px, W, H, r.x - 1, r.y - 1, 0x5a4a5a)
-      }
+      ellipse(px, W, H, W * 0.7, H * 0.92, W * 0.45, H * 0.2, 0xeca86e)
+      ellipse(px, W, H, W * 0.7, H * 0.92, W * 0.3, H * 0.12, 0xf2b676)
+      disc(px, W, H, W * 0.7, H * 0.92, Math.max(2, W * 0.12), 0xffd890)
+      for (const r of rocks) lit(px, W, H, r.x, r.y, r.r, r.r, 0x4a3a4a, 0x1e141e)
       for (const b of bs) {
         dot(px, W, H, b.x - b.vx * 1.4, b.y - b.vy * 1.4, 0x3a2a3a)
-        dot(px, W, H, b.x, b.y, 0x1a1020)
+        dot(px, W, H, b.x - b.vy, b.y + b.vx, 0x2a1e2a)
+        dot(px, W, H, b.x, b.y, 0x140c1a)
       }
       if (hawk.on) {
         const a = Math.atan2(hawk.vy, hawk.vx)
         line(px, W, H, hawk.x - Math.sin(a) * 2, hawk.y + Math.cos(a) * 2, hawk.x + Math.sin(a) * 2, hawk.y - Math.cos(a) * 2, 0x5a2a1a)
+        dot(px, W, H, hawk.x - Math.sin(a) * 2, hawk.y + Math.cos(a) * 2, 0x8a4a2a)
         dot(px, W, H, hawk.x + Math.cos(a), hawk.y + Math.sin(a), 0xffd040)
       }
     },
@@ -336,7 +355,9 @@ const fractaltree: Maker = (W, H, rng) => {
     },
     draw(px) {
       sky(px, W, H, 0x9ad0f0, 0xf0e8d0, H - 5)
-      rect(px, W, H, 0, H - 5, W, 5, 0x6a9a4a)
+      rect(px, W, H, 0, H - 5, W, 5, 0x5a8a3e)
+      rect(px, W, H, 0, H - 5, W, 1, 0x8ac060)
+      ellipse(px, W, H, W / 2 + 1, H - 4.5, W * 0.25, 1, 0x46702e)
       const sway = Math.sin(t * 0.04) * 0.02
       for (const b of brs) {
         const g = clamp((t - b.born) / 14, 0, 1)
@@ -345,13 +366,18 @@ const fractaltree: Maker = (W, H, rng) => {
         const x1 = b.x0 + Math.cos(a) * b.len * g
         const y1 = b.y0 + Math.sin(a) * b.len * g
         const c = mix(0x5a3a1e, 0x8a6a3a, b.depth / maxD)
-        line(px, W, H, b.x0, b.y0, x1, y1, c)
-        if (b.depth < 2) line(px, W, H, b.x0 + 1, b.y0, x1 + 1, y1, c)
+        if (b.depth < 2) {
+          line(px, W, H, b.x0 + 1, b.y0, x1 + 1, y1, scale(c, 0.7))
+          line(px, W, H, b.x0, b.y0, x1, y1, mix(c, 0xd8b080, 0.3))
+        } else line(px, W, H, b.x0, b.y0, x1, y1, c)
       }
       for (const l of leaves) {
         if (t < l.born) continue
-        dot(px, W, H, l.x, l.y, l.c)
-        if (!l.fall) dot(px, W, H, l.x + 1, l.y, scale(l.c, 0.85))
+        dot(px, W, H, l.x, l.y, l.fall ? l.c : mix(l.c, 0xffffff, 0.25))
+        if (!l.fall) {
+          dot(px, W, H, l.x + 1, l.y, l.c)
+          dot(px, W, H, l.x + 1, l.y + 1, scale(l.c, 0.7))
+        }
       }
     },
   }
@@ -458,11 +484,12 @@ const mazesolve: Maker = (W, H, rng) => {
     draw(px) {
       for (let k = 0; k < W * H; k++) {
         if (!open[k]) {
-          px[k] = 0x101024
+          px[k] = k + W < W * H && open[k + W] ? 0x2a2a48 : 0x101024
           continue
         }
         const d = dist[k]!
-        px[k] = d >= 0 ? hsv(0.6 + (d / Math.max(1, maxD)) * 0.5, 0.55, 0.75) : 0xe8e8f0
+        const c = d >= 0 ? hsv(0.6 + (d / Math.max(1, maxD)) * 0.5, 0.55, 0.75) : 0xe8e8f0
+        px[k] = k >= W && !open[k - W] ? scale(c, 0.8) : c
       }
       if (phase === 0 && stack.length) {
         const [x, y] = stack[stack.length - 1] as [number, number]
@@ -579,6 +606,10 @@ const astar: Maker = (W, H, rng) => {
         else if (state[k] === 2) col = hsv(0.55 + g[k]! * 0.012, 0.6, 0.55)
         else if (state[k] === 1) col = 0x8affc8
         rect(px, W, H, (k % GW) * c, Math.floor(k / GW) * c, c, c, col)
+        if (wall[k]) {
+          dot(px, W, H, (k % GW) * c, Math.floor(k / GW) * c, 0x9aa0b8)
+          dot(px, W, H, (k % GW) * c + c - 1, Math.floor(k / GW) * c + c - 1, 0x40445a)
+        }
       }
       for (let i = 0; i < Math.min(pi, path.length); i++) {
         const k = path[i] as number

@@ -1,6 +1,6 @@
 import { add, disc, dot, hsv, mix, rect, scale, sky, sprite } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, burst, clamp, ellipse, irand, line, pick, sparks } from '../kit'
+import { DIRS, burst, clamp, ellipse, hash, irand, line, lit, pick, slab, sparks, tones } from '../kit'
 import type { Spark } from '../kit'
 
 // Nature & weather: an event, not just a mood.
@@ -110,8 +110,12 @@ const tornado: Maker = (W, H, rng) => {
         rect(px, W, H, f.x, ground - 3, 1, 3, 0x8a6a4a)
         dot(px, W, H, f.x + 1, ground - 2, 0x8a6a4a)
       }
-      rect(px, W, H, W * 0.75, ground - 6, 6, 6, 0xa83a2a)
-      for (let k = 0; k < 4; k++) rect(px, W, H, W * 0.75 - 1 + k, ground - 7 - k, 8 - k * 2, 1, 0x6a2a1a)
+      slab(px, W, H, W * 0.75, ground - 6, 6, 6, 0xa83a2a)
+      rect(px, W, H, W * 0.75 + 2, ground - 4, 2, 2, 0xffd88a)
+      for (let k = 0; k < 4; k++) {
+        rect(px, W, H, W * 0.75 - 1 + k, ground - 7 - k, 8 - k * 2, 1, 0x6a2a1a)
+        dot(px, W, H, W * 0.75 - 1 + k, ground - 7 - k, 0x9a4a32)
+      }
       const top = 4
       for (let y = top; y < ground; y++) {
         const u = (ground - y) / (ground - top)
@@ -119,7 +123,8 @@ const tornado: Maker = (W, H, rng) => {
         const hw = 0.8 + u * u * W * 0.3
         for (let k = -hw; k <= hw; k++) {
           const band = Math.sin((k / hw) * 3 + y * 0.6 - t * 0.4) > 0.3
-          dot(px, W, H, cx + k, y, band ? 0x8a8a84 : 0x6a6a66)
+          const c = band ? 0x8a8a84 : 0x6a6a66
+          dot(px, W, H, cx + k, y, k < -hw * 0.5 ? mix(c, 0xd8d8d0, 0.2) : k > hw * 0.4 ? scale(c, 0.75) : c)
         }
       }
       for (let y = 0; y < top + 3; y++) rect(px, W, H, 0, y, W, 1, mix(0x2a2e2a, 0x4a4e46, y / (top + 3)))
@@ -166,6 +171,7 @@ const surfer: Maker = (W, H, rng) => {
     },
     draw(px) {
       sky(px, W, H, 0xffb06a, 0xffe0a0, sea)
+      disc(px, W, H, W * 0.8, sea - H * 0.25, 6, 0xffd890)
       disc(px, W, H, W * 0.8, sea - H * 0.25, 4, 0xfff4c0)
       for (let x = 0; x < W; x++) {
         const c = crest(x)
@@ -239,20 +245,57 @@ const volcano: Maker = (W, H, rng) => {
       }
     },
     draw(px) {
-      const glow = t > 120 && t < 360 ? 0.3 : 0
-      sky(px, W, H, mix(0x1a1430, 0x5a1a10, glow), mix(0x4a3050, 0xc04a1a, glow))
+      // the sky reddens with the eruption; stars fade out
+      const g = span(t, 100, 140) * (1 - span(t, 330, 400))
+      sky(px, W, H, mix(0x14102a, 0x3a0e10, g), mix(0x3a2a4a, 0xa8381a, g))
+      for (let k = 0; k < 12; k++) {
+        const x = Math.floor(hash(k, 1, 7) * W)
+        const y = Math.floor(hash(k, 2, 7) * peak * 0.9)
+        px[y * W + x] = mix(px[y * W + x] as number, 0xe8e0ff, 0.8 * (1 - g))
+      }
+      // a far range, then the cone: lit left flank, shaded right, rock strata
+      for (let x = 0; x < W; x++) {
+        const ridge = Math.round(peak + H * 0.14 + Math.sin(x * 0.35) * 2 + Math.sin(x * 0.13 + 1) * 3)
+        rect(px, W, H, x, ridge, 1, ground - ridge, mix(0x2a2238, 0x4a1c1c, g))
+      }
       const shake = t > 90 && t < 130 ? Math.sin(t * 2) * 0.7 : 0
       for (let x = 0; x < W; x++) {
         const y0 = slope(x - shake)
+        const side = x - shake - cx
+        const lava = flowed[x]!
         for (let y = Math.max(0, Math.floor(y0)); y < H; y++) {
-          let c = y < ground ? mix(0x4a3a3a, 0x2a2224, (y - y0) / 20) : 0x2a2420
-          if (y < y0 + 2 && flowed[x]! > 0.1) c = mix(c, 0xff6a1a, Math.min(1, flowed[x]! * 1.5))
+          const depth = y - y0
+          let c: number
+          if (y >= ground) c = mix(0x2a2024, 0x6a2010, g * 0.5 * (1 - (y - ground) / (H - ground)))
+          else {
+            c = side < -1 ? 0x5e4a4c : side > 1 ? 0x3a2a30 : 0x4a3a3e
+            if ((Math.floor((y + hash(Math.floor(x / 3), 0, 3) * 3) / 4) % 3) === 0) c = scale(c, 0.82)
+            c = mix(c, 0x1e1618, Math.min(1, depth / 26))
+            if (depth < 1 && side < 0) c = 0x8a6a66
+            if (lava > 0.1 && depth < 4) {
+              const heat = Math.min(1, lava * 1.5)
+              c = depth < 1 ? mix(c, 0xffe060, heat) : depth < 2.2 ? mix(c, 0xff6a1a, heat) : mix(c, 0x8a2a14, heat * 0.6)
+            }
+          }
           dot(px, W, H, x, y, c)
         }
       }
-      for (const s of smoke) disc(px, W, H, s.x, s.y, s.r, 0x5a5058)
-      for (const p of lava) dot(px, W, H, p.x, p.y, p.l % 6 < 3 ? 0xffd040 : 0xff5a1a)
-      if (t > 110 && t < 330) disc(px, W, H, cx, peak, 2, 0xffa020)
+      // the crater: dark at rest, glowing while it erupts
+      if (t > 110 && t < 330) {
+        disc(px, W, H, cx, peak, 2, 0xff8a1a)
+        disc(px, W, H, cx, peak - 0.5, 1, 0xfff0a0)
+      } else rect(px, W, H, cx - 2, Math.round(slope(cx)), 4, 1, 0x1a1214)
+      // smoke puffs: a dark body, a lit cap, an orange underside while it erupts
+      for (const s of smoke) {
+        disc(px, W, H, s.x + 0.4, s.y + 0.4, s.r, mix(0x3a3038, 0x8a3a20, g * 0.6))
+        disc(px, W, H, s.x - s.r * 0.25, s.y - s.r * 0.25, s.r * 0.7, 0x6a5e66)
+        if (s.r > 1.5) dot(px, W, H, s.x - s.r * 0.4, s.y - s.r * 0.5, 0x8a7e86)
+      }
+      // lava bombs with a cooling trail
+      for (const p of lava) {
+        if (!p.flow) dot(px, W, H, p.x - p.vx, p.y - p.vy, 0xa02a10)
+        dot(px, W, H, p.x, p.y, p.l % 6 < 3 ? 0xffe060 : 0xff5a1a)
+      }
     },
   }
 }
@@ -286,9 +329,12 @@ const waterfall: Maker = (W, H, rng) => {
         rect(px, W, H, 0, Math.max(y, lip - 6), x0, 1, (y + Math.floor(y / 5)) % 7 === 0 ? 0x5a5a4a : 0x6a6a58)
         rect(px, W, H, x1, Math.max(y, lip - 6), W - x1, 1, (y + Math.floor(y / 4)) % 6 === 0 ? 0x5a5a4a : 0x6a6a58)
       }
+      rect(px, W, H, x0 - 2, lip - 6, 2, pool - lip + 6, 0x8a8a72)
+      rect(px, W, H, x1, lip - 6, 2, pool - lip + 6, 0x4a4a3c)
+      rect(px, W, H, 0, lip - 6, 2, pool - lip + 6, 0x4e4e40)
       for (let x = 0; x < W; x += 3) dot(px, W, H, x, lip - 7, 0x3a8a3a)
-      for (let x = 0; x < x0; x += 4) disc(px, W, H, x + 2, lip - 7, 2, 0x3a8a3a)
-      for (let x = x1; x < W; x += 4) disc(px, W, H, x + 2, lip - 7, 2, 0x3a8a3a)
+      for (let x = 0; x < x0; x += 4) lit(px, W, H, x + 2, lip - 7, 2, 2, 0x3a8a3a)
+      for (let x = x1; x < W; x += 4) lit(px, W, H, x + 2, lip - 7, 2, 2, 0x3a8a3a)
       for (let y = lip; y < pool; y++)
         for (let x = x0; x < x1; x++) {
           const s = (x * 7 + Math.floor(y - t * 1.5) * 3) % 11
@@ -296,6 +342,7 @@ const waterfall: Maker = (W, H, rng) => {
         }
       rect(px, W, H, x0 - 1, lip, x1 - x0 + 2, 1, 0xffffff)
       for (let y = pool; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = (x + y * 2 + (t >> 2)) % 9 === 0 ? 0x8ad0f0 : mix(0x3a90c8, 0x1a5a8a, (y - pool) / (H - pool))
+      for (let x = x0 - 1; x <= x1; x++) dot(px, W, H, x, pool + ((x + (t >> 1)) % 3 === 0 ? 1 : 0), 0xffffff)
       for (const m of mist) dot(px, W, H, m.x, m.y, 0xf0f8ff)
       if ((t >> 6) % 3 === 0) for (let k = 0; k < 5; k++) for (let x = x0 - 2; x < x1 + 2; x += 2) dot(px, W, H, x, pool - 8 + k, hsv(k / 5, 0.5, 1))
     },
@@ -356,6 +403,9 @@ const seasons: Maker = (W, H, rng) => {
       sky(px, W, H, SKY[0], SKY[1], ground)
       rect(px, W, H, 0, ground, W, H - ground, GROUND)
       rect(px, W, H, cx - 1, H * 0.4, 3, ground - H * 0.4, 0x6a4a2a)
+      rect(px, W, H, cx - 1, H * 0.4, 1, ground - H * 0.4, 0x8a6a42)
+      rect(px, W, H, cx + 1, H * 0.4, 1, ground - H * 0.4, 0x4a321a)
+      ellipse(px, W, H, cx + 1, ground, W * 0.3, 1, scale(GROUND, 0.8))
       line(px, W, H, cx, H * 0.48, cx - W * 0.25, H * 0.34, 0x6a4a2a)
       line(px, W, H, cx, H * 0.45, cx + W * 0.22, H * 0.3, 0x6a4a2a)
       line(px, W, H, cx, H * 0.42, cx + 1, H * 0.24, 0x6a4a2a)
@@ -367,8 +417,8 @@ const seasons: Maker = (W, H, rng) => {
         if (s === 1 && i % 4 === 0) c = 0x4ab04a
         if (s === 2 && i % 3 === 0) c = 0xe0402a
         if (s === 3) c = 0xa8784a
-        dot(px, W, H, l.x, l.y, c)
-        if (!l.fall) dot(px, W, H, l.x + 1, l.y, c)
+        dot(px, W, H, l.x, l.y, l.fall ? c : mix(c, 0xffffff, 0.2))
+        if (!l.fall) dot(px, W, H, l.x + 1, l.y, scale(c, 0.8))
       })
       if (s === 3) {
         for (const f of snow) dot(px, W, H, f.x, f.y, 0xffffff)
@@ -403,6 +453,7 @@ const bloom: Maker = (W, H, rng) => {
       sky(px, W, H, mix(0x2a3a6a, 0x8ad0ff, day), mix(0xf0a070, 0xe0f4ff, day), ground)
       disc(px, W, H, W * 0.15 + t * 0.05, 8 + (1 - day) * 10, 3, 0xfff0a0)
       rect(px, W, H, 0, ground, W, H - ground, 0x5a3a24)
+      rect(px, W, H, 0, ground + 1, W, 1, 0x4a2e1c)
       for (let x = 0; x < W; x += 2) dot(px, W, H, x, ground, 0x6ab048)
       for (const f of fs) {
         const g = span(t, f.born, f.born + 120)
@@ -417,9 +468,11 @@ const bloom: Maker = (W, H, rng) => {
           const r = 1 + open * 3
           for (let p = 0; p < f.petals; p++) {
             const a = (p / f.petals) * 6.28 + t * 0.002
-            disc(px, W, H, f.x + Math.cos(a) * r * 0.8, top + Math.sin(a) * r * 0.8, 0.4 + open * 1.2, open < 0.3 ? 0x5ab05a : f.c)
+            const pc = open < 0.3 ? 0x5ab05a : f.c
+            const lightUp = Math.cos(a) + Math.sin(a) < 0
+            disc(px, W, H, f.x + Math.cos(a) * r * 0.8, top + Math.sin(a) * r * 0.8, 0.4 + open * 1.2, lightUp ? mix(pc, 0xffffff, 0.2) : scale(pc, 0.85))
           }
-          disc(px, W, H, f.x, top, 0.5 + open, 0xffd040)
+          lit(px, W, H, f.x, top, 0.5 + open, 0.5 + open, 0xffd040)
         }
       }
     },
@@ -486,7 +539,8 @@ const forestfire: Maker = (W, H, rng) => {
         const y = Math.floor(k / GW) * c
         if (v === 1) {
           rect(px, W, H, x, y, c, c, 0x2a7a2a)
-          dot(px, W, H, x, y, 0x3a9a3a)
+          dot(px, W, H, x, y, 0x5ac05a)
+          dot(px, W, H, x + c - 1, y + c - 1, 0x1a4a1e)
         } else if (v === 2) {
           rect(px, W, H, x, y, c, c, (x + y + t) % 4 < 2 ? 0xff6a1a : 0xffc030)
           dot(px, W, H, x + 1, y, 0xffe080)
@@ -531,13 +585,16 @@ const geyser: Maker = (W, H, rng) => {
       for (let x = 0; x < W; x++) {
         const h = 6 + Math.sin(x * 0.15) * 3
         rect(px, W, H, x, ground - 8 - h, 1, h, 0x7a9a8a)
+        dot(px, W, H, x, ground - 8 - h, 0x9ab8a8)
       }
       rect(px, W, H, 0, ground, W, H - ground, 0xd8c8a0)
-      ellipse(px, W, H, cx, ground + 2, W * 0.3, 2.5, 0xe8d8a8)
-      ellipse(px, W, H, cx, ground + 2, W * 0.2, 1.5, 0x4ab0d0)
+      lit(px, W, H, cx, ground + 2, W * 0.3, 2.5, 0xe8d8a8)
+      ellipse(px, W, H, cx, ground + 2, W * 0.2, 1.5, 0x3a98c0)
+      ellipse(px, W, H, cx - 0.5, ground + 1.6, W * 0.13, 0.8, 0x6ad0f0)
       const phase = t % 400
       if (phase > 120 && phase < 180) for (let k = 0; k < 4; k++) dot(px, W, H, cx - 3 + ((t + k * 5) % 7), ground + 1 - (t + k) % 2, 0xffffff)
-      for (const s of steam) disc(px, W, H, s.x, s.y, s.r, 0xf0f4f8)
+      for (const s of steam) disc(px, W, H, s.x + 0.4, s.y + 0.4, s.r, 0xc8d4e0)
+      for (const s of steam) disc(px, W, H, s.x - s.r * 0.2, s.y - s.r * 0.25, s.r * 0.75, 0xfafcff)
       for (const w of water) dot(px, W, H, w.x, w.y, w.c)
       for (let i = 0; i < 4; i++) sprite(px, W, H, 2 + i * 3, ground + 3, ['.s.', 'ccc', 'c.c'], { s: 0xffd0a0, c: hsv(i * 0.27, 0.6, 0.9) })
     },
@@ -584,7 +641,11 @@ const leaves: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0xb8c8e0, 0xf0d8b0, ground)
       rect(px, W, H, 0, ground, W, 3, 0x6a7a3a)
-      for (let x = 0; x < W; x++) if (pile[x]! > 0) rect(px, W, H, x, ground - pile[x]!, 1, pile[x]!, (x * 3) % 4 ? 0xc8601a : 0xe08a2a)
+      for (let x = 0; x < W; x++)
+        if (pile[x]! > 0) {
+          rect(px, W, H, x, ground - pile[x]!, 1, pile[x]!, (x * 3) % 4 ? 0xb8541a : 0xd8802a)
+          dot(px, W, H, x, ground - pile[x]!, 0xf0a84a)
+        }
       for (const l of ls) {
         dot(px, W, H, l.x, l.y, l.c)
         if (!l.rest) dot(px, W, H, l.x + Math.cos(l.y * 0.3 + l.ph), l.y, scale(l.c, 0.8))
@@ -636,17 +697,23 @@ const mushrooms: Maker = (W, H, rng) => {
         if (g <= 0) continue
         const h = m.h * g
         rect(px, W, H, m.x - 0.5, ground - h, 1.5, h, 0xf0e8d8)
+        rect(px, W, H, m.x + 0.5, ground - h, 1, h, 0xc8bca8)
         const r = m.r * g
+        const [hi, base, sh] = tones(m.c)
         for (let y = 0; y <= r; y++) {
           const hw = r * Math.sqrt(1 - (y / (r + 0.01)) ** 2)
-          rect(px, W, H, m.x - hw, ground - h - y, hw * 2 + 1, 1, y === 0 ? scale(m.c, 0.8) : m.c)
+          rect(px, W, H, m.x - hw, ground - h - y, hw * 2 + 1, 1, y === 0 ? sh : base)
+          if (y > 0) {
+            rect(px, W, H, m.x - hw, ground - h - y, Math.max(1, hw * 0.6), 1, hi)
+            rect(px, W, H, m.x + hw * 0.5, ground - h - y, hw * 0.5 + 1, 1, sh)
+          }
         }
         if (m.spots && g > 0.8) {
           dot(px, W, H, m.x - r * 0.4, ground - h - r * 0.5, 0xffffff)
           dot(px, W, H, m.x + r * 0.4, ground - h - r * 0.3, 0xffffff)
         }
       }
-      sprite(px, W, H, snail, ground - 3, ['.ss.', 'ssss', 'bbbbb'], { s: 0xc8883a, b: 0xb8a890 })
+      sprite(px, W, H, snail, ground - 3, ['.hs.', 'hsdd', 'bbbbb'], { h: 0xe8b060, s: 0xc8883a, d: 0x8a5a24, b: 0xb8a890 })
       for (const d of drops) line(px, W, H, d.x, d.y, d.x, d.y - 1.5, 0x8aa0b8)
     },
   }
@@ -686,11 +753,12 @@ const reef: Maker = (W, H, rng) => {
       for (const c of corals) {
         const sway = Math.sin(t * 0.04 + c.x) * 1
         if (c.kind === 0) {
+          line(px, W, H, c.x + 1, floor, c.x + 1 + sway, floor - c.h, scale(c.c, 0.7))
           line(px, W, H, c.x, floor, c.x + sway, floor - c.h, c.c)
           line(px, W, H, c.x, floor - c.h * 0.4, c.x - 2 + sway, floor - c.h * 0.8, c.c)
           line(px, W, H, c.x, floor - c.h * 0.5, c.x + 2 + sway, floor - c.h * 0.9, c.c)
         } else if (c.kind === 1) {
-          disc(px, W, H, c.x, floor - 2, 2.5, c.c)
+          lit(px, W, H, c.x, floor - 2, 2.5, 2.5, c.c)
           for (let k = 0; k < 5; k++) dot(px, W, H, c.x - 2 + k, floor - 4 - (k % 2) + sway * 0.5, mix(c.c, 0xffffff, 0.4))
         } else for (let k = -2; k <= 2; k++) line(px, W, H, c.x + k, floor, c.x + k * 1.5 + sway, floor - c.h * 0.6, c.c)
       }
@@ -789,6 +857,11 @@ const sunset: Maker = (W, H, rng) => {
       if (dusk > 0.5) for (const s of stars) if ((t / 7 + s.p) % 5 > 0.7) px[s.y * W + s.x] = mix(px[s.y * W + s.x] as number, 0xffffff, (dusk - 0.5) * 2)
       const sunR = W * 0.14
       const sunC = mix(0xfff0b0, 0xff6a2a, dusk)
+      for (let y = Math.max(0, Math.floor(sunY - sunR * 2)); y < Math.min(horizon, sunY + sunR * 2); y++)
+        for (let x = 0; x < W; x++) {
+          const d = Math.hypot(x + 0.5 - W / 2, y + 0.5 - sunY) / (sunR * 2)
+          if (d < 1) px[y * W + x] = mix(px[y * W + x] as number, sunC, Math.floor((1 - d) * 3) * 0.1)
+        }
       for (let y = Math.floor(sunY - sunR); y < Math.min(horizon, sunY + sunR + 1); y++)
         for (let x = 0; x < W; x++) if ((x + 0.5 - W / 2) ** 2 + (y + 0.5 - sunY) ** 2 <= sunR * sunR && y >= 0) px[y * W + x] = sunC
       for (const c of clouds) {

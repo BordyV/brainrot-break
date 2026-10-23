@@ -1,6 +1,6 @@
-import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
+import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, burst, clamp, hash, irand, line, pick, ring, shuffle, sparks, textWidth } from '../kit'
+import { DIRS, burst, clamp, hash, irand, line, lit, litSprite, pick, ring, shuffle, slab, sparks, textWidth } from '../kit'
 import type { Spark } from '../kit'
 
 // Developer humour: in-jokes for the people waiting on Claude.
@@ -119,7 +119,7 @@ const gittree: Maker = (W, H, rng) => {
         if (prev)
           for (const [a, b] of r.links) line(px, W, H, lx(a), prev.y, lx(b), r.y, COLS[b] as number)
         for (const d of r.dots) {
-          disc(px, W, H, lx(d), r.y, 1.3, COLS[d] as number)
+          lit(px, W, H, lx(d), r.y, 1.5, 1.5, COLS[d] as number)
           dot(px, W, H, lx(d), r.y, 0x0d1117)
         }
       }
@@ -350,7 +350,7 @@ const whackabug: Maker = (W, H, rng) => {
       })
       const lift = mallet.hit > 0 ? 0 : 4
       rect(px, W, H, mallet.x + 1, mallet.y - 8 - lift, 1, 6, 0x8a5a2a)
-      rect(px, W, H, mallet.x - 2, mallet.y - 3 - lift, 6, 3, 0xd0d0d8)
+      slab(px, W, H, mallet.x - 2, mallet.y - 3 - lift, 6, 3, 0xd0d0d8)
       text(px, W, H, 1, 1, String(score), 0xffffff)
     },
   }
@@ -376,8 +376,7 @@ const serverrack: Maker = (W, H, rng) => {
       rect(px, W, H, W - 2, 2, 1, H - 4, 0x3a3c44)
       for (let u = 0; u < units; u++) {
         const y = 4 + u * 5
-        rect(px, W, H, 3, y, W - 6, 4, 0x2a2d36)
-        rect(px, W, H, 3, y, W - 6, 1, 0x3a3e48)
+        slab(px, W, H, 3, y, W - 6, 4, 0x2e313c)
         for (let k = 0; k < 4; k++) {
           const on = hash(k, u, Math.floor(t / (2 + k))) > 0.4
           dot(px, W, H, 5 + k * 2, y + 2, u === alert ? (t % 6 < 3 ? 0xff2a2a : 0x3a0a0a) : on ? (k === 3 ? 0xffb020 : 0x3aff6a) : 0x0a2a10)
@@ -521,7 +520,7 @@ const packets: Maker = (W, H, rng) => {
       px.fill(0x0a1020)
       for (const [a, b] of edges) line(px, W, H, nodes[a]!.x, nodes[a]!.y, nodes[b]!.x, nodes[b]!.y, 0x1a3050)
       for (const n of nodes) {
-        rect(px, W, H, n.x - 1.5, n.y - 1, 4, 3, 0x3a5a8a)
+        slab(px, W, H, n.x - 1.5, n.y - 1, 4, 3, 0x3a5a8a)
         dot(px, W, H, n.x - 0.5, n.y, t % 8 < 4 ? 0x3aff8a : 0x1a8a4a)
       }
       for (const p of ps) {
@@ -598,11 +597,11 @@ const gc: Maker = (W, H, rng) => {
       }
       if (phase === 1) {
         const y = oy + rows * cs / 2 - 4
-        rect(px, W, H, truck - 6, y, 8, 6, 0x3a8a3a)
-        rect(px, W, H, truck + 2, y + 2, 4, 4, 0xe0e0e0)
+        slab(px, W, H, truck - 6, y, 8, 6, 0x3a8a3a)
+        slab(px, W, H, truck + 2, y + 2, 4, 4, 0xe0e0e0)
         dot(px, W, H, truck + 4, y + 3, 0x3a8aff)
-        disc(px, W, H, truck - 4, y + 6, 1.2, 0x1a1a1a)
-        disc(px, W, H, truck + 4, y + 6, 1.2, 0x1a1a1a)
+        lit(px, W, H, truck - 4, y + 6, 1.4, 1.4, 0x3a3a3e)
+        lit(px, W, H, truck + 4, y + 6, 1.4, 1.4, 0x3a3a3e)
       }
       text(px, W, H, 1, H - 6, String(freed), 0x3ac06a)
     },
@@ -639,7 +638,7 @@ const memleak: Maker = (W, H, rng) => {
       const floor = H - 2
       for (let k = 0; k < 3; k++) {
         const x = 3 + k * 10
-        rect(px, W, H, x, 16, 7, floor - 16, 0x2a2d36)
+        slab(px, W, H, x, 16, 7, floor - 16, 0x2e313c)
         for (let y = 18; y < floor - 2; y += 4) {
           dot(px, W, H, x + 2, y, hash(k, y, t >> 3) > 0.5 ? 0x3aff6a : 0x0a3a1a)
           rect(px, W, H, x + 4, y, 2, 1, 0x3a3e48)
@@ -668,7 +667,7 @@ const rubberduck: Maker = (W, H) => {
       sky(px, W, H, 0x1a1e2a, 0x2a2e3a, desk)
       rect(px, W, H, 0, desk, W, H - desk, 0x5a3a26)
       rect(px, W, H, 0, desk, W, 1, 0x7a5a3a)
-      rect(px, W, H, 2, desk - 16, 14, 11, 0x14161e)
+      slab(px, W, H, 2, desk - 16, 14, 11, 0x24262e, 0x0a0b10)
       rect(px, W, H, 3, desk - 15, 12, 9, 0x0d1117)
       for (let k = 0; k < 4; k++) rect(px, W, H, 4 + (k % 2) * 2, desk - 14 + k * 2, 4 + ((k * 5) % 6), 1, [0x3ad06a, 0x3a9aff, 0xffb020, 0xe04ac0][k] as number)
       rect(px, W, H, 8, desk - 5, 2, 5, 0x2a2a2a)
@@ -676,7 +675,7 @@ const rubberduck: Maker = (W, H) => {
       const bob = Math.sin(t * 0.08) * 0.6
       const dx = W * 0.72
       const dy = desk - 4 + bob
-      sprite(px, W, H, dx - 4, dy - 6, ['..yyy..', '.yyyyo.', '.yykyoo', '..yyy..', 'yyyyyyy', 'yyyyyyy', '.yyyyy.'], { y: 0xffd820, k: 0x1a1a1a, o: 0xff8a20 })
+      litSprite(px, W, H, dx - 4, dy - 6, ['..yyy..', '.yyyyo.', '.yykyoo', '..yyy..', 'yyyyyyy', 'yyyyyyy', '.yyyyy.'], { y: 0xffd820, k: 0x1a1a1a, o: 0xff8a20 })
       if (phase < 140) {
         for (let k = 0; k < 3; k++) if ((t >> 3) % 4 > k) dot(px, W, H, 18 + k * 2, desk - 20, 0xffffff)
         rect(px, W, H, 16, desk - 22, 8, 5, 0xe8e8f0)
@@ -800,17 +799,16 @@ const toasters: Maker = (W, H, rng) => {
       for (const [x, y] of stars) dot(px, W, H, x, y, 0x5a5a6a)
       for (const f of fs) {
         if (f.toast) {
-          rect(px, W, H, f.x, f.y, 4, 4, 0xd8a050)
+          slab(px, W, H, f.x, f.y, 4, 4, 0xd8a050)
           rect(px, W, H, f.x + 1, f.y + 1, 2, 2, 0xf0d090)
           continue
         }
-        rect(px, W, H, f.x, f.y, 6, 4, 0xc8ccd4)
-        rect(px, W, H, f.x, f.y, 6, 1, 0xf0f2f6)
+        slab(px, W, H, f.x, f.y, 6, 4, 0xc8ccd4)
         rect(px, W, H, f.x + 1, f.y - 1, 2, 1, 0x5a5a62)
         dot(px, W, H, f.x + 1, f.y + 2, 0x2a2a2a)
         const up = Math.sin(t * 0.4 + f.ph) > 0
-        sprite(px, W, H, f.x + 6, f.y - (up ? 3 : 0), up ? ['xx..', 'xxx.', '.xxx'] : ['.xxx', 'xxx.', 'xx..'], { x: 0xffffff })
-        sprite(px, W, H, f.x - 3, f.y - (up ? 3 : 0), up ? ['..xx', '.xxx', 'xxx.'] : ['xxx.', '.xxx', '..xx'], { x: 0xe0e0e0 })
+        litSprite(px, W, H, f.x + 6, f.y - (up ? 3 : 0), up ? ['xx..', 'xxx.', '.xxx'] : ['.xxx', 'xxx.', 'xx..'], { x: 0xffffff })
+        litSprite(px, W, H, f.x - 3, f.y - (up ? 3 : 0), up ? ['..xx', '.xxx', 'xxx.'] : ['xxx.', '.xxx', '..xx'], { x: 0xe0e0e0 })
       }
     },
   }
@@ -944,34 +942,46 @@ const robotcoder: Maker = (W, H, rng) => {
       if (l?.err && cur >= l.w && t % 3 === 0) l.err = false
     },
     draw(px) {
-      sky(px, W, H, 0x1a1e2a, 0x262a36, desk)
-      rect(px, W, H, 0, desk, W, H - desk, 0x5a4a3a)
+      // a dark room lit by the screen, a wooden desk
+      sky(px, W, H, 0x161a26, 0x262a36, desk)
       const sx = 2
       const sy = 3
       const sw = W - 4
       const sh = desk - 10
-      rect(px, W, H, sx, sy, sw, sh, 0x1a1a1a)
-      rect(px, W, H, sx + 1, sy + 1, sw - 2, sh - 2, 0x282c34)
+      for (let k = 3; k > 0; k--) rect(px, W, H, sx - k, sy - k + 1, sw + k * 2, sh + k * 2 - 1, mix(0x262a36, 0x3a4a6a, 0.25 * (4 - k)))
+      rect(px, W, H, 0, desk, W, H - desk, 0x5a4232)
+      rect(px, W, H, 0, desk, W, 1, 0x8a6a4e)
+      for (let y = desk + 3; y < H; y += 3) rect(px, W, H, (y * 5) % 7, y, W * 0.4, 1, 0x4e3828)
+      // the monitor: a lit bezel, the editor, a stand
+      slab(px, W, H, sx, sy, sw, sh, 0x3a3e4a, 0x101216)
+      rect(px, W, H, sx + 1, sy + 1, sw - 2, sh - 2, 0x22262e)
+      rect(px, W, H, sx + 1, sy + 1, 1, sh - 2, 0x1a1d24)
       lines.forEach((l, i) => {
         const y = sy + 2 + i * 3
         const w = i === lines.length - 1 ? cur : l.w
-        rect(px, W, H, sx + 2 + l.indent * 2, y, w, 1, l.err ? 0xe06c75 : l.c)
-        if (l.err) for (let x = 0; x < w; x += 2) dot(px, W, H, sx + 2 + l.indent * 2 + x, y + 1, 0xe06c75)
+        rect(px, W, H, sx + 3 + l.indent * 2, y, w, 1, l.err ? 0xe06c75 : l.c)
+        if (l.err) for (let x = 0; x < w; x += 2) dot(px, W, H, sx + 3 + l.indent * 2 + x, y + 1, 0xe06c75)
       })
       const last = lines[lines.length - 1]
-      if (last && t % 10 < 6) rect(px, W, H, sx + 2 + last.indent * 2 + cur, sy + 2 + (lines.length - 1) * 3 - 1, 1, 3, 0xffffff)
-      rect(px, W, H, W / 2 - 1, desk - 7, 3, 7, 0x2a2a2a)
-      const rx = W / 2 - 4
+      if (last && t % 10 < 6) rect(px, W, H, sx + 3 + last.indent * 2 + cur, sy + 2 + (lines.length - 1) * 3 - 1, 1, 3, 0xffffff)
+      slab(px, W, H, W / 2 - 1, desk - 7, 3, 6, 0x3a3a44)
+      slab(px, W, H, W / 2 - 4, desk - 1, 9, 1, 0x3a3a44)
+      // the robot, seen from behind the desk: an outlined head, glowing eyes, an antenna
+      const rx = Math.round(W / 2 - 4)
       const ry = desk + 2
-      rect(px, W, H, rx, ry, 9, 6, 0xb8bcc8)
-      rect(px, W, H, rx + 2, ry + 2, 1, 1, 0x3ad0ff)
-      rect(px, W, H, rx + 6, ry + 2, 1, 1, 0x3ad0ff)
+      slab(px, W, H, rx, ry, 9, 6, 0xb8bcc8, 0x3a3e4a)
+      for (const ex of [rx + 2, rx + 6]) {
+        dot(px, W, H, ex, ry + 2, 0x8ae8ff)
+        dot(px, W, H, ex, ry + 3, 0x2a90c0)
+      }
       rect(px, W, H, rx + 4, ry - 2, 1, 2, 0x8a8e98)
-      dot(px, W, H, rx + 4, ry - 3, t % 10 < 5 ? 0xff3a3a : 0x5a1a1a)
+      dot(px, W, H, rx + 4, ry - 3, t % 10 < 5 ? 0xff4a4a : 0x5a1a1a)
+      // hands tapping on the keyboard
+      slab(px, W, H, rx - 3, desk - 2, 15, 2, 0x2a2a32)
+      for (let x = rx - 2; x < rx + 11; x += 2) dot(px, W, H, x, desk - 2, 0x4a4a56)
       const tap = Math.floor(t / 2) % 2
-      rect(px, W, H, rx - 3, desk - 2 + tap, 3, 1, 0x8a8e98)
-      rect(px, W, H, rx + 9, desk - 1 - tap, 3, 1, 0x8a8e98)
-      rect(px, W, H, rx - 2, desk - 1, 13, 1, 0x2a2a30)
+      slab(px, W, H, rx - 3, desk - 3 + tap, 3, 2, 0x9aa0ac)
+      slab(px, W, H, rx + 9, desk - 2 - tap, 3, 2, 0x9aa0ac)
     },
   }
 }
@@ -1086,7 +1096,7 @@ const nodemodules: Maker = (W, H, rng) => {
         disc(px, W, H, cx, cy, size, 0x000000)
         ring(px, W, H, cx, cy, size + 1, 0xb06aff)
       } else {
-        rect(px, W, H, cx - size, cy - size * 0.7, size * 2, size * 1.5, 0xe8b040)
+        slab(px, W, H, cx - size, cy - size * 0.7, size * 2, size * 1.5, 0xe8b040)
         rect(px, W, H, cx - size, cy - size * 0.7 - 2, size, 2, 0xe8b040)
         rect(px, W, H, cx - size, cy - size * 0.7 + 1, size * 2, 1, 0xf8d070)
       }

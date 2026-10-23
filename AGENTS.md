@@ -94,8 +94,22 @@ A video is a `Maker`: `(W, H, rng) => { step(), draw(px) }`.
 - Budget: under 1 ms a frame (the slowest today take about 0.3), and under 131,072 characters of SVG per frame, which is the desktop's limit. The SVG has one rectangle per horizontal run of one colour, so per-pixel noise and dithering cost the most (the rainy window, at about 38 k, is the largest). `render.ts` prints both numbers and fails above the SVG limit.
 - `draw` can be called before the first `step`, so the starting state must already draw. Never call `rng` in `draw`: the terminal and the desktop draw at different rates, so it would change the clip. For noise in `draw`, use `hash(x, y, seed)`.
 - Helpers in `plugin/hooks/draw.ts`: `rgb`, `mix`, `add`, `scale`, `hsv`, `rect`, `dot`, `disc`, `sprite` (ASCII art rows mapped to colours), `text`, `sky` (vertical gradient). `text` knows the digits, `A B C D S V Z` and `+ - x % : ! ? . /`.
-- Helpers in `plugin/hooks/kit.ts`: maths (`clamp`, `lerp`, `irand`, `pick`, `shuffle`, `hash`, `rot`, `DIRS`), drawing (`line`, `ring`, `ellipse`, `poly`, `tint`, `shade`, `textWidth`), balls (`Ball`, `wallCircle`, `hitSeg`, `collide`, `keepSpeed`, `shiny`) and sparks (`Spark`, `burst`, `sparks`).
+- Helpers in `plugin/hooks/kit.ts`: maths (`clamp`, `lerp`, `irand`, `pick`, `shuffle`, `hash`, `rot`, `DIRS`), drawing (`line`, `ring`, `ellipse`, `poly`, `tint`, `shade`, `textWidth`), light (`tones` for a colour's four tones, `lit` for a lit ellipse, `slab` for a lit box, `beam` for a thick lit bar, `litSprite` for a `sprite` with lit and shaded edges, all lit from the upper left; `shiny` draws balls as lit spheres), balls (`Ball`, `wallCircle`, `hitSeg`, `collide`, `keepSpeed`, `shiny`) and sparks (`Spark`, `burst`, `sparks`).
 - A video can loop or reset itself. Games that play themselves need a bot that mostly wins, with the odd failure for drama (see `geodash` and `snake`).
+
+### Style
+
+The pixels are few, so each one has to carry volume. `ramen`, `aquarium` and `volcano` show the style; every theme has had a pass with the helpers in `kit.ts` (`tones`, `lit`, `slab`, `beam`, `litSprite`). A new video follows it from the start.
+
+- **One light, from the upper left.** Lit faces on the left and on top, shaded ones on the right and underneath, in every object of the clip.
+- **3 or 4 tones per material**: highlight, base, shadow, deep shadow (`mix` and `scale` from the base colour). A flat fill of one colour reads as a sticker.
+- **A dark outline** on the main subject, a shade darker than its darkest tone, not black.
+- **Backgrounds in gradients and layers**: a `sky(...)` gradient, then something far and dim (a ridge, a wall, light rays), then the scene. Keep backgrounds darker or less saturated than the subject.
+- **Subjects big enough to read**: the main subject fills a good part of the frame, and anything that matters is at least about 5 pixels across. On the desktop app, a 3-pixel fish reads as a speck.
+- **What shines stays flat.** Suns, moons, lamps, flames, neon and glowing screens are flat discs or fills, perhaps with a halo: `lit()` would give them a dull brown shadow.
+- **Recognisable looks win.** A meme or a game screen keeps its known look (Nyan Cat, Minesweeper); add only a shadow or a lit edge.
+- **Details that tell what it is**: the egg's yolk, the clownfish's stripe, the lava cooling from yellow to red crust. One or two per object, not noise.
+- **Mind the SVG budget.** A tone ramp adds a few runs per row and costs little; per-pixel noise and dithering cost the most. The three videos above went from 6 to 13 k and 12 to 17 k characters.
 
 ## How the mod works (and its traps)
 

@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, hash, irand, line, pick, ring, textWidth } from '../kit'
+import { clamp, ellipse, hash, irand, line, lit, pick, ring, slab, textWidth } from '../kit'
 
 // Music & dance: no sound, so the rhythm has to show.
 
@@ -85,7 +85,8 @@ const pianotiles: Maker = (W, H, rng) => {
       for (let k = 1; k < cols; k++) rect(px, W, H, Math.round(k * cw), 0, 1, H, 0xc8c8d4)
       for (const tl of tiles) {
         const x = Math.round(tl.c * cw) + 1
-        rect(px, W, H, x, tl.y, Math.round(cw) - 1, th * tl.len - 1, tl.hit ? 0xb8c0d0 : 0x1a1a24)
+        rect(px, W, H, x + Math.round(cw) - 1, tl.y + 1, 1, th * tl.len - 1, 0xd8d8e2)
+        slab(px, W, H, x, tl.y, Math.round(cw) - 1, th * tl.len - 1, tl.hit ? 0xb8c0d0 : 0x26262e)
         if (tl.len > 1 && !tl.hit) rect(px, W, H, x + cw / 2 - 1, tl.y + 2, 1, th * 2 - 4, 0x5a8aff)
       }
       if (tap) {
@@ -146,10 +147,11 @@ const trenddance: Maker = (W, H, rng) => {
       const shirt = hsv(hue + 0.5, 0.6, 1)
       line(px, W, H, cx, hipY, cx + Math.sin(pose[2] as number) * 8, hipY + Math.cos(pose[2] as number) * 9, 0x2a3a8a)
       line(px, W, H, cx + 1, hipY, cx + 1 + Math.sin(pose[3] as number) * 8, hipY + Math.cos(pose[3] as number) * 9, 0x2a3a8a)
-      rect(px, W, H, cx - 1.5, shoulderY, 4, 8, shirt)
+      ellipse(px, W, H, cx + 1, floor + 0.5, 5, 1, 0x1a0e26)
+      slab(px, W, H, cx - 1.5, shoulderY, 4, 8, shirt)
       line(px, W, H, cx - 1, shoulderY + 1, cx - 1 - Math.sin(pose[0] as number) * 6, shoulderY + 1 + Math.cos(pose[0] as number) * 6, skin)
       line(px, W, H, cx + 2, shoulderY + 1, cx + 2 - Math.sin(pose[1] as number) * 6, shoulderY + 1 + Math.cos(pose[1] as number) * 6, skin)
-      disc(px, W, H, cx + 0.5, shoulderY - 3, 2.2, skin)
+      lit(px, W, H, cx + 0.5, shoulderY - 3, 2.2, 2.2, skin)
       rect(px, W, H, cx - 1.5, shoulderY - 6, 4, 2, 0x3a2a1a)
       for (let i = 0; i < 6; i++) {
         const x = 2 + i * (W / 6)
@@ -214,8 +216,8 @@ const guitar: Maker = (W, H, rng) => {
       for (const n of notes) {
         const [x, y] = proj(n.lane, n.z)
         const r = 0.6 + (1 - n.z) * 1.4
-        disc(px, W, H, x, y, r, COLS[n.lane] as number)
-        dot(px, W, H, x, y, 0xffffff)
+        lit(px, W, H, x, y, r, r, COLS[n.lane] as number)
+        dot(px, W, H, x - r * 0.4, y - r * 0.4, 0xffffff)
       }
       text(px, W, H, 1, 1, String(streak), 0xffe040)
     },
@@ -257,10 +259,10 @@ const bassdrop: Maker = (W, H, rng) => {
       const pump = drop ? kick(t) : build * 0.3 * kick(t)
       for (const sy of [H * 0.25, H * 0.65]) {
         const cx = W / 2 + shake
-        rect(px, W, H, cx - 8, sy - 8, 16, 16, 0x1a1a1e)
-        disc(px, W, H, cx, sy, 5 + pump * 1.5, 0x3a3a42)
-        disc(px, W, H, cx, sy, 2 + pump, 0x5a5a62)
-        ring(px, W, H, cx, sy, 6, 0x2a2a30)
+        slab(px, W, H, cx - 8, sy - 8, 16, 16, 0x24242a, 0x0e0e12)
+        ring(px, W, H, cx, sy, 6, 0x3a3a44)
+        lit(px, W, H, cx, sy, 5 + pump * 1.5, 5 + pump * 1.5, 0x3e3e48)
+        lit(px, W, H, cx, sy, 2 + pump, 2 + pump, 0x6a6a76)
       }
       const bar = Math.floor(build * (W - 4))
       if (!drop) {
@@ -293,14 +295,14 @@ const djdecks: Maker = (W, H, rng) => {
         line(px, W, H, W * (i / 3), 0, W * (i / 3) + Math.sin(a) * H * 0.5, H * 0.45, hsv((i * 0.25 + t * 0.003) % 1, 0.7, 0.6))
       }
       const deckY = H * 0.5
-      rect(px, W, H, 1, deckY - 8, W - 2, 16, 0x2a2a30)
-      rect(px, W, H, 1, deckY - 8, W - 2, 1, 0x4a4a52)
+      slab(px, W, H, 1, deckY - 8, W - 2, 16, 0x2e2e36, 0x121216)
       for (const [cx, dir] of [
         [W * 0.25, 1],
         [W * 0.75, -1],
       ] as [number, number][]) {
-        disc(px, W, H, cx, deckY, 6, 0x101014)
-        ring(px, W, H, cx, deckY, 4, 0x1e1e24)
+        lit(px, W, H, cx, deckY, 6, 6, 0x1e1e26, 0x08080a)
+        ring(px, W, H, cx, deckY, 4, 0x14141a)
+        dot(px, W, H, cx - 3, deckY - 3, 0x5a5a6a)
         disc(px, W, H, cx, deckY, 1.5, dir > 0 ? 0xe03a3a : 0x3a8ae0)
         const a = t * 0.25 * dir
         dot(px, W, H, cx + Math.cos(a) * 3, deckY + Math.sin(a) * 3, 0xd0d0d8)
@@ -365,7 +367,7 @@ const rhythm: Maker = (W, H, rng) => {
           continue
         }
         const a = 1 - (t - c.t0) / life
-        disc(px, W, H, c.x, c.y, 3, c.c)
+        lit(px, W, H, c.x, c.y, 3, 3, c.c)
         ring(px, W, H, c.x, c.y, 3, 0xffffff)
         text(px, W, H, c.x - 1, c.y - 2, String(c.n), 0xffffff)
         ring(px, W, H, c.x, c.y, 3 + a * 6, mix(c.c, 0xffffff, 0.3))
@@ -395,7 +397,7 @@ const disco: Maker = (W, H, rng) => {
       px.fill(0x0a0614)
       sky(px, W, H, 0x0a0614, 0x1a0a24, top)
       line(px, W, H, W / 2, 0, W / 2, 6, 0x8a8a8a)
-      disc(px, W, H, W / 2, 9, 3.5, 0xc0c0d0)
+      lit(px, W, H, W / 2, 9, 3.5, 3.5, 0xb0b0c4)
       for (let k = 0; k < 8; k++) dot(px, W, H, W / 2 - 3 + ((k * 3 + b) % 7), 7 + (k % 4) * 1.5, 0xffffff)
       for (let k = 0; k < 10; k++) {
         const a = t * 0.03 + k * 0.63
@@ -412,6 +414,7 @@ const disco: Maker = (W, H, rng) => {
           else on = hash(i, j, b) > 0.6
           const c = on ? hsv((i * 0.1 + j * 0.07 + b * 0.13) % 1, 0.75, 1) : 0x1a1426
           rect(px, W, H, x, y, cs - 1, cs - 1, c)
+          if (on) rect(px, W, H, x, y, cs - 1, 1, mix(c, 0xffffff, 0.35))
         }
       for (const d of dancers) {
         const up = (b + Math.floor(d.x)) % 2
@@ -441,7 +444,8 @@ const stadiumwave: Maker = (W, H, rng) => {
       const wave = (t * 0.5) % (seats + 20) - 10
       for (let r = 0; r < rows; r++) {
         const y = top + r * 4
-        rect(px, W, H, 0, y + 3, W, 1, 0x5a5a6a)
+        rect(px, W, H, 0, y + 3, W, 1, 0x6a6a7c)
+        rect(px, W, H, 0, y, W, 1, 0x30303c)
         for (let s = 0; s < seats; s++) {
           const d = Math.abs(s - wave - r * 0.6)
           const up = d < 2.5 ? (d < 1.2 ? 2 : 1) : 0
@@ -504,6 +508,7 @@ const conga: Maker = (W, H, rng) => {
       const b = Math.floor(beatOf(t))
       for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) px[yy * W + xx] = (Math.floor(xx / 4) + Math.floor(yy / 4)) % 2 ? 0x2a1a3a : 0x342244
       const person = (px0: number, py0: number, c: number, kickLeg: boolean) => {
+        dot(px, W, H, px0 + 1, py0 + 1, 0x1a1026)
         dot(px, W, H, px0, py0 - 3, 0xe0b090)
         dot(px, W, H, px0, py0 - 2, c)
         dot(px, W, H, px0, py0 - 1, c)
@@ -592,14 +597,13 @@ const xylophone: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x1a1a2a, 0x2a2238)
       for (const b of bars) {
-        rect(px, W, H, b.x - 5, b.y, 10, 2, mix(b.c, 0xffffff, b.flash * 0.7))
+        slab(px, W, H, b.x - 5, b.y, 10, 3, mix(b.c, 0xffffff, b.flash * 0.7))
         dot(px, W, H, b.x - 4, b.y + 1, 0x8a8a8a)
         dot(px, W, H, b.x + 4, b.y + 1, 0x8a8a8a)
         if (b.flash > 0.5) ring(px, W, H, b.x, b.y, (1 - b.flash) * 8 + 2, b.c)
       }
       for (const m of ms) {
-        disc(px, W, H, m.x, m.y, 1, m.c)
-        dot(px, W, H, m.x - 0.4, m.y - 0.4, 0xffffff)
+        lit(px, W, H, m.x, m.y, 1.4, 1.4, m.c)
       }
     },
   }
@@ -625,35 +629,47 @@ const robot: Maker = (W, H, rng) => {
       pose = pose.map((p, i) => p + Math.sign((target[i] as number) - p) * Math.min(Math.abs((target[i] as number) - p), 0.35))
     },
     draw(px) {
-      sky(px, W, H, 0x0a1a2a, 0x1a2a3a, floor)
-      for (let y = 0; y < floor; y += 4) rect(px, W, H, 0, y, W, 1, 0x12223a)
-      for (let x = 0; x < W; x += 4) rect(px, W, H, x, 0, 1, floor, 0x12223a)
-      rect(px, W, H, 0, floor, W, H - floor, 0x2a2a34)
+      // a dark stage, a spotlight from above, a shiny floor
+      sky(px, W, H, 0x0a1426, 0x1a2a40, floor)
+      for (let y = 0; y < floor; y++) {
+        const hw = 2 + (y / floor) * W * 0.45
+        rect(px, W, H, W / 2 - hw, y, hw * 2, 1, mix(0x1a2a40, 0x3a4a6a, 0.35 + (y / floor) * 0.35))
+      }
+      rect(px, W, H, 0, floor, W, H - floor, 0x26262e)
+      rect(px, W, H, 0, floor, W, 1, 0x4a4a58)
       const cx = W / 2
       const bob = pose[2] as number
       const hipY = floor - 9 + bob
-      const metal = 0xc8ccd4
-      const dark = 0x8a8e98
-      rect(px, W, H, cx - 3, hipY - 9, 7, 9, metal)
-      rect(px, W, H, cx - 1, hipY - 7, 3, 2, Math.floor(beatOf(t)) % 2 ? 0xff3a6a : 0x3aff8a)
-      rect(px, W, H, cx - 2, hipY - 14, 5, 5, metal)
-      rect(px, W, H, cx - 1, hipY - 12, 1, 1, 0x3ad0ff)
-      rect(px, W, H, cx + 1, hipY - 12, 1, 1, 0x3ad0ff)
-      dot(px, W, H, cx, hipY - 16, dark)
-      dot(px, W, H, cx, hipY - 17, 0xff3a3a)
+      const metal = 0xc0c6d0
+      const dark = 0x6a707c
+      ellipse(px, W, H, cx + 1, floor + 1.5, 6, 1, 0x16161c)
+      // legs and feet
+      const legSpread = 1 + Math.abs(pose[3] as number)
+      for (const s of [-1, 1]) {
+        line(px, W, H, cx + s, hipY, cx + s * legSpread, floor - 1, s < 0 ? 0x9aa0ac : dark)
+        slab(px, W, H, s < 0 ? cx - legSpread - 1 : cx + legSpread, floor - 2, 3, 2, metal)
+      }
+      // arms: an upper arm, a forearm, a joint
       const arm = (sx: number, a: number, side: number) => {
         const ex = sx + side * 3
         const ey = hipY - 8 + Math.round(a) * 2
         line(px, W, H, sx, hipY - 8, ex, ey, dark)
         line(px, W, H, ex, ey, ex + (a > 0 ? 0 : side * 2), ey + (a > 0 ? -3 : 2), metal)
+        dot(px, W, H, ex, ey, 0xe8ecf2)
       }
-      arm(cx - 3, pose[0] as number, -1)
-      arm(cx + 3, pose[1] as number, 1)
-      const legSpread = 1 + Math.abs(pose[3] as number)
-      line(px, W, H, cx - 1, hipY, cx - legSpread, floor - 1, dark)
-      line(px, W, H, cx + 1, hipY, cx + legSpread, floor - 1, dark)
-      rect(px, W, H, cx - legSpread - 1, floor - 1, 2, 1, metal)
-      rect(px, W, H, cx + legSpread, floor - 1, 2, 1, metal)
+      arm(cx - 4, pose[0] as number, -1)
+      arm(cx + 4, pose[1] as number, 1)
+      // torso and head, lit from the upper left, with an outline
+      slab(px, W, H, cx - 4, hipY - 10, 9, 10, metal, 0x2a2e38)
+      slab(px, W, H, cx - 1, hipY - 7, 3, 2, Math.floor(beatOf(t)) % 2 ? 0xff3a6a : 0x3aff8a)
+      slab(px, W, H, cx - 3, hipY - 16, 7, 6, metal, 0x2a2e38)
+      for (const ex of [cx - 1, cx + 1]) {
+        dot(px, W, H, ex, hipY - 13, 0x7ae8ff)
+        dot(px, W, H, ex, hipY - 12, 0x2a90c0)
+      }
+      dot(px, W, H, cx, hipY - 17, dark)
+      dot(px, W, H, cx, hipY - 18, 0xff4a4a)
+      dot(px, W, H, cx + 1, hipY - 18, 0xa82020)
     },
   }
 }

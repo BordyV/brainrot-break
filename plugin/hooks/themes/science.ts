@@ -1,6 +1,6 @@
-import { disc, dot, hsv, mix, rect, sky, sprite, text } from '../draw'
+import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, burst, clamp, ellipse, hash, irand, line, pick, poly, sparks } from '../kit'
+import { DIRS, burst, clamp, ellipse, hash, irand, line, lit, pick, poly, slab, sparks } from '../kit'
 import type { Spark } from '../kit'
 
 // Science experiments: each one comes with a built-in "wait for it".
@@ -9,9 +9,15 @@ const span = (t: number, a: number, b: number) => clamp((t - a) / (b - a), 0, 1)
 
 function lab(px: Uint32Array, W: number, H: number, bench: number) {
   sky(px, W, H, 0xe8eef4, 0xd0dae4, bench)
-  for (let y = 4; y < bench; y += 6) for (let x = (y / 6) % 2 ? 0 : 3; x < W; x += 6) rect(px, W, H, x, y, 5, 5, 0xf0f4f8)
+  for (let y = 4; y < bench; y += 6)
+    for (let x = (y / 6) % 2 ? 0 : 3; x < W; x += 6) {
+      rect(px, W, H, x, y, 5, 5, 0xf0f4f8)
+      rect(px, W, H, x, y, 5, 1, 0xfafcff)
+      rect(px, W, H, x + 4, y + 1, 1, 4, 0xe0e6ee)
+    }
   rect(px, W, H, 0, bench, W, H - bench, 0x3a3e46)
-  rect(px, W, H, 0, bench, W, 1, 0x5a5e66)
+  rect(px, W, H, 0, bench, W, 1, 0x6a6e78)
+  rect(px, W, H, 0, bench + 1, W, 1, 0x2a2e34)
 }
 
 // --- elephant toothpaste ----------------------------------------------------------
@@ -48,8 +54,11 @@ const toothpaste: Maker = (W, H, rng) => {
       poly(px, W, H, [[cx - 2, bench - 13], [cx + 2, bench - 13], [cx + 6, bench], [cx - 6, bench]], 0xd8ecf4)
       poly(px, W, H, [[cx - 4, bench - 6], [cx + 4, bench - 6], [cx + 6, bench], [cx - 6, bench]], t < 40 ? 0xf0e070 : 0xf0d8e0)
       rect(px, W, H, cx - 2, bench - 15, 4, 2, 0xd8ecf4)
+      line(px, W, H, cx - 2, bench - 12, cx - 5, bench - 1, 0xffffff)
+      line(px, W, H, cx + 2, bench - 12, cx + 5, bench - 1, 0x9ab8c8)
       if (t > 20 && t < 40) line(px, W, H, cx + 8, bench - 24, cx + 1, bench - 14, 0x8a5aff)
-      for (const f of foam) disc(px, W, H, f.x, f.y, f.r, f.c)
+      for (const f of foam) disc(px, W, H, f.x + 0.4, f.y + 0.4, f.r, scale(f.c, 0.85))
+      for (const f of foam) disc(px, W, H, f.x - 0.2, f.y - 0.2, f.r * 0.8, f.c)
       sprite(px, W, H, 1, bench - 9, ['.ww.', 'wwww', 'w..w'], { w: 0x3a3a3a })
     },
   }
@@ -86,6 +95,8 @@ const mentos: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x6ab8f0, 0xd8f0ff, ground)
       rect(px, W, H, 0, ground, W, H - ground, 0x5aa83a)
+      rect(px, W, H, 0, ground, W, 1, 0x8ad060)
+      ellipse(px, W, H, cx + 1, ground, 4, 0.8, 0x3a7a2a)
       for (const s of spray) dot(px, W, H, s.x, s.y, s.vy < 0 ? 0xf0e8d8 : 0x8a5a3a)
       const by = ground - 12
       rect(px, W, H, cx - 2, by + 3, 5, 9, 0x3a2418)
@@ -93,9 +104,11 @@ const mentos: Maker = (W, H, rng) => {
       rect(px, W, H, cx - 2, by + 3, 5, 9 - lv, 0xd8ecf4)
       rect(px, W, H, cx - 1, by, 3, 3, 0xd8ecf4)
       rect(px, W, H, cx - 2, by + 6, 5, 2, 0xe03a3a)
+      rect(px, W, H, cx - 2, by + 3, 1, 9, 0xffffff)
+      rect(px, W, H, cx + 2, by + 3, 1, 9, 0x6a8a98)
       if (t < 40) {
         const my = 2 + (t / 40) * (by - 4)
-        for (let k = 0; k < 3; k++) disc(px, W, H, cx, my - k * 3, 1, 0xf8f8f0)
+        for (let k = 0; k < 3; k++) lit(px, W, H, cx, my - k * 3, 1.2, 1.2, 0xf8f8f0)
       }
     },
   }
@@ -125,7 +138,7 @@ const cradle: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x2a2e38, 0x14161c)
       rect(px, W, H, x0 - r - 3, top - 1, (n - 1) * r * 2 + r * 2 + 6, 1, 0xb0b8c4)
-      rect(px, W, H, x0 - r - 3, top + L + r + 3, (n - 1) * r * 2 + r * 2 + 6, 2, 0x5a5e68)
+      slab(px, W, H, x0 - r - 3, top + L + r + 3, (n - 1) * r * 2 + r * 2 + 6, 2, 0x5a5e68)
       rect(px, W, H, x0 - r - 3, top - 1, 1, L + r + 5, 0xb0b8c4)
       rect(px, W, H, x0 + (n - 1) * r * 2 + r + 2, top - 1, 1, L + r + 5, 0xb0b8c4)
       // the end balls take turns: k balls swing out on one side, then k on the other
@@ -138,7 +151,7 @@ const cradle: Maker = (W, H, rng) => {
         const bx = px0 + Math.sin(a) * L
         const by = top + Math.cos(a) * L
         line(px, W, H, px0, top, bx, by, 0x8a8e98)
-        disc(px, W, H, bx, by, r, 0xc8ccd4)
+        lit(px, W, H, bx, by, r, r, 0xb8bcc8, 0x3a3e48)
         dot(px, W, H, bx - r * 0.4, by - r * 0.4, 0xffffff)
       }
     },
@@ -183,10 +196,11 @@ const tesla: Maker = (W, H, rng) => {
       }
       for (let y = top + 3; y < base; y++) {
         rect(px, W, H, cx - 2, y, 5, 1, y % 2 ? 0xc87a3a : 0xa8602a)
+        dot(px, W, H, cx - 2, y, 0xf0a868)
+        dot(px, W, H, cx + 2, y, 0x6a3a18)
       }
-      rect(px, W, H, cx - 5, base, 11, 4, 0x3a3a42)
-      ellipse(px, W, H, cx, top, 7, 2.5, 0xb8bcc8)
-      ellipse(px, W, H, cx, top - 0.5, 5, 1.5, 0xe0e4ec)
+      slab(px, W, H, cx - 5, base, 11, 4, 0x3a3a42)
+      lit(px, W, H, cx, top, 7, 2.5, 0xb8bcc8, 0x4a4e5a)
       for (const seg of arcs)
         for (let i = 1; i < seg.length; i++) {
           const [ax, ay] = seg[i - 1] as [number, number]
@@ -249,7 +263,7 @@ const mousetrap: Maker = (W, H, rng) => {
       px.fill(0xb8a888)
       for (let y = 0; y < H; y += 5) rect(px, W, H, 0, y, W, 1, 0xa89878)
       for (const tr of traps) {
-        rect(px, W, H, tr.x - 2, tr.y - 1, 5, 3, 0xd8b078)
+        slab(px, W, H, tr.x - 2, tr.y - 1, 5, 3, 0xd8b078)
         if (tr.sprung) rect(px, W, H, tr.x - 2, tr.y - 1, 5, 1, 0x8a8a92)
         else {
           rect(px, W, H, tr.x - 2, tr.y + 1, 5, 1, 0x8a8a92)
@@ -305,7 +319,11 @@ const sodavolcano: Maker = (W, H, rng) => {
       lab(px, W, H, bench)
       for (let x = 0; x < W; x++) {
         const y = slope(x)
-        if (y < bench) rect(px, W, H, x, y, 1, bench - y, (x * 3) % 7 ? 0x8a6a4a : 0x7a5a3a)
+        if (y < bench) {
+          const c = (x * 3) % 7 ? 0x8a6a4a : 0x7a5a3a
+          rect(px, W, H, x, y, 1, bench - y, x < cx - 1 ? mix(c, 0xd8b890, 0.2) : x > cx + 1 ? scale(c, 0.78) : c)
+          dot(px, W, H, x, y, x < cx ? 0xb08a62 : 0x6a4a2e)
+        }
       }
       rect(px, W, H, cx - 1, peak, 3, 2, 0x3a2a1a)
       if (t > 30 && t < 55) {
@@ -365,10 +383,11 @@ const crystals: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0xf0ece4, 0xd8d0c4)
       rect(px, W, H, x0, jarTop, x1 - x0, jarBottom - jarTop, mix(0xe8f4fc, col, 0.15))
-      rect(px, W, H, x0 - 1, jarTop, 1, jarBottom - jarTop + 1, 0xc0d0dc)
+      rect(px, W, H, x0 - 1, jarTop, 1, jarBottom - jarTop + 1, 0xf4faff)
+      rect(px, W, H, x0, jarTop, 1, jarBottom - jarTop, mix(0xffffff, col, 0.1))
       rect(px, W, H, x1, jarTop, 1, jarBottom - jarTop + 1, 0xc0d0dc)
       rect(px, W, H, x0 - 1, jarBottom, x1 - x0 + 2, 1, 0xc0d0dc)
-      rect(px, W, H, x0 - 3, jarTop - 1, x1 - x0 + 6, 1, 0x8a6a4a)
+      slab(px, W, H, x0 - 3, jarTop - 2, x1 - x0 + 6, 2, 0x8a6a4a)
       for (let y = jarTop; y < jarBottom; y++)
         for (let x = x0; x < x1; x++)
           if (grid[y * W + x]) px[y * W + x] = x === Math.round(W / 2) && y < jarBottom - 6 && !grid[y * W + x - 1] && !grid[y * W + x + 1] ? 0xf0f0f0 : hash(x, y, 4) > 0.6 ? mix(col, 0xffffff, 0.6) : col
@@ -399,18 +418,19 @@ const balloonpop: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x1a1a2a, 0x2a2a3a)
       rect(px, W, H, 0, H - 4, W, 4, 0x3a3a4a)
+      rect(px, W, H, 0, H - 4, W, 1, 0x5a5a6c)
       const pinX = cx + R + 8 - span(t, 20, 60) * 8
       const peel = span(t, 62, 100)
       const fall = span(t, 100, 150)
       const wy = cy + fall * fall * (H - cy - 6)
       if (t < 62) {
-        disc(px, W, H, cx, cy, R, 0xe03a5a)
-        dot(px, W, H, cx - R * 0.4, cy - R * 0.4, 0xff8aa0)
+        lit(px, W, H, cx, cy, R, R, 0xe03a5a)
+        dot(px, W, H, cx - R * 0.45, cy - R * 0.45, 0xffd0dc)
         dot(px, W, H, cx, cy + R + 1, 0xa02a3a)
       } else if (t < 150) {
         const squash = fall * 0.4
-        ellipse(px, W, H, cx, wy, R * (1 + squash * 0.3), R * (1 - squash), 0x5aa0f0)
-        dot(px, W, H, cx - R * 0.3, wy - R * 0.3, 0xc8e8ff)
+        lit(px, W, H, cx, wy, R * (1 + squash * 0.3), R * (1 - squash), 0x5aa0f0)
+        dot(px, W, H, cx - R * 0.35, wy - R * 0.35, 0xe8f6ff)
         if (peel < 1) {
           const a0 = Math.PI * peel
           for (let k = 0; k < 40; k++) {
@@ -520,11 +540,12 @@ const gasbox: Maker = (W, H, rng) => {
     },
     draw(px) {
       sky(px, W, H, 0xe8eef4, 0xd0dae4)
-      rect(px, W, H, x0 - 1, 2, 1, bottom - 1, 0x8a8e98)
+      rect(px, W, H, x0 - 1, 2, 1, bottom - 1, 0xb4b8c2)
       rect(px, W, H, x1, 2, 1, bottom - 1, 0x8a8e98)
       rect(px, W, H, x0 - 1, bottom, x1 - x0 + 2, 1, 0x8a8e98)
-      rect(px, W, H, x0, piston - 2, x1 - x0, 2, 0x6a6e78)
-      rect(px, W, H, W / 2 - 1, 0, 2, piston - 2, 0x8a8e98)
+      slab(px, W, H, x0, piston - 2, x1 - x0, 2, 0x7a7e88)
+      rect(px, W, H, W / 2 - 1, 0, 1, piston - 2, 0xb0b4be)
+      rect(px, W, H, W / 2, 0, 1, piston - 2, 0x6a6e78)
       for (const p of ps) dot(px, W, H, p.x, p.y, mix(0x3a6ae0, 0xff3a2a, temp))
       const flames = Math.round(temp * 4)
       for (let k = 0; k < flames; k++) for (let x = x0 + 2; x < x1 - 1; x += 3) dot(px, W, H, x + (k % 2), bottom + 2 + (k % 2), k % 2 ? 0xff8a20 : 0x3a8aff)
@@ -576,14 +597,17 @@ const waterrocket: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x5ab0f0, 0xd8f0ff, ground)
       rect(px, W, H, 0, ground, W, H - ground, 0x5aa83a)
+      rect(px, W, H, 0, ground, W, 1, 0x8ad060)
       const ry = ground - 10 + y
       const drawY = Math.max(ry, 6)
       if (phase === 2) {
-        ellipse(px, W, H, cx, drawY - 8, 5, 2, 0xe03a3a)
+        lit(px, W, H, cx, drawY - 8, 5, 2, 0xe03a3a)
         line(px, W, H, cx - 4, drawY - 7, cx, drawY, 0xd0d0d0)
         line(px, W, H, cx + 4, drawY - 7, cx, drawY, 0xd0d0d0)
       }
       rect(px, W, H, cx - 1.5, drawY, 3, 9, 0xd8ecf4)
+      rect(px, W, H, cx - 1.5, drawY, 1, 9, 0xffffff)
+      rect(px, W, H, cx + 0.5, drawY, 1, 9, 0x9ab4c4)
       rect(px, W, H, cx - 0.5, drawY - 2, 1, 2, 0xe03a3a)
       poly(px, W, H, [[cx - 1.5, drawY + 6], [cx - 3.5, drawY + 9], [cx - 1.5, drawY + 9]], 0xe03a3a)
       poly(px, W, H, [[cx + 1.5, drawY + 6], [cx + 3.5, drawY + 9], [cx + 1.5, drawY + 9]], 0xe03a3a)
@@ -645,15 +669,16 @@ const eggdrop: Maker = (W, H, rng) => {
       sky(px, W, H, 0x6ab0f0, 0xe0f4ff, ground)
       rect(px, W, H, 0, ground, W, H - ground, 0x8a8a92)
       rect(px, W, H, 0, 0, 5, ground, 0xb87a5a)
+      rect(px, W, H, 4, 0, 1, ground, 0x8a5a40)
       for (let yy = 2; yy < ground; yy += 4) rect(px, W, H, 1, yy, 3, 2, 0x8ad0f0)
       const cx = W / 2 + 2
       if (kind === 0 && !landed) {
-        ellipse(px, W, H, cx, y - 8, 6, 2.5, 0xff6a3a)
+        lit(px, W, H, cx, y - 8, 6, 2.5, 0xff6a3a)
         line(px, W, H, cx - 5, y - 7, cx - 1, y, 0xd0d0d0)
         line(px, W, H, cx + 5, y - 7, cx + 1, y, 0xd0d0d0)
       }
       if (kind === 1) {
-        rect(px, W, H, cx - 3, y, 7, 6, 0xc8a070)
+        slab(px, W, H, cx - 3, y, 7, 6, 0xc8a070)
         for (let k = 0; k < 3; k++) line(px, W, H, cx - 3 + k * 3, y, cx - 4 + k * 3, y - 2, 0xff6aa0)
       }
       if (kind === 2) for (let k = 0; k < 3; k++) disc(px, W, H, cx - 3 + k * 3, y - 6 - (k % 2) * 2, 1.8, hsv(k * 0.3, 0.6, 1))
@@ -661,8 +686,7 @@ const eggdrop: Maker = (W, H, rng) => {
         ellipse(px, W, H, cx, ground - 1, 4, 1, 0xffffff)
         disc(px, W, H, cx, ground - 1, 1.2, 0xffc020)
       } else {
-        ellipse(px, W, H, cx, y + (kind === 1 ? 3 : 2), 1.5, 2, 0xfaf4e8)
-        dot(px, W, H, cx - 0.5, y + 1, 0xffffff)
+        lit(px, W, H, cx, y + (kind === 1 ? 3 : 2), 1.6, 2.1, 0xf4ecdc)
       }
       if (landed) text(px, W, H, W / 2 - 1, 8, survived ? '!' : 'x', survived ? 0x3ac06a : 0xe03a3a)
       text(px, W, H, 7, ground + 1, String(score[0]), 0x3ac06a)
@@ -781,8 +805,16 @@ const antfarm: Maker = (W, H, rng) => {
     },
     draw(px) {
       sky(px, W, H, 0x9ad0f0, 0xd8eef8, surface)
-      for (let y = surface; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = dug[y * W + x] ? 0x4a3420 : hash(x, y, 2) > 0.85 ? 0xc8a070 : 0xd8b484
-      for (let x = 0; x < W; x++) if (heap[x]! > 0) rect(px, W, H, x, surface - heap[x]!, 1, heap[x]!, 0xd0a878)
+      for (let y = surface; y < H; y++)
+        for (let x = 0; x < W; x++) {
+          const k = y * W + x
+          px[k] = dug[k] ? (y > surface && !dug[k - W] ? 0x2e2012 : 0x4a3420) : y > surface && dug[k - W] ? 0xe8c898 : hash(x, y, 2) > 0.85 ? 0xc8a070 : 0xd8b484
+        }
+      for (let x = 0; x < W; x++)
+        if (heap[x]! > 0) {
+          rect(px, W, H, x, surface - heap[x]!, 1, heap[x]!, 0xd0a878)
+          dot(px, W, H, x, surface - heap[x]!, 0xe8c898)
+        }
       rect(px, W, H, 0, 0, 1, H, 0x8a6a4a)
       rect(px, W, H, W - 1, 0, 1, H, 0x8a6a4a)
       rect(px, W, H, 0, H - 2, W, 2, 0x8a6a4a)

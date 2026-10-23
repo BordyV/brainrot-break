@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, clamp, ellipse, hash, irand, line, pick, poly, ring, shade, shuffle, sparks, textWidth, tint } from '../kit'
+import { burst, clamp, ellipse, hash, irand, line, lit, pick, poly, ring, shade, shuffle, slab, sparks, textWidth, tint } from '../kit'
 import type { Spark } from '../kit'
 
 // Seasons, holidays & spooky: something moves first, the season comes second.
@@ -260,11 +260,11 @@ const xmaslights: Maker = (W, H, rng) => {
         const b = top + ((k + 2) * (bot - top)) / 4
         poly(px, W, H, [[cx, a - 1], [cx - halfAt(b), b], [cx + halfAt(b), b]], k % 2 ? 0x1a6a3a : 0x1a5a32)
       }
-      rect(px, W, H, cx - 1.5 * u, bot, 3 * u, fy - bot, 0x5a3418)
+      slab(px, W, H, cx - 1.5 * u, bot, 3 * u, fy - bot, 0x5a3418)
       // presents
-      rect(px, W, H, cx - 10 * u, fy - 4 * u, 5 * u, 4 * u, 0xd03a4a)
+      slab(px, W, H, cx - 10 * u, fy - 4 * u, 5 * u, 4 * u, 0xd03a4a)
       rect(px, W, H, cx - 8 * u, fy - 4 * u, u, 4 * u, 0xffd03a)
-      rect(px, W, H, cx + 5 * u, fy - 5 * u, 5 * u, 5 * u, 0x3a6ad0)
+      slab(px, W, H, cx + 5 * u, fy - 5 * u, 5 * u, 5 * u, 0x3a6ad0)
       rect(px, W, H, cx + 7 * u, fy - 5 * u, u, 5 * u, 0xffffff)
       // bulbs
       bulbs.forEach(([x, y], i) => {
@@ -326,7 +326,7 @@ const sleigh: Maker = (W, H, rng) => {
       for (const hk of [0.2, 0.62, 0.85]) {
         const hx = W * hk
         const hy = H * 0.8 + Math.sin(hx * 0.11 + 2) * 2
-        rect(px, W, H, hx - 3 * u, hy - 4 * u, 6 * u, 4 * u, 0x5a3a3a)
+        slab(px, W, H, hx - 3 * u, hy - 4 * u, 6 * u, 4 * u, 0x5a3a3a)
         poly(px, W, H, [[hx - 4 * u, hy - 4 * u], [hx, hy - 7 * u], [hx + 4 * u, hy - 4 * u]], 0xf0f4ff)
         dot(px, W, H, hx - u, hy - 2 * u, 0xffd060)
         dot(px, W, H, hx + u, hy - 2 * u, 0xffd060)
@@ -400,18 +400,18 @@ const unwrap: Maker = (W, H, rng) => {
         const gy = fy - bh - rise * 8 * u
         if (gift === 0) {
           // a teddy bear
-          disc(px, W, H, cx, gy, 3.5 * u, 0xa0703a)
+          lit(px, W, H, cx, gy, 3.5 * u, 3.5 * u, 0xa0703a)
           disc(px, W, H, cx - 3 * u, gy - 3 * u, 1.5 * u, 0xa0703a)
           disc(px, W, H, cx + 3 * u, gy - 3 * u, 1.5 * u, 0xa0703a)
           disc(px, W, H, cx, gy + u, 1.5 * u, 0xd8b080)
           dot(px, W, H, cx - 1.3 * u, gy - u, 0x101010)
           dot(px, W, H, cx + 1.3 * u, gy - u, 0x101010)
           dot(px, W, H, cx, gy + 0.5 * u, 0x3a2010)
-          ellipse(px, W, H, cx, gy + 6 * u, 3.5 * u, 3 * u, 0xa0703a)
+          lit(px, W, H, cx, gy + 6 * u, 3.5 * u, 3 * u, 0xa0703a)
         } else if (gift === 1) {
           // a rubber duck
-          ellipse(px, W, H, cx, gy + 4 * u, 5 * u, 3 * u, 0xffd020)
-          disc(px, W, H, cx + 2 * u, gy, 2.8 * u, 0xffd020)
+          lit(px, W, H, cx, gy + 4 * u, 5 * u, 3 * u, 0xffd020)
+          lit(px, W, H, cx + 2 * u, gy, 2.8 * u, 2.8 * u, 0xffd020)
           dot(px, W, H, cx + 3 * u, gy - u, 0x101010)
           rect(px, W, H, cx + 4.5 * u, gy, 2 * u, u, 0xff8a20)
         } else {
@@ -495,12 +495,13 @@ const balldrop: Maker = (W, H, rng) => {
       const poleTop = H * 0.2
       const poleBot = H * 0.55
       rect(px, W, H, cx - 3 * u, poleBot, 6 * u, H - poleBot, 0x2a2a44)
+      rect(px, W, H, cx - 3 * u, poleBot, u, H - poleBot, 0x3e3e5e)
       for (let y = Math.round(poleBot + 2); y < H; y += 3) rect(px, W, H, cx - 2 * u, y, 4 * u, 1, 0x4a4a6a)
       rect(px, W, H, cx - 0.5, poleTop, 1, poleBot - poleTop, 0x8a8aa0)
       // the ball, glittering
       const by = poleTop + prog * (poleBot - poleTop - 3 * u)
       const r = 3 * u
-      disc(px, W, H, cx, by, r, 0xc0c8e0)
+      lit(px, W, H, cx, by, r, r, 0xb8c0d8)
       for (let k = 0; k < 6; k++) {
         const a = k + t * 0.15
         dot(px, W, H, cx + Math.cos(a) * r * 0.6, by + Math.sin(a * 1.3) * r * 0.6, hsv(k / 6 + t * 0.02, 0.6, 1))
@@ -570,14 +571,14 @@ const dragondance: Maker = (W, H, rng) => {
       for (let i = N - 1; i >= 1; i--) {
         const [x, y] = pts[i]
         const r = (3.2 - i * 0.12) * u
-        disc(px, W, H, x, y, r, i % 2 ? 0xd02020 : 0xe84020)
+        lit(px, W, H, x, y, r, r, i % 2 ? 0xd02020 : 0xe84020)
         dot(px, W, H, x, y - r, 0xffd040)
         dot(px, W, H, x, y + r * 0.5, 0xffd040)
       }
       // head
       const [hx, hy] = pts[0]
       const dir = pts[0][0] >= pts[1][0] ? 1 : -1
-      ellipse(px, W, H, hx, hy, 4.5 * u, 3.5 * u, 0xd02020)
+      lit(px, W, H, hx, hy, 4.5 * u, 3.5 * u, 0xd02020, 0x6a0a0a)
       rect(px, W, H, hx + dir * 2 * u - 2 * u, hy + u, 4 * u, 2 * u, 0xffd040)
       dot(px, W, H, hx + dir * 1.5 * u, hy - 1.5 * u, 0xffffff)
       dot(px, W, H, hx + dir * 1.5 * u, hy - 1.5 * u + 1, 0x101010)
@@ -741,13 +742,15 @@ const blossoms: Maker = (W, H, rng) => {
         }
       // trees on both sides: trunk and a big crown of blossoms
       for (const [tx, side] of [[W * 0.1, 1], [W * 0.92, -1]] as [number, number][]) {
-        line(px, W, H, tx, fy + 2, tx, H * 0.3, 0x5a3a3a)
-        line(px, W, H, tx + side, fy + 2, tx + side, H * 0.35, 0x5a3a3a)
+        line(px, W, H, tx, fy + 2, tx, H * 0.3, 0x7a5452)
+        line(px, W, H, tx + side, fy + 2, tx + side, H * 0.35, 0x3e2626)
         line(px, W, H, tx, H * 0.4, tx + side * W * 0.25, H * 0.18, 0x5a3a3a)
         for (let k = 0; k < 18; k++) {
           const cx = tx + side * hash(k, 1, 3) * W * 0.32 + (hash(k, 5, 3) - 0.5) * 4
           const cy = H * 0.06 + hash(k, 2, 3) * H * 0.3
-          disc(px, W, H, cx, cy, 2 + hash(k, 4, 3) * 2.5, PINK[k % 3])
+          const r = 2 + hash(k, 4, 3) * 2.5
+          disc(px, W, H, cx + 0.5, cy + 0.6, r, scale(PINK[k % 3], 0.86))
+          disc(px, W, H, cx - r * 0.15, cy - r * 0.2, r * 0.8, PINK[k % 3])
         }
       }
       for (const p of petals) dot(px, W, H, p.x, p.y, PINK[p.c])
@@ -1170,9 +1173,9 @@ const leafpile: Maker = (W, H, rng) => {
     draw(px) {
       sky(px, W, H, 0x8ab8e0, 0xf8e0b8, fy)
       // a tree and a house wall
-      rect(px, W, H, W * 0.06, H * 0.3, 3 * u, fy - H * 0.3, 0x5a3a2a)
-      disc(px, W, H, W * 0.1, H * 0.25, 7 * u, 0xd8642a)
-      disc(px, W, H, W * 0.2, H * 0.3, 5 * u, 0xe89a2a)
+      slab(px, W, H, W * 0.06, H * 0.3, 3 * u, fy - H * 0.3, 0x5a3a2a)
+      lit(px, W, H, W * 0.1, H * 0.25, 7 * u, 7 * u, 0xd8642a)
+      lit(px, W, H, W * 0.2, H * 0.3, 5 * u, 5 * u, 0xe89a2a)
       for (let y = fy; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = (x + y) % 5 ? 0x7a9a4a : 0x6a8a3a
       // the rake leans on the tree
       line(px, W, H, W * 0.18, fy - 1, W * 0.32, fy - 12 * u, 0x9a7a4a)

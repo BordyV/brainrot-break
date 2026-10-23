@@ -1,4 +1,4 @@
-import { mix, rect } from '../draw'
+import { dot, mix, rect, scale } from '../draw'
 import type { Maker } from '../draw'
 import { irand } from '../kit'
 
@@ -161,6 +161,11 @@ const powder: Maker = (W, H, rng) => {
         else if (m === WOOD) c = tn === 0 ? 0x7a4a22 : 0x8a5a2a
         else if (m === FIRE) c = life[i] > 15 ? 0xffe060 : life[i] > 6 ? 0xff8a20 : 0xd83a1a
         else c = mix(0x161620, 0xc8d0e0, Math.min(1, life[i] / 12))
+        // a lit surface where the grain has nothing above it, a darker underside where nothing holds it below
+        if (m !== EMPTY && m !== FIRE && m !== STEAM) {
+          if (i < W || mat[i - W] === EMPTY) c = mix(c, 0xfff8ee, 0.3)
+          else if (i + W < N && mat[i + W] === EMPTY) c = scale(c, 0.75)
+        }
         px[i] = c
       }
       if (t > 600) rect(px, W, H, 0, 0, W, Math.round(((t - 600) / 40) * H), 0x161620)
@@ -268,31 +273,37 @@ const phantomjam: Maker = (W, H, rng) => {
       }
     },
     draw(px) {
-      // grass, then the road
+      // grass with a little texture, then the road: a lit outer kerb, asphalt, a dark inner kerb
       for (let y = 0; y < H; y++)
-        for (let x = 0; x < W; x++) px[y * W + x] = (x + y * 3) % 7 === 0 ? 0x3a6a32 : 0x2e5a2a
+        for (let x = 0; x < W; x++) px[y * W + x] = (x + y * 3) % 7 === 0 ? 0x3a6a32 : (x * 5 + y) % 11 === 0 ? 0x26502a : 0x2e5a2a
       for (let k = 0; k < P; k++) {
         const [x, y] = pts[k]
         const ox = (x - cx) / rx
         const oy = (y - cy) / ry
         const d = Math.hypot(ox, oy) || 1
-        for (let r = -1.5; r <= 1.5; r += 0.5) {
+        for (let r = -2; r <= 2; r += 0.5) {
           const qx = Math.round(x + (ox / d) * r)
           const qy = Math.round(y + (oy / d) * r)
-          if (qx >= 0 && qx < W && qy >= 0 && qy < H) px[qy * W + qx] = 0x4a4a52
+          if (qx >= 0 && qx < W && qy >= 0 && qy < H) px[qy * W + qx] = r > 1.6 ? 0x8a8a94 : r < -1.6 ? 0x2a2a30 : 0x4a4a52
         }
       }
       // the infield shows the history: jams are the red stripes running backwards
-      rect(px, W, H, ix - 1, iy - 1, iw + 2, ih + 2, 0x24321f)
+      rect(px, W, H, ix - 1, iy - 1, iw + 2, ih + 2, 0x1a2616)
+      rect(px, W, H, ix - 1, iy + ih, iw + 2, 1, 0x3a4a34)
       for (let y = 0; y < ih; y++)
         for (let x = 0; x < iw; x++) {
           const c = hist[y * iw + x]
           px[(iy + y) * W + ix + x] = c || DARK
         }
+      // cars: a lit roof corner, the colour of their speed, a darker back corner
       for (let i = 0; i < n; i++) {
         const [x, y] = pts[Math.floor(s[i]) % P]
-        const c = speedColour(v[i] / V0)
-        rect(px, W, H, Math.round(x) - 1, Math.round(y) - 1, 2, 2, i === braking && brakeT > 0 ? 0xffffff : c)
+        const c = i === braking && brakeT > 0 ? 0xffffff : speedColour(v[i] / V0)
+        const X = Math.round(x) - 1
+        const Y = Math.round(y) - 1
+        rect(px, W, H, X, Y, 2, 2, c)
+        dot(px, W, H, X, Y, mix(c, 0xffffff, 0.4))
+        dot(px, W, H, X + 1, Y + 1, scale(c, 0.65))
       }
     },
   }

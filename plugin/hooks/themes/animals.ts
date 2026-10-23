@@ -1,6 +1,6 @@
-import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
+import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, clamp, ellipse, irand, line, pick, ring, sparks } from '../kit'
+import { burst, clamp, ellipse, irand, line, lit, litSprite, pick, ring, slab, sparks } from '../kit'
 import type { Spark } from '../kit'
 
 // Animals & pets: one animal, one funny thing, a loop.
@@ -58,7 +58,7 @@ const catglass: Maker = (W, H, rng) => {
       const blink = t % 50 > 46 || (t > 160 && t < 175)
       const look = t > 140
       const rows = CAT.map((r, i) => (i === 3 && blink ? r.replace(/e/g, 'o') : r))
-      sprite(px, W, H, cx, table - 11, rows, { o: fur, e: 0x3ad06a, q: 0xff8aa0, w: mix(fur, 0xffffff, 0.5), t: fur })
+      litSprite(px, W, H, cx, table - 11, rows, { o: fur, e: 0x3ad06a, q: 0xff8aa0, w: mix(fur, 0xffffff, 0.5), t: fur })
       if (look) dot(px, W, H, cx + 2, table - 8, 0x000000)
       const push = span(t, 30, 110)
       const gx = Math.round(W * 0.55) + (edge - Math.round(W * 0.55)) * ease(push)
@@ -124,13 +124,13 @@ const zoomies: Maker = (W, H, rng) => {
       for (const [x, y, c] of flowers) dot(px, W, H, x, y, c)
       ellipse(px, W, H, cx, cy, 4, 3, 0x6ac8ff)
       ellipse(px, W, H, cx, cy, 3, 2, 0x9ae0ff)
-      sprite(px, W, H, 2, 2, ['.s.', 'sss', '.b.', 'b.b'], { s: 0xffd0a0, b: 0x3a5aaa })
+      litSprite(px, W, H, 2, 2, ['.s.', 'sss', '.b.', 'b.b'], { s: 0xffd0a0, b: 0x3a5aaa })
       for (const d of dust) dot(px, W, H, d.x, d.y, d.c)
       const x = cx + Math.cos(a) * rx
       const y = cy + Math.sin(a) * ry
       const h = a + (Math.PI / 2) * dir
       if (rest > 0 && speed < 0.03) {
-        ellipse(px, W, H, x, y, 2.5, 1.5, 0xb8783a)
+        lit(px, W, H, x, y, 2.5, 1.5, 0xb8783a)
         dot(px, W, H, x + 2, y - 1, 0x2a1a0a)
         if (t % 20 < 10) dot(px, W, H, x + 3, y, 0xff6a8a)
       } else {
@@ -182,8 +182,8 @@ const capybara: Maker = (W, H, rng) => {
       const bob = Math.sin(t * 0.05) * 0.6
       const cx = Math.round(W / 2 - 6)
       const cy = water - 3 + bob
-      sprite(px, W, H, cx, cy, CAPY, { b: 0x9a6a3a, e: 0x2a1a0a, n: 0x5a3a1a })
-      if (t % 80 > 74) sprite(px, W, H, cx + 11, cy + 1, ['b'], { b: 0x9a6a3a })
+      litSprite(px, W, H, cx, cy, CAPY, { b: 0x9a6a3a, e: 0x2a1a0a, n: 0x5a3a1a })
+      if (t % 80 > 74) litSprite(px, W, H, cx + 11, cy + 1, ['b'], { b: 0x9a6a3a })
       rect(px, W, H, cx, water, 12, 1, 0x8ad8d0)
       disc(px, W, H, cx + 6, cy - 2, 1.6, 0xff9a1a)
       dot(px, W, H, cx + 6, cy - 4, 0x3a9a2a)
@@ -197,7 +197,7 @@ const capybara: Maker = (W, H, rng) => {
       for (const s of steam) dot(px, W, H, s.x, s.y, 0xe8eef4)
       for (const s of snow) dot(px, W, H, s.x, s.y, 0xffffff)
       const dx = (t * 0.15) % (W + 10) - 5
-      sprite(px, W, H, dx, water + 8, ['.y.', 'yyy'], { y: 0xffe040 })
+      litSprite(px, W, H, dx, water + 8, ['.y.', 'yyy'], { y: 0xffe040 })
       dot(px, W, H, dx + 3, water + 8, 0xff8a20)
     },
   }
@@ -229,7 +229,7 @@ const ducklings: Maker = (W, H, rng) => {
       dot(px, W, H, flowerX, path - 5, 0x3a8a2a)
       const mx = -8 + t * 0.12
       const step = Math.floor(t / 5) % 2
-      sprite(px, W, H, mx, path - 6, ['..ww.', '.wwko', 'wwww.', 'wwww.', '.o.o.'], { w: 0xf4f4f0, k: 0x000000, o: 0xff9a2a })
+      litSprite(px, W, H, mx, path - 6, ['..ww.', '.wwko', 'wwww.', 'wwww.', '.o.o.'], { w: 0xf4f4f0, k: 0x000000, o: 0xff9a2a })
       for (let i = 0; i < n; i++) {
         let x = mx - 4 - i * 4
         let y = path - 3
@@ -240,7 +240,7 @@ const ducklings: Maker = (W, H, rng) => {
           y -= away * 3
           if (panic) x += Math.sin(t * 0.8) * 0.5
         }
-        sprite(px, W, H, x, y + ((step + i) % 2 ? 0 : -0.5), ['.yy', 'yyk', 'yyy'], { y: 0xffe040, k: 0x000000 })
+        litSprite(px, W, H, x, y + ((step + i) % 2 ? 0 : -0.5), ['.yy', 'yyk', 'yyy'], { y: 0xffe040, k: 0x000000 })
         dot(px, W, H, x + 3, y + 1, 0xff9a2a)
       }
       if (t > 225 && t < 250) text(px, W, H, mx - 4 - lost * 4, path - 12, '!', 0xff3a3a)
@@ -308,7 +308,7 @@ const frog: Maker = (W, H, rng) => {
       for (let x = 0; x < W; x += 3) rect(px, W, H, x, water - 6 - (x % 4), 1, 6 + (x % 4), 0x3a7a2a)
       for (let y = water; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = (x + y * 3 + (t >> 2)) % 13 === 0 ? 0x4a8ab0 : mix(0x2a6a8a, 0x1a4a6a, (y - water) / (H - water))
       for (const p of pads) {
-        ellipse(px, W, H, p.x, p.y, 4, 1.6, 0x4aa03a)
+        lit(px, W, H, p.x, p.y, 4, 1.6, 0x4aa03a)
         dot(px, W, H, p.x + 2, p.y, 0x2a6a8a)
       }
       const p = pads[at] as { x: number; y: number }
@@ -319,7 +319,7 @@ const frog: Maker = (W, H, rng) => {
         fx = p.x + (q.x - p.x) * jump
         fy = p.y - 2 + (q.y - p.y) * jump - Math.sin(jump * Math.PI) * 10
       }
-      sprite(px, W, H, fx - 3, fy - 3, ['.e.e.', 'ggggg', 'ggggg', 'g...g'], { e: 0xffffff, g: 0x5ad03a })
+      litSprite(px, W, H, fx - 3, fy - 3, ['.e.e.', 'ggggg', 'ggggg', 'g...g'], { e: 0xffffff, g: 0x5ad03a })
       dot(px, W, H, fx - 2, fy - 3, 0x000000)
       dot(px, W, H, fx, fy - 3, 0x000000)
       if (gulp > 10) disc(px, W, H, fx, fy - 1, 1.2, 0xc8f0a0)
@@ -411,7 +411,7 @@ const hamster: Maker = (W, H, rng) => {
         hy = fy
       }
       const legs = Math.floor(t * (0.2 + speed)) % 2
-      ellipse(px, W, H, hx, hy, 2.2, 1.6, 0xf0b060)
+      lit(px, W, H, hx, hy, 2.2, 1.6, 0xf0b060)
       dot(px, W, H, hx + 1, hy - 1, 0x1a1a1a)
       dot(px, W, H, hx - 1, hy + 1, 0xffffff)
       if (!dizzy && fling < 0) dot(px, W, H, hx + (legs ? 1 : -1), hy + 2, 0xd0905a)
@@ -468,11 +468,11 @@ const penguins: Maker = (W, H, rng) => {
         if (p.phase === 2) continue
         if (p.phase === 0) {
           const w = Math.sin(p.u * 3) > 0 ? 0 : 1
-          sprite(px, W, H, p.u, top - 4 + w * 0, ['.kk.', 'kwwk', 'kwwk', '.oo.'], { k: 0x1a1a2a, w: 0xffffff, o: 0xff9a1a })
+          litSprite(px, W, H, p.u, top - 4 + w * 0, ['.kk.', 'kwwk', 'kwwk', '.oo.'], { k: 0x1a1a2a, w: 0xffffff, o: 0xff9a1a })
           dot(px, W, H, p.u + 2, top - 3, 0xff9a1a)
         } else {
           const y = slopeY(p.u) - 2
-          sprite(px, W, H, p.u - 2, y, ['.kkkko', 'kwwwwk'], { k: 0x1a1a2a, w: 0xffffff, o: 0xff9a1a })
+          litSprite(px, W, H, p.u - 2, y, ['.kkkko', 'kwwwwk'], { k: 0x1a1a2a, w: 0xffffff, o: 0xff9a1a })
           if (p.v > 1) dot(px, W, H, p.u - 4, y + 1, 0xffffff)
         }
       }
@@ -512,22 +512,22 @@ const corgi: Maker = (W, H, rng) => {
         const side = k % 2 ? -1 : 1
         const x = W / 2 + side * (4 + s * W * 0.45)
         const sz = 1 + s * 4
-        disc(px, W, H, x, y - sz, sz, 0x2a8a3a)
+        lit(px, W, H, x, y - sz, sz, sz, 0x2a8a3a)
         rect(px, W, H, x, y - sz * 0.2, 1, sz * 0.6, 0x6a4a2a)
       }
       const cx = W / 2
       const cy = H * 0.72
       const wig = Math.sin(t * 0.4) * 1.2
       const step = Math.floor(t / 4) % 2
-      disc(px, W, H, cx - 2 + wig * 0.3, cy, 3.3, 0xe8903a)
-      disc(px, W, H, cx + 2 + wig * 0.3, cy, 3.3, 0xe8903a)
+      lit(px, W, H, cx - 2 + wig * 0.3, cy, 3.3, 3.3, 0xe8903a)
+      lit(px, W, H, cx + 2 + wig * 0.3, cy, 3.3, 3.3, 0xe8903a)
       disc(px, W, H, cx - 2 + wig * 0.3, cy + 1, 2, 0xfff0dc)
       disc(px, W, H, cx + 2 + wig * 0.3, cy + 1, 2, 0xfff0dc)
       dot(px, W, H, cx + wig * 0.3, cy + 1, 0xc8703a)
       rect(px, W, H, cx - 4, cy + 3 + step, 2, 2, 0xfff0dc)
       rect(px, W, H, cx + 3, cy + 3 + (1 - step), 2, 2, 0xfff0dc)
       const hx = cx + (look > 0 ? (look > 20 ? 2 : 1) : 0)
-      sprite(px, W, H, hx - 3, cy - 9, ['.e...e.', 'eee.eee', 'ooooooo', '.ooooo.'], { e: 0xe8903a, o: 0xe8903a })
+      litSprite(px, W, H, hx - 3, cy - 9, ['.e...e.', 'eee.eee', 'ooooooo', '.ooooo.'], { e: 0xe8903a, o: 0xe8903a })
       if (look > 0) {
         dot(px, W, H, hx + 1, cy - 7, 0x1a1a1a)
         dot(px, W, H, hx + 3, cy - 6, 0x1a1a1a)
@@ -558,7 +558,7 @@ const cucumber: Maker = (W, H, rng) => {
       rect(px, W, H, 0, floor, W, H - floor, 0xa87a4a)
       for (let x = 0; x < W; x += 6) rect(px, W, H, x, floor, 1, H - floor, 0x8a5a32)
       const bx = Math.round(W * 0.68)
-      rect(px, W, H, bx, floor - 2, 6, 2, 0xe03a5a)
+      slab(px, W, H, bx, floor - 2, 6, 2, 0xe03a5a)
       rect(px, W, H, bx + 1, floor - 3, 4, 1, 0xa86a3a)
       const placed = span(t, 30, 60)
       const ux = Math.round(W * 0.2)
@@ -574,15 +574,15 @@ const cucumber: Maker = (W, H, rng) => {
       const leap = span(t, 105, 150)
       if (t < 105) {
         const rows = turn ? SIT.map(r => [...r].reverse().join('')) : SIT
-        sprite(px, W, H, bx - 7, floor - 9, rows, { o: fur, e: 0x3ad06a })
+        litSprite(px, W, H, bx - 7, floor - 9, rows, { o: fur, e: 0x3ad06a })
         if (!turn && t % 10 < 5) dot(px, W, H, bx - 1, floor - 4, fur)
       } else if (t < 150) {
         const x = bx - 6 + leap * (W - bx + 2)
         const y = floor - 9 - Math.sin(leap * Math.PI) * H * 0.4
-        sprite(px, W, H, x, y, JUMP, { o: fur, E: 0xffffff })
+        litSprite(px, W, H, x, y, JUMP, { o: fur, E: 0xffffff })
         text(px, W, H, x - 2, y - 7, '!', 0xff3a3a)
       } else {
-        sprite(px, W, H, W - 7, floor - 9, SIT.map(r => [...r].reverse().join('')), { o: fur, e: 0x3ad06a })
+        litSprite(px, W, H, W - 7, floor - 9, SIT.map(r => [...r].reverse().join('')), { o: fur, e: 0x3ad06a })
         if (t > 170 && t % 30 < 15) text(px, W, H, W - 10, floor - 17, '?', 0x3a3a3a)
       }
     },
@@ -613,10 +613,9 @@ const hippo: Maker = (W, H, rng) => {
       const inPool = span(t, 130, 150) - span(t, 210, 235)
       const hx = W * 0.3 + inPool * W * 0.32
       const hy = ground - 3 + inPool * 6 - Math.sin(inPool * Math.PI) * 6
-      ellipse(px, W, H, hx, hy, 6, 3.5, 0x8a7a8a)
-      ellipse(px, W, H, hx, hy + 1, 5, 2, 0xa898a8)
+      lit(px, W, H, hx, hy, 6, 3.5, 0x8a7a8a, 0x4a3a4a)
       const mouth = bite * 3
-      ellipse(px, W, H, hx + 6, hy - 2 - mouth * 0.5, 3, 2, 0x9a8a9a)
+      lit(px, W, H, hx + 6, hy - 2 - mouth * 0.5, 3, 2, 0x9a8a9a)
       ellipse(px, W, H, hx + 6, hy + mouth * 0.5, 3, 1.5, 0x9a8a9a)
       if (mouth > 1) rect(px, W, H, hx + 4, hy - 1 - mouth * 0.3, 4, mouth * 0.8, 0xff7a9a)
       dot(px, W, H, hx + 4, hy - 4 - mouth * 0.5, 0x1a1a1a)
@@ -709,12 +708,12 @@ const frisbee: Maker = (W, H, rng) => {
       for (let x = 0; x < W; x += 3) dot(px, W, H, x, ground, 0x7ad050)
       for (let k = 0; k < 2; k++) {
         const tx = W * (0.3 + k * 0.5)
-        disc(px, W, H, tx, ground - 14, 5, 0x3a8a3a)
+        lit(px, W, H, tx, ground - 14, 5, 5, 0x3a8a3a)
         rect(px, W, H, tx, ground - 10, 1, 10, 0x6a4a2a)
       }
-      sprite(px, W, H, 1, ground - 10, ['.s.', 'sss', 'rrr', 'rrr', 'b.b', 'b.b', 'b.b', 'k.k'], { s: 0xffd0a0, r: 0xe04a4a, b: 0x3a4aaa, k: 0x2a2a2a })
+      litSprite(px, W, H, 1, ground - 10, ['.s.', 'sss', 'rrr', 'rrr', 'b.b', 'b.b', 'b.b', 'k.k'], { s: 0xffd0a0, r: 0xe04a4a, b: 0x3a4aaa, k: 0x2a2a2a })
       const run = Math.floor(t / 3) % 2
-      sprite(px, W, H, dx, ground - 6 + dy, ['.....bb', '.....bwk', 'bbbbbbb.', 'bbbbbb..', run ? 'b.b.b.' : '.b.b.b'], { b: 0x2a2a2a, w: 0xffffff, k: 0x1a1a1a })
+      litSprite(px, W, H, dx, ground - 6 + dy, ['.....bb', '.....bwk', 'bbbbbbb.', 'bbbbbb..', run ? 'b.b.b.' : '.b.b.b'], { b: 0x2a2a2a, w: 0xffffff, k: 0x1a1a1a })
       dot(px, W, H, dx + 1, ground - 5 + dy, 0xffffff)
       rect(px, W, H, fx - 1.5, fy, 3, 1, 0xff3aa0)
       text(px, W, H, W - 1 - 3, 1, String(caught % 10), 0xffffff)
@@ -794,18 +793,18 @@ const feeder: Maker = (W, H, rng) => {
       rect(px, W, H, 0, H - 4, W, 4, 0x6aa84a)
       line(px, W, H, 0, 6, W, 4, 0x6a4a2a)
       line(px, W, H, 0, 7, W, 5, 0x5a3a1a)
-      for (let k = 0; k < 6; k++) disc(px, W, H, k * 6 + 2, 4 + (k % 2), 2, 0x4a9a3a)
+      for (let k = 0; k < 6; k++) lit(px, W, H, k * 6 + 2, 4 + (k % 2), 2, 2, 0x4a9a3a)
       line(px, W, H, fx, 5, fx, fy - 2, 0x8a8a8a)
-      sprite(px, W, H, fx - 4, fy - 3, ['..rrrrr..', '.rrrrrrr.', 'rrrrrrrrr', '.wsssssw.', '.wsssssw.', '.wsssssw.', '.wwwwwww.', 'k.......k'], { r: 0xc84a3a, w: 0xf0e0c0, s: 0xd8b060, k: 0x6a4a2a })
+      litSprite(px, W, H, fx - 4, fy - 3, ['..rrrrr..', '.rrrrrrr.', 'rrrrrrrrr', '.wsssssw.', '.wsssssw.', '.wsssssw.', '.wwwwwww.', 'k.......k'], { r: 0xc84a3a, w: 0xf0e0c0, s: 0xd8b060, k: 0x6a4a2a })
       for (const s of seeds) dot(px, W, H, s.x, s.y, s.c)
       for (const b of birds) {
         const flap = b.state !== 1 && b.t % 6 < 3
-        sprite(px, W, H, b.x - 1, b.y - 1, flap ? ['x.x', '.x.', '.x.'] : ['.x.', 'xxx', '.x.'], { x: b.c })
+        litSprite(px, W, H, b.x - 1, b.y - 1, flap ? ['x.x', '.x.', '.x.'] : ['.x.', 'xxx', '.x.'], { x: b.c })
         dot(px, W, H, b.x + (b.x < fx ? 1 : -1), b.y - 1, 0x1a1a1a)
       }
       if (sq.phase) {
         const sy = sq.y
-        sprite(px, W, H, fx - 2, sy - 2, ['.tt..', 'tt.bb', '.bbbb', '.bbbe', '..bb.'], { t: 0x9a6a3a, b: 0x8a5a2a, e: 0x1a1a1a })
+        litSprite(px, W, H, fx - 2, sy - 2, ['.tt..', 'tt.bb', '.bbbb', '.bbbe', '..bb.'], { t: 0x9a6a3a, b: 0x8a5a2a, e: 0x1a1a1a })
       }
     },
   }
@@ -842,7 +841,7 @@ const otters: Maker = (W, H, rng) => {
         for (let k = -3; k <= 3; k++) dot(px, W, H, ox + Math.cos(a) * k, oy - 1 + Math.sin(a) * k * flip, 0xa0704a)
         const hx = ox + Math.cos(a) * 5
         const hy = oy + Math.sin(a) * 5 * flip
-        disc(px, W, H, hx, hy - 1, 1.6, 0x9a6a3a)
+        lit(px, W, H, hx, hy - 1, 1.6, 1.6, 0x9a6a3a)
         dot(px, W, H, hx + 0.5, hy - 1.5, 0x1a1a1a)
         dot(px, W, H, hx + 1.5, hy - 1, 0xd8b090)
       }
@@ -901,7 +900,7 @@ const raccoon: Maker = (W, H, rng) => {
       const bx = Math.round(W * 0.58)
       const tipped = t >= 90
       if (!tipped) {
-        rect(px, W, H, bx, ground - 9, 7, 9, 0x5a6a5a)
+        slab(px, W, H, bx, ground - 9, 7, 9, 0x5a6a5a)
         rect(px, W, H, bx - 1, ground - 10, 9, 2, 0x6a7a6a)
         for (let y = ground - 8; y < ground; y += 2) rect(px, W, H, bx, y, 7, 1, 0x4a5a4a)
       } else {
@@ -914,7 +913,7 @@ const raccoon: Maker = (W, H, rng) => {
       if (t > 175) rx = bx - 6 - span(t, 175, 210) * (bx + 4) * -1 + span(t, 175, 210) * (W + 10)
       const peek = t > 70 && t < 175
       const ry = ground - 5
-      sprite(px, W, H, rx, ry, ['g.g...', 'gggg..', 'wkkwg.', 'gggggg', 'ggggggs', 'g.g.gs.'], { g: 0x8a8a92, k: 0x1a1a1a, w: 0xffffff, s: 0x5a5a62 })
+      litSprite(px, W, H, rx, ry, ['g.g...', 'gggg..', 'wkkwg.', 'gggggg', 'ggggggs', 'g.g.gs.'], { g: 0x8a8a92, k: 0x1a1a1a, w: 0xffffff, s: 0x5a5a62 })
       if (peek && t > 120) {
         rect(px, W, H, rx + 3, ry + 1, 3, 2, 0xf0c040)
         dot(px, W, H, rx + 4, ry + 1, 0xd04a3a)
@@ -976,10 +975,10 @@ const leafcutter: Maker = (W, H, rng) => {
         const [x, y] = at(k / 60)
         dot(px, W, H, x, y, 0x5a3c22)
       }
-      disc(px, W, H, nest.x, nest.y, 3, 0x8a6a42)
+      lit(px, W, H, nest.x, nest.y, 3, 3, 0x8a6a42)
       disc(px, W, H, nest.x, nest.y, 1.5, 0x1a0e06)
       rect(px, W, H, tree.x - 1, 0, 4, tree.y + 2, 0x4a3018)
-      for (let k = 0; k < 6; k++) disc(px, W, H, tree.x - 4 + k * 2, tree.y - 4 + (k % 2) * 2, 2, 0x3a8a2a)
+      for (let k = 0; k < 6; k++) lit(px, W, H, tree.x - 4 + k * 2, tree.y - 4 + (k % 2) * 2, 2, 2, 0x3a8a2a)
       for (const [x, y, c] of dropped) rect(px, W, H, x, y, 2, 2, c)
       for (const a of ants) {
         const [x, y] = at(a.u)
@@ -1051,7 +1050,7 @@ const octopus: Maker = (W, H, rng) => {
       for (let k = 0; k < 6; k++) dot(px, W, H, (k * 11 + t * 0.1) % W, (k * 7 + t * 0.2) % (H * 0.6), 0x6aa8d0)
       const y = H * 0.7 - 2
       const c = alarm > 0 ? (alarm % 4 < 2 ? 0xff3a3a : 0xffffff) : col
-      ellipse(px, W, H, x, y - 3, 3, 3, c)
+      lit(px, W, H, x, y - 3, 3, 3, c)
       for (let k = -2; k <= 2; k++) {
         const wav = Math.sin(t * 0.2 + k) * 1
         line(px, W, H, x + k * 1.2, y - 1, x + k * 2.2 + wav, y + 2, scale(c, 0.85))
@@ -1062,7 +1061,7 @@ const octopus: Maker = (W, H, rng) => {
       dot(px, W, H, x + 1, y - 2, 0x1a1a1a)
       for (const s of ink) disc(px, W, H, s.x, s.y, 1.3, s.c)
       if (fish.on) {
-        sprite(px, W, H, fish.x - 2, H * 0.4, ['.yy.', 'yyyky', '.yy.'], { y: 0xffd040, k: 0x1a1a1a })
+        litSprite(px, W, H, fish.x - 2, H * 0.4, ['.yy.', 'yyyky', '.yy.'], { y: 0xffd040, k: 0x1a1a1a })
       }
     },
   }
@@ -1119,7 +1118,7 @@ const bees: Maker = (W, H, rng) => {
         dot(px, W, H, hx, hy, 0xffd040)
       }
       line(px, W, H, hive.x, 0, hive.x, 3, 0x6a4a2a)
-      ellipse(px, W, H, hive.x, hive.y, 3, 4, 0xe0a83a)
+      lit(px, W, H, hive.x, hive.y, 3, 4, 0xe0a83a)
       for (let k = -3; k <= 3; k += 2) rect(px, W, H, hive.x - 3, hive.y + k, 7, 1, 0xb8802a)
       dot(px, W, H, hive.x, hive.y + 2, 0x2a1a0a)
       for (const b of bs) {
@@ -1190,7 +1189,7 @@ const squirrel: Maker = (W, H, rng) => {
       rect(px, W, H, W * 0.83, H * 0.8 + 1, 4, ground - H * 0.8, 0x8a6a3a)
       const nx = W * 0.2
       if (!(hold > 0 && hold < 50)) {
-        disc(px, W, H, nx, ground - 2, 1.5, 0xa8783a)
+        lit(px, W, H, nx, ground - 2, 1.5, 1.5, 0xa8783a)
         rect(px, W, H, nx - 1, ground - 4, 3, 1, 0x6a4a2a)
       }
       const a = pts[seg] as [number, number, number]
@@ -1204,7 +1203,7 @@ const squirrel: Maker = (W, H, rng) => {
         y = ground - 1
       }
       const rows = ['...tt', '..ttt', 'bb.tt', 'bbbb.', 'b.b..']
-      sprite(px, W, H, x - 2, y - 5, dir > 0 ? rows.map(r => [...r].reverse().join('')) : rows, { t: 0xc8884a, b: 0xa86a3a })
+      litSprite(px, W, H, x - 2, y - 5, dir > 0 ? rows.map(r => [...r].reverse().join('')) : rows, { t: 0xc8884a, b: 0xa86a3a })
       dot(px, W, H, x + dir, y - 4, 0x1a1a1a)
       if (hold > 0 && hold % 10 < 5) text(px, W, H, x - 1, y - 12, '!', 0xffd040)
     },
@@ -1272,7 +1271,7 @@ const chat: Maker = (W, H, rng) => {
       }
       const hx = cx + rx * 0.6
       const hy = by - ry * 0.35
-      disc(px, W, H, hx, hy, 4, fur)
+      lit(px, W, H, hx, hy, 4, 4, fur)
       const ear = twitch > 0 ? 1 : 0
       for (const side of [-1, 1]) {
         for (let j = 0; j < 3; j++)

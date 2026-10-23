@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, clamp, ellipse, hash, irand, lerp, line, pick, poly, ring, sparks } from '../kit'
+import { burst, clamp, ellipse, hash, irand, lerp, line, lit, pick, poly, ring, sparks } from '../kit'
 import type { Spark } from '../kit'
 
 // Internet memes & brainrot: original characters only, no named memes.
@@ -426,6 +426,7 @@ const spincat: Maker = (W, H, rng) => {
       // turntable
       ellipse(px, W, H, cx, by + 1, sw * s * 0.6 + 2, 2.5, 0x4a4a5a)
       ellipse(px, W, H, cx, by, sw * s * 0.6 + 2, 2.5, 0x8a8a9a)
+      ellipse(px, W, H, cx + 1, by, sw * s * 0.45, 1.5, 0x6a6a7a)
       for (let k = 0; k < 6; k++) {
         const q = a + (k / 6) * Math.PI * 2
         if (Math.sin(q) > 0) dot(px, W, H, cx + Math.cos(q) * (sw * s * 0.6), by + Math.sin(q) * 1.5, 0xd0d0e0)
@@ -451,7 +452,7 @@ const spincat: Maker = (W, H, rng) => {
         for (let j = 0; j < sh * s; j++) {
           const ch = (sprite[Math.floor(j / s)] as string)[i] as string
           const col = CAT_COLS[ch]
-          if (col !== undefined) dot(px, W, H, cx + dx, top + j, ch === 'K' ? col : scale(col, light))
+          if (col !== undefined) dot(px, W, H, cx + dx, top + j, ch === 'K' ? col : scale(col, light * (dx > reach * 0.35 ? 0.82 : dx < -reach * 0.35 ? 1.06 : 1)))
         }
       }
       // the stare after the stop
@@ -1124,6 +1125,8 @@ const tumtum: Maker = (W, H, rng) => {
         line(px, W, H, lx + (2 + side * 3) * u, gy - 3 * u - bob, lx + (2 + side * 3) * u + swingL, gy - 1, 0x3a2410)
       }
       rect(px, W, H, lx, top, lw, gy - 3 * u - top, 0x9a6a38)
+      rect(px, W, H, lx, top, Math.max(1, u), gy - 3 * u - top, 0xb88a54)
+      rect(px, W, H, lx + lw - Math.max(1, u), top, Math.max(1, u), gy - 3 * u - top, 0x6a4422)
       for (let k = 1; k < 4; k++) rect(px, W, H, lx + k * 1.8 * u, top + 2 * u + (k % 2) * 3 * u, Math.max(1, 0.5 * u), 7 * u, 0x7a4a24)
       ellipse(px, W, H, lx + lw / 2, top, lw / 2, 1.5 * u, 0xe0b878)
       ellipse(px, W, H, lx + lw / 2, top, lw / 4, 0.7 * u, 0xb08048)
@@ -1927,6 +1930,7 @@ const elefantino: Maker = (W, H, rng) => {
       for (let y = gy + 1; y < H; y += 2)
         for (let x = 0; x < W; x++) if (hash(Math.floor(x + cam), y, 5) < 0.06) px[y * W + x] = 0xd09a50
 
+      ellipse(px, W, H, cx + u, gy, 9 * u, 1.2 * u, 0xc8904a)
       // legs, walking
       for (const [lx, s] of [[-5, 1], [-2, -1], [3, 1], [5.5, -1]] as const) {
         const up = Math.max(0, Math.sin(t * 0.35) * s) * u
@@ -1935,14 +1939,14 @@ const elefantino: Maker = (W, H, rng) => {
       }
       line(px, W, H, cx - 8 * u, by - u, cx - 10 * u, by + 2 * u, GD)
       // body with cactus ribs and spines
-      ellipse(px, W, H, cx, by, 8 * u, 5 * u, G)
+      lit(px, W, H, cx, by, 8 * u, 5 * u, G)
       for (let k = -3; k <= 3; k++) line(px, W, H, cx + k * 2 * u, by - 4 * u + Math.abs(k) * 0.6 * u, cx + k * 2 * u, by + 4 * u - Math.abs(k) * 0.6 * u, GD)
       for (let k = 0; k < 14; k++) {
         const b = (k / 14) * Math.PI * 2
         dot(px, W, H, cx + Math.cos(b) * 8.6 * u, by + Math.sin(b) * 5.6 * u, SPINE)
       }
       // head, ear pad, trunk
-      disc(px, W, H, head[0], head[1], 4 * u, G)
+      lit(px, W, H, head[0], head[1], 4 * u, 4 * u, G)
       for (let k = 0; k < 9; k++) {
         const b = -Math.PI * 0.9 + (k / 8) * Math.PI * 1.1
         dot(px, W, H, head[0] + Math.cos(b) * 4.6 * u, head[1] + Math.sin(b) * 4.6 * u, SPINE)
@@ -1964,8 +1968,8 @@ const elefantino: Maker = (W, H, rng) => {
 
       for (const b of balloons) {
         line(px, W, H, b.x, b.y + 2.2 * u, b.x + Math.sin(t * 0.2 + b.ph), b.y + 6 * u, 0x8a6a50)
-        disc(px, W, H, b.x, b.y, 2.2 * u, b.c)
-        dot(px, W, H, b.x - 0.8 * u, b.y - 0.8 * u, mix(b.c, 0xffffff, 0.6))
+        lit(px, W, H, b.x, b.y, 2.2 * u, 2.2 * u, b.c)
+        dot(px, W, H, b.x - 0.8 * u, b.y - 0.8 * u, mix(b.c, 0xffffff, 0.7))
       }
       for (const s of bits) dot(px, W, H, s.x, s.y, s.c)
       if (shock) text(px, W, H, head[0] + 4 * u, head[1] - 9 * u, '!', 0xffffff)
