@@ -44,7 +44,7 @@ Run from the repository root.
 | `npx tsx tools/render.ts` | Runs every video 600 frames offline, prints ms per frame and SVG sizes, rewrites `assets/preview.png` |
 | `npx tsx tools/render.ts <kind>` | One video over 32 s, frames side by side in `tools/out/<kind>.png` (git-ignored). Look at it |
 | `npx tsx tools/render.ts <theme>` | Every video of a theme, one row each, in `tools/out/<theme>.png`, with each one's time and SVG size. Several kinds or themes can be given |
-| `npx tsx tools/site.ts [--serve]` | Builds the project page into `site/dist/` (git-ignored); `--serve` then serves it on http://localhost:8080 |
+| `npx tsx tools/site.ts [--serve]` | Builds the project page into `site/dist/` (git-ignored), with its `llms.txt` (`tools/llms.ts`, from the videos and their English names); `--serve` then serves it on http://localhost:8080 |
 | `npx tsx tools/social.ts` | Rewrites `assets/social.png`: the title, the number of videos and five clips (`CLIPS`). After a change, upload it again in the repository's settings |
 | `npx tsx tools/gif.ts [kind...]` | Rewrites `assets/feed.gif`: six videos playing side by side, or the kinds given |
 | `npx tsx tools/sync-locales.ts` | Rewrites each `plugin/hooks/locales/<lang>/videos.ts` from its theme files and lists the videos a language lacks. `--check` only lists them; `check.ts` runs it |
