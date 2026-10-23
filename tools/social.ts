@@ -15,6 +15,9 @@ import { png } from './png'
 
 const OW = 1280
 const OH = 640
+// GitHub crops the edges: its template keeps everything that matters 80 px
+// inside them.
+const SAFE = 80
 const W = 32
 const H = 56
 
@@ -118,23 +121,24 @@ for (let y = 0; y < OH; y++) {
 
 // The title, the smiley before it, the tagline under it.
 const title = 'brainrot-break'
-const TS = 9
-const SS = 5
-const titleW = 16 * SS + 36 + textWidth(title, TS)
+const TS = 8
+const SS = 4
+const titleW = 16 * SS + 28 + textWidth(title, TS)
 const tx = Math.round((OW - titleW) / 2)
-smiley(tx, 52, SS)
-write(title, tx + 16 * SS + 36, 60, TS, TITLE)
+smiley(tx, SAFE + 12, SS)
+write(title, tx + 16 * SS + 28, SAFE + 16, TS, TITLE)
 const tagline = `${Object.keys(MAKERS).length} pixel art mini-videos to scroll while claude answers`
-write(tagline, Math.round((OW - textWidth(tagline, 3)) / 2), 158, 3, TAGLINE)
+write(tagline, Math.round((OW - textWidth(tagline, 3)) / 2), SAFE + 114, 3, TAGLINE)
 
 // The clips, each in a phone frame.
-const CS = 6
+const CS = 5
 const PAD = 8
 const GAP = 40
 const PW = W * CS + 2 * PAD
 const PH = H * CS + 2 * PAD
 const rowX = Math.round((OW - (CLIPS.length * PW + (CLIPS.length - 1) * GAP)) / 2)
-const rowY = 222
+const rowY = OH - SAFE - PH
+if (rowX < SAFE || tx < SAFE) throw new Error('the clips or the title spill out of the safe area: fewer clips, or smaller')
 for (const [i, [kind, frame]] of CLIPS.entries()) {
   const x0 = rowX + i * (PW + GAP)
   // a frame with its corners cut, two steps deep
