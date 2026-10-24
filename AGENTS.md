@@ -28,7 +28,7 @@ The mod is the `plugin/` folder: the marketplace's `source`, and all an install 
 | `.github/workflows/check.yml` | CI: the kinds check, the translations check and the offline render, the parts of `check.ts` that need no Claude Code session |
 | `site/` | The project page on GitHub Pages: the feed playing in the browser (`app.ts`, `index.html`, `style.css`), drawn like the mod's pane. It imports the videos and their texts from `plugin/hooks/`, so every video is on it. Its own texts are the `SITE` table in `app.ts`, in every language |
 | `.github/workflows/pages.yml` | Builds the page with `tools/site.ts` and publishes it on GitHub Pages at each push to `main` |
-| `docs/` | Two lists of 500 scored video ideas (`video-ideas.md`, `video-ideas-2.md`). The second one writes the score out as points per criterion; score new ideas the same way. Pick the next videos from there |
+| `docs/` | Two lists of 500 scored video ideas (`video-ideas.md`, `video-ideas-2.md`) and a short third one (`video-ideas-3.md`). The second one writes the score out as points per criterion; score new ideas the same way. Pick the next videos from there |
 | `assets/preview.png` | The README's picture of every video, written by `tools/render.ts` |
 | `assets/feed.gif` | The README's moving picture, written by `tools/gif.ts` |
 | `assets/social.png` | The social preview (1280 × 640), written by `tools/social.ts`: the project page's `og:image`, and the repository's, uploaded by hand in its GitHub settings (Social preview) |
