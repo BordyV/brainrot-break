@@ -369,6 +369,12 @@ export type Kind =
   | 'ropebridge'
   | 'softbody'
   | 'ragdoll'
+  | 'voxeltower'
+  | 'bullettime'
+  | 'woodsplit'
+  | 'barrelchain'
+  | 'laserheist'
+  | 'robowalk'
 
 export type Video = {
   id: string

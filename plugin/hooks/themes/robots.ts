@@ -1,6 +1,7 @@
-import { disc, dot, mix, rect, text } from '../draw'
+import { disc, dot, mix, rect, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { hash, irand, lit, slab, textWidth } from '../kit'
+import { beam, burst, hash, irand, lit, litSprite, slab, sparks, textWidth, tint } from '../kit'
+import type { Spark } from '../kit'
 
 // Sci-fi, robots & mecha: machines that act alive.
 
@@ -253,6 +254,283 @@ const robovac: Maker = (W, H, rng) => {
   }
 }
 
+// --- laser grid heist ---------------------------------------------------------------
+
+const THIEF = ['..k..', '.kwk.', 'kkkkk', '.kkk.', '.k.k.']
+
+const laserheist: Maker = (W, H, rng) => {
+  const top = 11
+  const bottom = H - 6
+  type Row = { y: number; kind: 'blink' | 'gap'; ph: number; sp: number }
+  let rows: Row[] = []
+  let x = W / 2
+  let y = bottom
+  let t = 0
+  let next = 0
+  let crossing = false
+  let slip = -1
+  let alarm = 0
+  let won = 0
+  let fx: Spark[] = []
+  const reset = () => {
+    const n = 4
+    rows = []
+    for (let i = 0; i < n; i++) rows.push({ y: Math.round(bottom - 7 - (i * (bottom - top - 12)) / (n - 1)), kind: rng() < 0.5 ? 'blink' : 'gap', ph: rng() * 100, sp: 0.03 + rng() * 0.03 })
+    x = W / 2
+    y = bottom
+    t = 0
+    next = 0
+    crossing = false
+    // now and then the thief goes a moment too early
+    slip = rng() < 0.25 ? irand(rng, n) : -1
+    alarm = 0
+    won = 0
+  }
+  reset()
+  const on = (r: Row, tt: number) => (tt + r.ph) % 50 < 28
+  const gapX = (r: Row, tt: number) => W / 2 + Math.sin(tt * r.sp + r.ph) * (W / 2 - 5)
+  const burns = (r: Row, tt: number, px0: number) => (r.kind === 'blink' ? on(r, tt) : Math.abs(px0 - gapX(r, tt)) > 2.5)
+
+  return {
+    step() {
+      fx = sparks(fx, 0.04)
+      t++
+      if (alarm > 0) {
+        if (++alarm > 60) reset()
+        return
+      }
+      if (won > 0) {
+        if (++won > 50) reset()
+        return
+      }
+      const r = rows[next]
+      if (!r) {
+        // the last stretch: up to the diamond
+        y -= 0.5
+        x += (W / 2 - x) * 0.1
+        if (y <= top + 3) {
+          won = 1
+          for (let k = 0; k < 3; k++) burst(fx, rng, W / 2, top, 0xa0f8ff, 8, 1)
+        }
+        return
+      }
+      if (r.kind === 'gap') x += Math.max(-0.7, Math.min(0.7, gapX(r, t + 4) - x))
+      if (!crossing) {
+        if (y > r.y + 4) y -= 0.5
+        else {
+          // waiting for the beam to go dark, or for the gap to come round
+          let safe = true
+          for (let k = 0; k < 10; k++) if (burns(r, t + k, r.kind === 'gap' ? gapX(r, t + k) : x)) safe = false
+          if (r.kind === 'gap') safe = Math.abs(x - gapX(r, t)) < 1
+          if (safe || (next === slip && rng() < 0.05)) crossing = true
+        }
+      } else {
+        y -= 0.9
+        if (y < r.y - 3) {
+          crossing = false
+          next++
+        }
+      }
+      if (Math.abs(y - r.y) < 1.5 && burns(r, t, x)) {
+        alarm = 1
+        for (let k = 0; k < 2; k++) burst(fx, rng, x, y, 0xff4040, 8, 0.8)
+      }
+    },
+    draw(px) {
+      // a marble floor in dim light, the walls of the vault
+      for (let yy = 0; yy < H; yy++)
+        for (let xx = 0; xx < W; xx++) {
+          const tile = (Math.floor(xx / 4) + Math.floor(yy / 4)) % 2
+          px[yy * W + xx] = mix(tile ? 0x22243a : 0x1c1e30, 0x0a0a14, Math.abs(xx - W / 2) / W)
+        }
+      rect(px, W, H, 0, 0, W, 6, 0x3a3a50)
+      rect(px, W, H, 0, 5, W, 1, 0x50506a)
+      // the pedestal and its diamond
+      slab(px, W, H, W / 2 - 3, top - 2, 7, 5, 0x6a6a80, 0x2a2a38)
+      if (!won) {
+        const sparkle = t % 30 < 4
+        rect(px, W, H, W / 2 - 1, top - 4, 3, 1, 0xa0f8ff)
+        rect(px, W, H, W / 2 - 2, top - 3, 5, 1, 0x60d8f0)
+        rect(px, W, H, W / 2 - 1, top - 2, 3, 1, 0x40b0d8)
+        dot(px, W, H, W / 2, top - 1, 0x40b0d8)
+        if (sparkle) dot(px, W, H, W / 2 - 1, top - 4, 0xffffff)
+      }
+      for (const r of rows) {
+        const lit2 = r.kind === 'blink' ? on(r, t) : true
+        slab(px, W, H, 0, r.y - 1, 2, 3, 0x5a5a6a)
+        slab(px, W, H, W - 2, r.y - 1, 2, 3, 0x5a5a6a)
+        dot(px, W, H, 1, r.y, lit2 ? 0xff4050 : 0x5a2028)
+        dot(px, W, H, W - 2, r.y, lit2 ? 0xff4050 : 0x5a2028)
+        if (r.kind === 'blink' && !lit2) continue
+        const g = r.kind === 'gap' ? gapX(r, t) : -99
+        for (let xx = 2; xx < W - 2; xx++) {
+          if (Math.abs(xx - g) <= 2.5) continue
+          dot(px, W, H, xx, r.y, 0xff3a4a)
+          tint(px, W, H, xx, r.y - 1, 0xff2030, 0.35)
+          tint(px, W, H, xx, r.y + 1, 0xff2030, 0.35)
+        }
+      }
+      // a torch beam ahead of the thief
+      for (let k = 2; k < 9; k++) for (let w = -k / 2; w <= k / 2; w++) tint(px, W, H, x + w, y - 2 - k, 0xfff4c0, 0.3 - k * 0.02)
+      litSprite(px, W, H, Math.round(x - 2), Math.round(y - 2), THIEF, { k: 0x40405e, w: 0xf0f0f0 })
+      if (won) lit(px, W, H, x + 2, y + 1, 1.6, 1.6, 0x8a7a5a)
+      if (alarm) {
+        const k = alarm % 10 < 5
+        for (let i = 0; i < W * H; i++) px[i] = mix(px[i], 0xff2020, k ? 0.3 : 0.1)
+        disc(px, W, H, 2, 2, 1.5, k ? 0xff4040 : 0x6a1010)
+        disc(px, W, H, W - 3, 2, 1.5, k ? 0x6a1010 : 0xff4040)
+      }
+      text(px, W, H, W - 1 - textWidth(`${next}/${rows.length}`), 0, `${Math.min(next, rows.length)}/${rows.length}`, 0xd0d0e0)
+      for (const s of fx) dot(px, W, H, s.x, s.y, s.c)
+    },
+  }
+}
+
+// --- robot learns to walk -------------------------------------------------------------
+
+const robowalk: Maker = (W, H, rng) => {
+  const ground = Math.round(H * 0.74)
+  const leg = Math.max(3, Math.round(H * 0.075))
+  const bw = Math.max(5, Math.round(W * 0.26))
+  const bh = Math.max(4, Math.round(W * 0.22))
+  let x = 0
+  let phase = 0
+  let tilt = 0
+  let spin = 0
+  let state: 'walk' | 'wobble' | 'fall' | 'down' | 'up' | 'win' = 'walk'
+  let t = 0
+  let attempt = 1
+  let fails = 0
+  let failAt = 0
+  let fallDir = 1
+  let fx: Spark[] = []
+  const run = () => {
+    attempt = 1
+    fails = 1 + irand(rng, 3)
+    start()
+  }
+  const start = () => {
+    x = W * 0.2
+    phase = 0
+    tilt = 0
+    spin = 0
+    state = 'walk'
+    t = 0
+    failAt = attempt <= fails ? 15 + irand(rng, 30) : 9999
+    fallDir = rng() < 0.6 ? 1 : -1
+  }
+  run()
+
+  return {
+    step() {
+      fx = sparks(fx, 0.06)
+      t++
+      if (state === 'walk') {
+        phase += 0.16
+        x += 0.32
+        if (t > failAt) {
+          state = 'wobble'
+          t = 0
+        }
+        if (x > W + bw) {
+          state = 'win'
+          t = 0
+          for (let k = 0; k < 4; k++) burst(fx, rng, W / 2, H * 0.3, [0xff5a6a, 0x5ad0ff, 0xffd24a, 0x7aff6a][k], 10, 1.3)
+        }
+      } else if (state === 'wobble') {
+        tilt = Math.sin(t * 0.5) * t * 0.012
+        if (t > 22) {
+          state = 'fall'
+          spin = fallDir * 0.02
+          tilt = fallDir * 0.15
+        }
+      } else if (state === 'fall') {
+        spin += Math.sin(tilt) * 0.03
+        tilt += spin
+        if (Math.abs(tilt) > 1.45) {
+          tilt = Math.sign(tilt) * 1.45
+          if (Math.abs(spin) > 0.04) spin = -spin * 0.3
+          else {
+            state = 'down'
+            t = 0
+            for (let k = 0; k < 6; k++) fx.push({ x: x + fallDir * (leg * 2 + bh), y: ground, vx: (rng() - 0.5) * 0.8, vy: -rng() * 0.6, l: 14, c: 0xb8b8c8 })
+          }
+        }
+      } else if (state === 'down' && t > 30) {
+        state = 'up'
+        t = 0
+      } else if (state === 'up') {
+        tilt *= 0.88
+        if (t > 25) {
+          attempt++
+          start()
+        }
+      } else if (state === 'win' && t > 45) run()
+    },
+    draw(px) {
+      // the lab: a tiled wall, a monitor counting the tries, a floor with hazard stripes
+      sky(px, W, H, 0x2a3446, 0x3a4658, ground)
+      for (let yy = 0; yy < ground; yy++) for (let xx = 0; xx < W; xx++) if (xx % 8 === 0 || yy % 8 === 0) px[yy * W + xx] = 0x26303e
+      slab(px, W, H, 2, 8, 13, 9, 0x1a2028, 0x0a0e12)
+      text(px, W, H, 4, 10, String(attempt), state === 'win' ? 0x60ff90 : 0x60d0ff)
+      for (let k = 0; k < Math.min(attempt - 1, 3); k++) {
+        dot(px, W, H, 11, 10 + k * 2, 0xff5050)
+      }
+      for (let yy = ground; yy < H; yy++) for (let xx = 0; xx < W; xx++) px[yy * W + xx] = yy === ground ? 0x8a94a8 : mix(0x4a5262, 0x2a303c, (yy - ground) / (H - ground))
+      // the robot, drawn around its feet, so a fall turns it about them
+      const pivotX = x
+      const c = Math.cos(tilt)
+      const s = Math.sin(tilt)
+      const P = (lx: number, ly: number): [number, number] => [pivotX + lx * c - ly * s, ground + lx * s + ly * c]
+      const hipY = -leg * 2 + (state === 'walk' ? Math.abs(Math.sin(phase)) * 0.6 : 0)
+      for (const side of [0, 1]) {
+        const a = state === 'walk' ? Math.sin(phase + side * Math.PI) * 0.5 : 0
+        const knee = state === 'walk' ? Math.max(0, Math.sin(phase + side * Math.PI + 1)) * 0.6 : 0
+        const kx = Math.sin(a) * leg
+        const ky = hipY + Math.cos(a) * leg
+        const fxp = kx + Math.sin(a - knee) * leg
+        const fyp = Math.min(0, ky + Math.cos(a - knee) * leg)
+        const col = side ? 0x7a8498 : 0x9aa4b8
+        beam(px, W, H, ...P(0, hipY), ...P(kx, ky), col)
+        beam(px, W, H, ...P(kx, ky), ...P(fxp, fyp), col)
+        const [fx0, fy0] = P(fxp + 1, fyp)
+        rect(px, W, H, fx0 - 2, fy0 - 1, 4, 1, 0x3a4050)
+      }
+      // the body: a lit box with a screen for a face, an antenna
+      const corners: [number, number][] = [P(-bw / 2, hipY), P(bw / 2, hipY), P(bw / 2, hipY - bh), P(-bw / 2, hipY - bh)]
+      const outline = corners.map(([a, b]) => [a, b] as [number, number])
+      for (let k = 0; k < 4; k++) {
+        const [ax, ay] = outline[k]
+        const [bx, by] = outline[(k + 1) % 4]
+        for (let j = 0; j <= 12; j++) dot(px, W, H, ax + ((bx - ax) * j) / 12, ay + ((by - ay) * j) / 12, 0x1a2030)
+      }
+      for (let ly = hipY - bh + 1; ly < hipY; ly++)
+        for (let lx = -bw / 2 + 1; lx < bw / 2; lx++) {
+          const [qx, qy] = P(lx, ly)
+          const edge = ly < hipY - bh + 2 || lx < -bw / 2 + 2
+          dot(px, W, H, qx, qy, edge ? 0xe8ecf4 : ly > hipY - 2 || lx > bw / 2 - 2 ? 0x8a94a8 : 0xc0c8d8)
+        }
+      for (let ly = hipY - bh + 2; ly < hipY - 1.5; ly++)
+        for (let lx = -bw / 2 + 2; lx < bw / 2 - 1.5; lx++) {
+          const [qx, qy] = P(lx, ly)
+          dot(px, W, H, qx, qy, 0x1a2a3a)
+        }
+      const happy = state === 'win' || state === 'walk'
+      const eye = state === 'fall' || state === 'down' ? 0xff6060 : 0x60f0ff
+      dot(px, W, H, ...P(-1.5 + 1, hipY - bh + 3), eye)
+      dot(px, W, H, ...P(1.5 + 1, hipY - bh + 3), eye)
+      if (happy) dot(px, W, H, ...P(1, hipY - bh + 4), eye)
+      const [ax, ay] = P(0, hipY - bh - 2)
+      const [ax0, ay0] = P(0, hipY - bh)
+      dot(px, W, H, ax0, ay0 - 1, 0x6a7488)
+      dot(px, W, H, ax, ay, t % 16 < 8 ? 0xff5050 : 0xffd040)
+      for (const sp of fx) dot(px, W, H, sp.x, sp.y, sp.c)
+    },
+  }
+}
+
 export const ROBOTS = {
   robovac,
+  laserheist,
+  robowalk,
 }
