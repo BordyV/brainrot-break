@@ -101,9 +101,12 @@ const TILE = [0xcdc1b4, 0xeee4da, 0xede0c8, 0xf2b179, 0xf59563, 0xf67c5f, 0xf65e
 
 const game2048: Maker = (W, H, rng) => {
   const ts = Math.max(3, Math.min(7, Math.floor((W - 3) / 4)))
+  // tiles taller than wide where the clip has the height: two rows of digits, so 128 to 2048 fit
+  const th = Math.max(ts, Math.min(11, Math.floor((H - 12) / 4)))
   const size = ts * 4 + 3
+  const sizeY = th * 4 + 3
   const ox = Math.floor((W - size) / 2)
-  const oy = Math.floor((H - size) / 2) + 3
+  const oy = Math.floor((H - sizeY) / 2) + 3
   let g = new Array(16).fill(0)
   let anim: { from: number; to: number; v: number }[] = []
   let at = 0
@@ -200,26 +203,33 @@ const game2048: Maker = (W, H, rng) => {
     draw(px) {
       px.fill(0xfaf8ef)
       // the board's frame a pixel round the grid; at 32 pixels wide it fills the width
-      rect(px, W, H, ox - 1, oy - 1, size + 2, size + 2, 0xbbada0)
-      const pos = (i: number): [number, number] => [ox + (i % 4) * (ts + 1), oy + Math.floor(i / 4) * (ts + 1)]
+      rect(px, W, H, ox - 1, oy - 1, size + 2, sizeY + 2, 0xbbada0)
+      const pos = (i: number): [number, number] => [ox + (i % 4) * (ts + 1), oy + Math.floor(i / 4) * (th + 1)]
       for (let i = 0; i < 16; i++) {
         const [x, y] = pos(i)
-        rect(px, W, H, x, y, ts, ts, TILE[0] as number)
+        rect(px, W, H, x, y, ts, th, TILE[0] as number)
         rect(px, W, H, x, y, ts, 1, scale(TILE[0] as number, 0.92))
       }
       const tile = (x: number, y: number, v: number, big: boolean) => {
         const c = TILE[Math.min(v, 12)] as number
         const x0 = x - (big ? 1 : 0)
         const y0 = y - (big ? 1 : 0)
-        // tiles a pixel apart: seven wide, so two digits of the 3-pixel font fit
-        const s0 = ts + (big ? 2 : 0)
+        // tiles a pixel apart: seven wide, so two digits of the 3-pixel font fit on a row
+        const sw = ts + (big ? 2 : 0)
+        const sh = th + (big ? 2 : 0)
         // a tile with a little depth: a lit top edge, a shaded bottom edge
-        rect(px, W, H, x0, y0, s0, s0, c)
-        rect(px, W, H, x0, y0, s0, 1, mix(c, 0xffffff, 0.25))
-        rect(px, W, H, x0, y0 + s0 - 1, s0, 1, scale(c, 0.85))
+        rect(px, W, H, x0, y0, sw, sh, c)
+        rect(px, W, H, x0, y0, sw, 1, mix(c, 0xffffff, 0.25))
+        rect(px, W, H, x0, y0 + sh - 1, sw, 1, scale(c, 0.85))
         const s = String(2 ** v)
-        if (textWidth(s) <= ts) text(px, W, H, x + Math.floor((ts - textWidth(s)) / 2), y + Math.floor((ts - 5) / 2), s, v <= 2 ? 0x776e65 : 0xffffff)
-        else dot(px, W, H, x + 1, y + 1, 0xffffff)
+        const ink = v <= 2 ? 0x776e65 : 0xffffff
+        const row = (part: string, yy: number) => text(px, W, H, x + Math.floor((ts - textWidth(part)) / 2), yy, part, ink)
+        if (textWidth(s) <= ts) row(s, y + Math.floor((th - 5) / 2))
+        else if (th >= 11) {
+          // three or four digits wrap like a line of text: 12 over 8, 10 over 24
+          row(s.slice(0, 2), y + Math.floor((th - 11) / 2))
+          row(s.slice(2), y + Math.floor((th - 11) / 2) + 6)
+        } else dot(px, W, H, x + 1, y + 1, 0xffffff)
       }
       if (at > 0) {
         const f = at / 5
@@ -230,7 +240,7 @@ const game2048: Maker = (W, H, rng) => {
         }
       } else for (let i = 0; i < 16; i++) if (g[i]) tile(...pos(i), g[i] as number, pops.has(i) && hold === 0)
       const b = String(2 ** Math.max(1, best))
-      text(px, W, H, W / 2 - textWidth(b) / 2, oy - 8, b, hold > 0 ? 0xf65e3b : 0x776e65)
+      text(px, W, H, W / 2 - textWidth(b) / 2, Math.max(0, oy - 7), b, hold > 0 ? 0xf65e3b : 0x776e65)
     },
   }
 }
