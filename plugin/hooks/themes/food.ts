@@ -314,8 +314,19 @@ const popcorn: Maker = (W, H, rng) => {
         if (k.y > potTop) k.x = clamp(k.x, potL + 1, potR - 2)
         const floorY = k.x > potL && k.x < potR ? heights[Math.round(clamp(k.x, 0, W - 1))]! : H - 4
         if (k.vy > 0 && k.y >= floorY) {
-          k.y = floorY
+          // it rolls off the top of the pile to a lower neighbour, so the heap keeps a slope
+          let cx = Math.round(clamp(k.x, potL + 1, potR - 2))
+          for (let n = 0; n < 8; n++) {
+            const l = cx - 1 > potL ? heights[cx - 1]! : -1
+            const r = cx + 1 < potR - 1 ? heights[cx + 1]! : -1
+            const lower = l > r || (l === r && rng() < 0.5) ? cx - 1 : cx + 1
+            if (Math.max(l, r) <= heights[cx]! + 1.5) break
+            cx = lower
+          }
+          k.x = cx
+          k.y = heights[cx]!
           k.rest = true
+          heights[cx] = Math.min(heights[cx]!, k.y - 1.5)
         }
         if (lid.vy === 0 && k.y < lid.y + 1 && lid.y < potTop) {
           k.vy = Math.abs(k.vy) * 0.5

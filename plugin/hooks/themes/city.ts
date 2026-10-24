@@ -121,7 +121,13 @@ const roundabout: Maker = (W, H, rng) => {
             c.a = ARM[c.arm] as number
           }
         } else if (c.stage === 1) {
-          c.a += 0.45 / R
+          // keep a car's length behind the one ahead on the ring
+          const ahead = cars.some(o => {
+            if (o === c || o.stage !== 1) return false
+            const gap = (((o.a - c.a) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)
+            return gap > 0.01 && gap < 5 / R
+          })
+          if (!ahead) c.a += 0.45 / R
           const target = ARM[c.exit] as number
           if (Math.abs(Math.atan2(Math.sin(c.a - target), Math.cos(c.a - target))) < 0.05 && c.a - (ARM[c.arm] as number) > 0.5) {
             c.stage = 2
@@ -146,17 +152,24 @@ const roundabout: Maker = (W, H, rng) => {
       for (const c of cars) {
         let x: number
         let y: number
+        // the way it drives: in along its arm, clockwise round the ring, out along the next
+        let h: number
         if (c.stage === 1) {
           x = cx + Math.cos(c.a) * R
           y = cy + Math.sin(c.a) * R
+          h = c.a + Math.PI / 2
         } else {
           const a = ARM[c.arm] as number
           const side = c.stage === 0 ? -1.5 : 1.5
           x = cx + Math.cos(a) * c.p + Math.sin(a) * side
           y = cy + Math.sin(a) * c.p - Math.cos(a) * side
+          h = c.stage === 0 ? a + Math.PI : a
         }
-        disc(px, W, H, x, y, 1.2, c.c)
-        dot(px, W, H, x, y, mix(c.c, 0xffffff, 0.5))
+        // a small car seen from above: a body four pixels long, a windscreen at the front
+        const hx = Math.cos(h)
+        const hy = Math.sin(h)
+        for (let k = -1.5; k <= 1.5; k += 0.5) for (const w of [-0.5, 0.5]) dot(px, W, H, x + hx * k - hy * w, y + hy * k + hx * w, c.c)
+        dot(px, W, H, x + hx * 0.8, y + hy * 0.8, 0xa8d8f0)
       }
     },
   }
@@ -324,14 +337,16 @@ const runway: Maker = (W, H, rng) => {
     step() {
       t++
       if (t % 200 === 1) planes.push({ y: -10, z: 10, mode: 0, c: pick(rng, [0xffffff, 0xe0e8f0]) })
-      if (t % 200 === 100) planes.push({ y: H * 0.8, z: 0, mode: 1, c: pick(rng, [0xffffff, 0xe0e8f0]) })
+      // one runway, one direction (into the wind): landings and take-offs both head down the
+      // screen, a take-off only once the landing plane has rolled clear
+      if (t % 200 === 150) planes.push({ y: H * 0.15, z: 0, mode: 1, c: pick(rng, [0xffffff, 0xe0e8f0]) })
       for (const p of planes) {
         if (p.mode === 0) {
-          p.y += 0.9 - Math.min(0.6, Math.max(0, p.y - H * 0.4) * 0.03)
+          p.y += 0.9 - Math.min(0.5, Math.max(0, p.y - H * 0.4) * 0.03)
           p.z = Math.max(0, 10 - (p.y + 10) * 0.25)
         } else {
-          p.y -= 0.3 + Math.max(0, H * 0.8 - p.y) * 0.04
-          p.z = Math.max(0, (H * 0.6 - p.y) * 0.2)
+          p.y += 0.3 + Math.max(0, p.y - H * 0.15) * 0.04
+          p.z = Math.max(0, (p.y - H * 0.4) * 0.2)
         }
       }
       planes = planes.filter(p => p.y > -16 && p.y < H + 6)
@@ -351,11 +366,16 @@ const runway: Maker = (W, H, rng) => {
         ellipse(px, W, H, cx + p.z * 0.6, p.y + p.z, 2 * s, 1, 0x3a5a3a)
         const x = cx
         const y = p.y
+        // nose down the screen: the cockpit at the front, the tailplane at the back
         rect(px, W, H, x - 0.5, y - 4 * s, 2, 8 * s, p.c)
-        rect(px, W, H, x - 5 * s, y - 1, 10 * s + 1, 2, p.c)
-        rect(px, W, H, x - 2 * s, y + 3 * s, 4 * s + 1, 1, p.c)
-        dot(px, W, H, x, y - 4 * s, 0x3a8aff)
-        if (t % 10 < 5) dot(px, W, H, x - 5 * s, y, 0xff3a3a)
+        rect(px, W, H, x - 5 * s, y, 10 * s + 1, 2, p.c)
+        rect(px, W, H, x - 2 * s, y - 3 * s - 1, 4 * s + 1, 1, p.c)
+        dot(px, W, H, x, y + 4 * s - 1, 0x3a8aff)
+        // flying south, its left wing (red light) is on the screen's right, the right (green) on its left
+        if (t % 10 < 5) {
+          dot(px, W, H, x + 5 * s + 1, y, 0xff3a3a)
+          dot(px, W, H, x - 5 * s, y, 0x3aff6a)
+        }
       }
     },
   }

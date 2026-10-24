@@ -677,7 +677,9 @@ const curling: Maker = (W, H, rng) => {
 
 const archery: Maker = (W, H, rng) => {
   const ground = H - 6
-  const target = { x: W - 4, y: H * 0.45 }
+  // the archer stands on the grass; the boss on its stand, its gold about chest high
+  const target = { x: W - 4, y: ground - 9 }
+  const shoulder = ground - 6
   let arrow = { x: 0, y: 0, vx: 0, vy: 0, stuck: false }
   let hits: [number, number][] = []
   let score = 0
@@ -686,7 +688,7 @@ const archery: Maker = (W, H, rng) => {
 
   function shoot() {
     wind = (rng() - 0.5) * 0.004
-    arrow = { x: 6, y: H * 0.5, vx: 1.6, vy: -0.55 + (rng() - 0.5) * 0.12, stuck: false }
+    arrow = { x: 6, y: shoulder, vx: 1.6, vy: -0.55 + (rng() - 0.5) * 0.12, stuck: false }
     t = 0
   }
   shoot()
@@ -711,9 +713,9 @@ const archery: Maker = (W, H, rng) => {
         arrow.stuck = true
         t = 0
         const d = Math.abs(arrow.y - target.y)
-        if (d < 8) {
+        if (d < 7) {
           hits.push([arrow.x, arrow.y])
-          score += Math.max(1, 10 - Math.round(d * 1.2))
+          score += Math.max(1, 10 - Math.round(d * 1.4))
         }
       }
       if (arrow.y > ground) {
@@ -726,16 +728,17 @@ const archery: Maker = (W, H, rng) => {
       rect(px, W, H, 0, ground, W, H - ground, 0x5aa03a)
       rect(px, W, H, 0, ground, W, 1, 0x7ac05a)
       for (const [r, c] of [
-        [8, 0xf0f0f0],
-        [6, 0x2a2a2a],
-        [4, 0x3a8ae0],
-        [2.5, 0xe03a3a],
-        [1, 0xffd040],
+        [7, 0xf0f0f0],
+        [5.3, 0x2a2a2a],
+        [3.6, 0x3a8ae0],
+        [2.2, 0xe03a3a],
+        [0.9, 0xffd040],
       ] as [number, number][])
         ellipse(px, W, H, target.x, target.y, 2, r, c)
-      line(px, W, H, target.x, target.y + 8, target.x - 2, ground, 0x8a5a2a)
-      litSprite(px, W, H, 2, H * 0.5 - 3, ['.s.', 'ggg', '.g.', 'b.b', 'b.b'], { s: 0xffd0a0, g: 0x3a7a3a, b: 0x5a3a2a })
-      line(px, W, H, 5, H * 0.5 - 4, 5, H * 0.5 + 3, 0x8a5a2a)
+      line(px, W, H, target.x, target.y + 7, target.x - 2, ground, 0x8a5a2a)
+      litSprite(px, W, H, 2, ground - 8, ['.s.', '.s.', 'ggg', 'ggg', '.g.', 'b.b', 'b.b', 'b.b'], { s: 0xffd0a0, g: 0x3a7a3a, b: 0x5a3a2a })
+      // the bow, held out at shoulder height
+      line(px, W, H, 5, shoulder - 4, 5, shoulder + 3, 0x8a5a2a)
       for (const [hx, hy] of hits) line(px, W, H, hx - 4, hy, hx, hy, 0x8a6a4a)
       const a = Math.atan2(arrow.vy, arrow.vx)
       line(px, W, H, arrow.x - Math.cos(a) * 5, arrow.y - Math.sin(a) * 5, arrow.x, arrow.y, 0x6a4a2a)

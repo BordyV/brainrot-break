@@ -193,6 +193,8 @@ const seagull: Maker = (W, H, rng) => {
   let t = 0
   let has = true
   let flail = 0
+  // beak first, whichever way it flies
+  let face = 1
   let fx: Spark[] = []
   const reset = () => {
     gx = -10
@@ -210,6 +212,7 @@ const seagull: Maker = (W, H, rng) => {
       t++
       fx = sparks(fx, 0.06)
       if (flail) flail--
+      const before = gx
       if (state === 'circle') {
         gx = W / 2 + Math.cos(t * 0.05) * W * 0.35
         gy = 10 + Math.sin(t * 0.05) * 4
@@ -228,6 +231,7 @@ const seagull: Maker = (W, H, rng) => {
         gy -= 0.8
         if (gy < -6) state = 'away'
       } else if (state === 'away' && ++t > 260) reset()
+      if (Math.abs(gx - before) > 0.05) face = gx > before ? 1 : -1
     },
     draw(px) {
       sky(px, W, H, 0x5aaaf0, 0xc8e8ff, Math.round(H * 0.42))
@@ -256,9 +260,9 @@ const seagull: Maker = (W, H, rng) => {
       line(px, W, H, gx - 1, gy, gx - 5, gy - 1 - flap * 3, 0x8a90a0)
       line(px, W, H, gx + 1, gy - 1, gx + 6, gy - 2 - flap * 3, 0xa0a8b8)
       line(px, W, H, gx + 1, gy, gx + 5, gy - 1 - flap * 3, 0x8a90a0)
-      dot(px, W, H, gx + 2, gy - 1, 0x1a1a1a)
-      dot(px, W, H, gx + 3, gy, 0xf0b020)
-      dot(px, W, H, gx + 4, gy, 0xf0b020)
+      dot(px, W, H, gx + face * 2, gy - 1, 0x1a1a1a)
+      dot(px, W, H, gx + face * 3, gy, 0xf0b020)
+      dot(px, W, H, gx + face * 4, gy, 0xf0b020)
       for (const s of fx) dot(px, W, H, s.x, s.y, s.c)
     },
   }

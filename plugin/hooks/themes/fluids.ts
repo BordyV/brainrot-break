@@ -186,7 +186,7 @@ const tiltglass: Maker = (W, H, rng) => {
   const gw = Math.max(6, Math.round(W * 0.44))
   const gh = Math.max(8, Math.round(H * 0.42))
   const bx = W / 2
-  const by = Math.round(H * 0.74)
+  const baseY = Math.round(H * 0.74)
   const level = gh * 0.5
   let a = 0
   let t = 0
@@ -200,7 +200,8 @@ const tiltglass: Maker = (W, H, rng) => {
       t++
       // tipped one way, then the other; the water lags behind and sloshes
       a = Math.sin(t * 0.04) * 0.42 * (0.7 + 0.3 * Math.sin(t * 0.011))
-      sv += (-Math.tan(a) - slope) * 0.06
+      // in the glass's own frame, a level surface slopes by tan(a)
+      sv += (Math.tan(a) - slope) * 0.06
       sv *= 0.93
       slope += sv
       if (t % 9 === 0) bubbles.push({ u: (rng() - 0.5) * (gw - 4), v: 2 })
@@ -212,11 +213,13 @@ const tiltglass: Maker = (W, H, rng) => {
       // a window behind, the table
       slab(px, W, H, W * 0.6, H * 0.1, W * 0.34, H * 0.3, 0xb8dcf0, 0xe8e0d0)
       rect(px, W, H, W * 0.6 + W * 0.17, H * 0.1, 1, H * 0.3, 0xe8e0d0)
-      for (let y = by + 3; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = y === by + 3 ? 0xd8a870 : mix(0xb07a48, 0x7a4e2a, (y - by) / (H - by))
-      ellipse(px, W, H, bx, by + 4, gw * 0.55, 1, 0x7a4e2a)
+      for (let y = baseY + 3; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = y === baseY + 3 ? 0xd8a870 : mix(0xb07a48, 0x7a4e2a, (y - baseY) / (H - baseY))
+      ellipse(px, W, H, bx, baseY + 4, gw * 0.55, 0.6, 0x7a4e2a)
       const c = Math.cos(a)
       const s = Math.sin(a)
       const half = gw / 2
+      // it tips on the corner of its base that stays on the table, so the other corner lifts
+      const by = baseY + 2.6 - half * Math.abs(s)
       for (let y = 0; y < H; y++)
         for (let x = 0; x < W; x++) {
           const dx = x - bx

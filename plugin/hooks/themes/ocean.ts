@@ -134,7 +134,8 @@ const whale: Maker = (W, H, rng) => {
       vy += y < sea ? 0.075 : phase === 'rise' ? -0.005 : 0.02
       x += vx
       y += vy
-      a = Math.atan2(vy, vx * 4) * 0.9
+      // its heading, the sideways drift exaggerated so it arcs rather than shooting straight up
+      a = Math.atan2(vy, vx * 4)
       if (wasUnder && y <= sea) {
         phase = 'air'
         for (let k = 0; k < 22; k++) splash.push({ x: x + (rng() - 0.5) * 6, y: sea, vx: (rng() - 0.5) * 1.4, vy: -0.6 - rng() * 1.4, l: 30, c: k % 3 ? 0xffffff : 0xb0e0ff })
@@ -168,9 +169,10 @@ const whale: Maker = (W, H, rng) => {
           const half = Math.max(0.6, 3.3 * Math.sin((k / 12) * Math.PI * 0.95 + 0.15))
           body.push([u, half])
         }
-        const dir = vx >= 0 ? 1 : -1
+        // along its heading: +u runs back toward the flukes, +v is the belly side, kept underneath
+        const belly = Math.cos(a) >= 0 ? 1 : -1
         const P = (u: number, v: number): [number, number] => {
-          const [rx, ry] = rot(u * dir, v, a * dir + (dir < 0 ? 0 : 0))
+          const [rx, ry] = rot(-u, v * belly, a)
           return [x + rx, y + ry]
         }
         const under = y > sea

@@ -1,6 +1,6 @@
 import { add, disc, dot, hsv, mix, rect, scale, sky, sprite } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, burst, clamp, ellipse, hash, irand, line, lit, pick, slab, sparks, tones } from '../kit'
+import { DIRS, burst, clamp, ellipse, hash, irand, line, lit, litSprite, pick, slab, sparks, tones } from '../kit'
 import type { Spark } from '../kit'
 
 // Nature & weather: an event, not just a mood.
@@ -90,7 +90,8 @@ const tornado: Maker = (W, H, rng) => {
     step() {
       t++
       x += vx + Math.sin(t * 0.02) * 0.1
-      if (x < W * 0.2 || x > W * 0.8) vx = -vx
+      // it veers off just short of the house: a near miss, since a direct hit would leave nothing standing
+      if (x < W * 0.2 || x > W * 0.62) vx = -vx
       for (const d of debris) {
         d.a += 0.15 + (1 - d.h) * 0.1
         d.h += 0.006
@@ -766,7 +767,10 @@ const reef: Maker = (W, H, rng) => {
       for (let k = -3; k <= 3; k++) line(px, W, H, ax + k * 0.8, floor, ax + k * 1.3 + Math.sin(t * 0.06 + k) * 1.2, floor - 6, 0xd070c0)
       const cx = ax + Math.cos(clown.a) * 4
       const cy = floor - 8 + Math.sin(clown.a * 2) * 1.5
-      sprite(px, W, H, cx - 2, cy - 1, ['owow.', 'owowo', 'owow.'], { o: 0xff8a1a, w: 0xffffff })
+      // facing the way it swims round the anemone: a forked tail behind, two white bands, an eye in front
+      const CLOWN = ['o.owoo.', 'oowowko', 'o.owoo.']
+      const right = Math.sin(clown.a) < 0
+      litSprite(px, W, H, cx - 3, cy - 1, right ? CLOWN : CLOWN.map(r => r.split('').reverse().join('')), { o: 0xff8a1a, w: 0xffffff, k: 0x101018 })
       for (const f of school) {
         dot(px, W, H, f.x, f.y, f.c)
         dot(px, W, H, f.x - 1, f.y, 0x2a6aff)

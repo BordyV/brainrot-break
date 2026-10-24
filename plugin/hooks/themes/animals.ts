@@ -128,7 +128,8 @@ const zoomies: Maker = (W, H, rng) => {
       for (const d of dust) dot(px, W, H, d.x, d.y, d.c)
       const x = cx + Math.cos(a) * rx
       const y = cy + Math.sin(a) * ry
-      const h = a + (Math.PI / 2) * dir
+      // the way it runs: the ellipse's own tangent, not a circle's
+      const h = Math.atan2(ry * Math.cos(a) * dir, -rx * Math.sin(a) * dir)
       if (rest > 0 && speed < 0.03) {
         lit(px, W, H, x, y, 2.5, 1.5, 0xb8783a)
         dot(px, W, H, x + 2, y - 1, 0x2a1a0a)
@@ -649,6 +650,8 @@ const frisbee: Maker = (W, H, rng) => {
   let has = false
   let miss = false
   let caught = 0
+  // the way the dog faces: where it runs, and back to the thrower with the frisbee
+  let face = 1
 
   function throwIt() {
     fx = 4
@@ -676,7 +679,9 @@ const frisbee: Maker = (W, H, rng) => {
           fvy = 0
         }
         const target = fx + fvx * 6
+        const before = dx
         dx = clamp(dx + clamp(target - 4 - dx, -0.9, 0.9), 0, W - 8)
+        if (Math.abs(dx - before) > 0.05) face = dx > before ? 1 : -1
         if (dy === 0 && !miss && Math.abs(fx - dx - 6) < 4 && fy < ground - 6 && fvy > 0) dvy = -1.5
         if (dvy !== 0 || dy < 0) {
           dvy += 0.1
@@ -693,11 +698,12 @@ const frisbee: Maker = (W, H, rng) => {
         }
       } else {
         dx -= 0.6
+        face = -1
         if (dy < 0) {
           dvy += 0.1
           dy = Math.min(0, dy + dvy)
         }
-        fx = dx + 7
+        fx = dx
         fy = ground - 5 + dy
         if (dx < 6) throwIt()
       }
@@ -713,8 +719,10 @@ const frisbee: Maker = (W, H, rng) => {
       }
       litSprite(px, W, H, 1, ground - 10, ['.s.', 'sss', 'rrr', 'rrr', 'b.b', 'b.b', 'b.b', 'k.k'], { s: 0xffd0a0, r: 0xe04a4a, b: 0x3a4aaa, k: 0x2a2a2a })
       const run = Math.floor(t / 3) % 2
-      litSprite(px, W, H, dx, ground - 6 + dy, ['.....bb', '.....bwk', 'bbbbbbb.', 'bbbbbb..', run ? 'b.b.b.' : '.b.b.b'], { b: 0x2a2a2a, w: 0xffffff, k: 0x1a1a1a })
-      dot(px, W, H, dx + 1, ground - 5 + dy, 0xffffff)
+      const DOG = ['.....bb.', '.....bwk', 'bbbbbbb.', 'bbbbbb..', run ? 'b.b.b...' : '.b.b.b..']
+      litSprite(px, W, H, dx, ground - 6 + dy, face > 0 ? DOG : DOG.map(r => r.split('').reverse().join('')), { b: 0x2a2a2a, w: 0xffffff, k: 0x1a1a1a })
+      // the white tip of its tail, at the back
+      dot(px, W, H, face > 0 ? dx + 1 : dx + 6, ground - 5 + dy, 0xffffff)
       rect(px, W, H, fx - 1.5, fy, 3, 1, 0xff3aa0)
       text(px, W, H, W - 1 - 3, 1, String(caught % 10), 0xffffff)
     },
@@ -913,7 +921,8 @@ const raccoon: Maker = (W, H, rng) => {
       if (t > 175) rx = bx - 6 - span(t, 175, 210) * (bx + 4) * -1 + span(t, 175, 210) * (W + 10)
       const peek = t > 70 && t < 175
       const ry = ground - 5
-      litSprite(px, W, H, rx, ry, ['g.g...', 'gggg..', 'wkkwg.', 'gggggg', 'ggggggs', 'g.g.gs.'], { g: 0x8a8a92, k: 0x1a1a1a, w: 0xffffff, s: 0x5a5a62 })
+      // it always heads right, in to the bin and out past it: masked face in front, striped tail behind
+      litSprite(px, W, H, rx, ry, ['...g.g.', '...gggg', '.gwkkw.', '.gggggg', 'sgggggg', '.sg.g.g'], { g: 0x8a8a92, k: 0x1a1a1a, w: 0xffffff, s: 0x5a5a62 })
       if (peek && t > 120) {
         rect(px, W, H, rx + 3, ry + 1, 3, 2, 0xf0c040)
         dot(px, W, H, rx + 4, ry + 1, 0xd04a3a)
@@ -923,8 +932,8 @@ const raccoon: Maker = (W, H, rng) => {
         dot(px, W, H, rx + 6, ry + 1, 0xd04a3a)
       }
       if (!lit && (t >> 3) % 6 === 0) {
-        dot(px, W, H, rx + 1, ry + 2, 0xfff0a0)
-        dot(px, W, H, rx + 2, ry + 2, 0xfff0a0)
+        dot(px, W, H, rx + 4, ry + 2, 0xfff0a0)
+        dot(px, W, H, rx + 5, ry + 2, 0xfff0a0)
       }
       if (lit && t < 190) text(px, W, H, rx + 1, ry - 8, '!', 0xff3a3a)
     },
@@ -1061,7 +1070,10 @@ const octopus: Maker = (W, H, rng) => {
       dot(px, W, H, x + 1, y - 2, 0x1a1a1a)
       for (const s of ink) disc(px, W, H, s.x, s.y, 1.3, s.c)
       if (fish.on) {
-        litSprite(px, W, H, fish.x - 2, H * 0.4, ['.yy.', 'yyyky', '.yy.'], { y: 0xffd040, k: 0x1a1a1a })
+        // it swims toward the octopus, then away once it is spotted: face that way
+        const FISH = ['y.yy.', 'yyyky', 'y.yy.']
+        const right = alarm ? fish.x > x : fish.x < x
+        litSprite(px, W, H, fish.x - 2, H * 0.4, right ? FISH : FISH.map(r => r.split('').reverse().join('')), { y: 0xffd040, k: 0x1a1a1a })
       }
     },
   }

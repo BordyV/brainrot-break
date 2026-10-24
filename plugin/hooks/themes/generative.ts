@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, clamp, ellipse, irand, line, lit, pick, poly, ring, shuffle, textWidth, tones } from '../kit'
+import { DIRS, clamp, ellipse, irand, line, lit, pick, poly, ring, shuffle, textWidth } from '../kit'
 
 // Generative art & maths: rules on a grid, endless variety, no art to draw.
 
@@ -1141,9 +1141,11 @@ const pythagoras: Maker = (W, H) => {
         const q = pts.map(P)
         for (let j = 0; j < 4; j++) line(px, W, H, ...q[j], ...q[(j + 1) % 4], 0xd8e8f8)
       }
-      fill(big, flow, 0x3a90e0)
-      fill(s1, 1 - flow, 0x3a90e0)
-      fill(s2, 1 - flow, 0x3a90e0)
+      // the water always sits in the tanks underneath: the big square while it hangs below the
+      // triangle, then the two small ones once the turn has brought them down
+      fill(big, 1 - flow, 0x3a90e0)
+      fill(s1, flow, 0x3a90e0)
+      fill(s2, flow, 0x3a90e0)
       const tri = [A, B, C].map(P)
       poly(px, W, H, tri, 0x5a6a7a)
       for (let j = 0; j < 3; j++) line(px, W, H, ...tri[j], ...tri[(j + 1) % 3], 0xf0d060)
@@ -1158,7 +1160,7 @@ const pythagoras: Maker = (W, H) => {
 const pendulumwave: Maker = (W, H) => {
   const N = 15
   const top = 5
-  const A = W * 0.36
+  const A = W * 0.3
   let t = 0
   // in 60 seconds the shortest swings 51 times, the longest 65: they drift in and out of step
   const period = 60 * 15
@@ -1171,10 +1173,16 @@ const pendulumwave: Maker = (W, H) => {
       sky(px, W, H, 0x101424, 0x1a1e34)
       rect(px, W, H, 1, top - 2, W - 2, 2, 0x8a8a9a)
       rect(px, W, H, 1, top - 2, W - 2, 1, 0xc8c8d8)
+      // seen end-on, every pendulum hangs from the same bar; a pendulum's length goes as 1 / f²,
+      // so the slowest is the longest and the fastest only (51 / 65)² as long. Drawn longest first.
+      const Lmax = H - top - 6
       for (let i = 0; i < N; i++) {
-        const y = top + 4 + i * ((H - top - 9) / (N - 1))
         const f = (51 + i) / period
-        const x = W / 2 + Math.sin(2 * Math.PI * f * t) * A
+        const L = Lmax * (51 / (51 + i)) ** 2
+        // released together from the same sideways pull, so each swings through its own angle, on an arc
+        const th = Math.asin(Math.min(0.9, A / L)) * Math.sin(2 * Math.PI * f * t)
+        const x = W / 2 + Math.sin(th) * L
+        const y = top + Math.cos(th) * L
         for (let s = 0; s < 1; s += 0.08) {
           const lx = W / 2 + (x - W / 2) * s
           const ly = top + (y - top) * s
@@ -1182,7 +1190,7 @@ const pendulumwave: Maker = (W, H) => {
           if (lx >= 0 && lx < W && ly >= 0 && ly < H) px[at] = mix(px[at], 0x6a6e88, 0.25)
         }
         const col = hsv(i / N, 0.7, 1)
-        lit(px, W, H, x, y, 1.6, 1.6, col, tones(col)[3])
+        lit(px, W, H, x, y, 1.4, 1.4, col)
       }
     },
   }

@@ -2271,6 +2271,7 @@ const doodle: Maker = (W, H, rng) => {
   type Plat = { x: number; y: number; type: number; vx: number; broken: number }
   let plats: Plat[] = []
   let d = { x: W / 2, y: H - 10, vx: 0, vy: -2.6 }
+  let face = 1
   let cam = 0
   let best = 0
   let dead = 0
@@ -2319,6 +2320,8 @@ const doodle: Maker = (W, H, rng) => {
       if (d.vy > -1.5 || !target) d.vx += clamp((tx - d.x) * 0.05 - d.vx, -0.15, 0.15)
       d.vx = clamp(d.vx, -0.9, 0.9)
       d.x += d.vx
+      // it turns to face the way it drifts, snout first
+      if (Math.abs(d.vx) > 0.15) face = d.vx > 0 ? 1 : -1
       if (d.x < -2) d.x = W + 1
       if (d.x > W + 2) d.x = -1
       d.vy += 0.1
@@ -2356,7 +2359,8 @@ const doodle: Maker = (W, H, rng) => {
       }
       const x = d.x - 2
       const y = d.y - cam - 5
-      litSprite(px, W, H, x, y, ['.ggg.', 'ggwgg', 'ggggs', 'gyyy.', '.k.k.'], { g: 0x8ad83a, w: 0x000000, s: 0x8ad83a, y: 0x5aa02a, k: 0x2a2a2a })
+      const DOODLER = ['.ggg.', 'ggwgg', 'ggggs', 'gyyy.', '.k.k.']
+      litSprite(px, W, H, x, y, face > 0 ? DOODLER : DOODLER.map(r => r.split('').reverse().join('')), { g: 0x8ad83a, w: 0x000000, s: 0x8ad83a, y: 0x5aa02a, k: 0x2a2a2a })
       text(px, W, H, 1, 1, String(best), 0x3a3a5a)
     },
   }
