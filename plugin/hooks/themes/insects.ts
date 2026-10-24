@@ -97,6 +97,8 @@ const dungbeetle: Maker = (W, H, rng) => {
   let slip = 0
   let roll = 0
   let over = 0
+  // where the beetle is once the ball has got away from it
+  let bug = 0
   const reset = () => {
     s = 3
     v = 0
@@ -115,7 +117,9 @@ const dungbeetle: Maker = (W, H, rng) => {
         v += 0.04
         s += v
         roll += v / R
-        if (s > W + 10) reset()
+        // it scurries down after its ball; the scene starts over once both are gone
+        bug += 0.45
+        if (s > W + 10 && bug > W + 4) reset()
         return
       }
       if (slip > 0) {
@@ -128,7 +132,10 @@ const dungbeetle: Maker = (W, H, rng) => {
       s += 0.18
       roll += 0.18 / R
       if (rng() < 0.004 && s > W * 0.3) slip = 18
-      if (s > W * 0.72) over = 1
+      if (s > W * 0.72) {
+        over = 1
+        bug = s - R - 2.5
+      }
     },
     draw(px) {
       // the savanna at sunset, acacias far away
@@ -161,6 +168,14 @@ const dungbeetle: Maker = (W, H, rng) => {
         line(px, W, H, ex + 1, ey, bx - R + 0.5, by + 1 - step, 0x1a1a24)
         dot(px, W, H, ex - 1, ey + 2, 0x1a1a24)
         dot(px, W, H, ex + 1, ey + 2 - step, 0x1a1a24)
+      } else {
+        // the beetle, alone now, trotting down the slope after the ball
+        const ey = ground(bug) - 2
+        const step = Math.floor(t / 3) % 2
+        lit(px, W, H, bug, ey, 2.4, 1.7, 0x2a2a3a, 0x0a0a10)
+        dot(px, W, H, bug - 1, ey - 1, 0x6a7aa0)
+        dot(px, W, H, bug + 2.5, ey + 1, 0x1a1a24)
+        for (const k of [-1, 1]) dot(px, W, H, bug + k, ground(bug + k) - (k === 1 ? step : 1 - step), 0x1a1a24)
       }
       const pct = `${Math.round(clamp(s / (W * 0.72), 0, 1) * 100)}%`
       text(px, W, H, 1, 1, pct, 0xffffff)

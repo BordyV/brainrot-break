@@ -199,24 +199,26 @@ const game2048: Maker = (W, H, rng) => {
     },
     draw(px) {
       px.fill(0xfaf8ef)
-      rect(px, W, H, ox, oy, size, size, 0xbbada0)
-      const pos = (i: number): [number, number] => [ox + (i % 4) * (ts + 1) + 1, oy + Math.floor(i / 4) * (ts + 1) + 1]
+      // the board's frame a pixel round the grid; at 32 pixels wide it fills the width
+      rect(px, W, H, ox - 1, oy - 1, size + 2, size + 2, 0xbbada0)
+      const pos = (i: number): [number, number] => [ox + (i % 4) * (ts + 1), oy + Math.floor(i / 4) * (ts + 1)]
       for (let i = 0; i < 16; i++) {
         const [x, y] = pos(i)
-        rect(px, W, H, x, y, ts - 1, ts - 1, TILE[0] as number)
-        rect(px, W, H, x, y, ts - 1, 1, scale(TILE[0] as number, 0.92))
+        rect(px, W, H, x, y, ts, ts, TILE[0] as number)
+        rect(px, W, H, x, y, ts, 1, scale(TILE[0] as number, 0.92))
       }
       const tile = (x: number, y: number, v: number, big: boolean) => {
         const c = TILE[Math.min(v, 12)] as number
         const x0 = x - (big ? 1 : 0)
         const y0 = y - (big ? 1 : 0)
-        const s0 = ts - 1 + (big ? 2 : 0)
+        // tiles a pixel apart: seven wide, so two digits of the 3-pixel font fit
+        const s0 = ts + (big ? 2 : 0)
         // a tile with a little depth: a lit top edge, a shaded bottom edge
         rect(px, W, H, x0, y0, s0, s0, c)
         rect(px, W, H, x0, y0, s0, 1, mix(c, 0xffffff, 0.25))
         rect(px, W, H, x0, y0 + s0 - 1, s0, 1, scale(c, 0.85))
         const s = String(2 ** v)
-        if (textWidth(s) <= ts - 1) text(px, W, H, x + Math.floor((ts - 1 - textWidth(s)) / 2), y + Math.floor((ts - 6) / 2), s, v <= 2 ? 0x776e65 : 0xffffff)
+        if (textWidth(s) <= ts) text(px, W, H, x + Math.floor((ts - textWidth(s)) / 2), y + Math.floor((ts - 5) / 2), s, v <= 2 ? 0x776e65 : 0xffffff)
         else dot(px, W, H, x + 1, y + 1, 0xffffff)
       }
       if (at > 0) {

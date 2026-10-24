@@ -717,7 +717,7 @@ const frisbee: Maker = (W, H, rng) => {
         lit(px, W, H, tx, ground - 14, 5, 5, 0x3a8a3a)
         rect(px, W, H, tx, ground - 10, 1, 10, 0x6a4a2a)
       }
-      litSprite(px, W, H, 1, ground - 10, ['.s.', 'sss', 'rrr', 'rrr', 'b.b', 'b.b', 'b.b', 'k.k'], { s: 0xffd0a0, r: 0xe04a4a, b: 0x3a4aaa, k: 0x2a2a2a })
+      litSprite(px, W, H, 1, ground - 8, ['.s.', 'sss', 'rrr', 'rrr', 'b.b', 'b.b', 'b.b', 'k.k'], { s: 0xffd0a0, r: 0xe04a4a, b: 0x3a4aaa, k: 0x2a2a2a })
       const run = Math.floor(t / 3) % 2
       const DOG = ['.....bb.', '.....bwk', 'bbbbbbb.', 'bbbbbb..', run ? 'b.b.b...' : '.b.b.b..']
       litSprite(px, W, H, dx, ground - 6 + dy, face > 0 ? DOG : DOG.map(r => r.split('').reverse().join('')), { b: 0x2a2a2a, w: 0xffffff, k: 0x1a1a1a })

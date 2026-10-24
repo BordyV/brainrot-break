@@ -151,8 +151,8 @@ const whale: Maker = (W, H, rng) => {
       sky(px, W, H, 0x3a4a8a, 0xf0a070, sea)
       // a low sun on the horizon, a far boat of whale watchers
       ellipse(px, W, H, W * 0.75, sea - 1, 4, 3, 0xffe8a0)
-      rect(px, W, H, 3, sea - 2, 5, 1, 0x2a2a3a)
-      rect(px, W, H, 5, sea - 4, 1, 2, 0x2a2a3a)
+      rect(px, W, H, 3, sea - 1, 5, 1, 0x2a2a3a)
+      rect(px, W, H, 5, sea - 3, 1, 2, 0x2a2a3a)
       for (let yy = sea; yy < H; yy++)
         for (let xx = 0; xx < W; xx++) px[yy * W + xx] = (xx * 2 + yy * 3 + Math.floor(t / 5)) % 23 === 0 && yy < sea + 8 ? 0x8ac0e8 : mix(0x2a6aa8, 0x0a1e40, (yy - sea) / (H - sea))
       if (phase !== 'wait') {

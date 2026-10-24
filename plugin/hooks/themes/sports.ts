@@ -74,9 +74,10 @@ const trickshots: Maker = (W, H, rng) => {
       for (let x = 0; x < W; x += 6) rect(px, W, H, x, floor, 1, H - floor, 0xc08a4a)
       rect(px, W, H, W - 2, hoop.y - 10, 1, floor - hoop.y + 10, 0x8a8a92)
       rect(px, W, H, W - 3, hoop.y - 8, 1, 8, 0xffffff)
-      rect(px, W, H, hoop.x - 2, hoop.y, 5, 1, 0xff5a1a)
+      // the rim runs right up to the backboard, no gap between them
+      rect(px, W, H, hoop.x - 2, hoop.y, W - 3 - (hoop.x - 2), 1, 0xff5a1a)
       for (let k = 0; k < 4; k++) line(px, W, H, hoop.x - 2 + k * 1.3, hoop.y + 1, hoop.x - 1 + k * 1 + (net > 0 ? Math.sin(net) : 0), hoop.y + 4 + (net > 0 ? 1 : 0), 0xf0f0f0)
-      litSprite(px, W, H, shooter - 1, floor - 8, ['.s.', 'jjj', 'jjj', '.j.', 'b.b', 'b.b', 'k.k'], { s: 0x8a5a3a, j: 0xe03a3a, b: 0x2a2a6a, k: 0xffffff })
+      litSprite(px, W, H, shooter - 1, floor - 7, ['.s.', 'jjj', 'jjj', '.j.', 'b.b', 'b.b', 'k.k'], { s: 0x8a5a3a, j: 0xe03a3a, b: 0x2a2a6a, k: 0xffffff })
       lit(px, W, H, ball.x, ball.y, 1.5, 1.5, 0xf07a1a)
       dot(px, W, H, ball.x, ball.y, 0x8a3a0a)
       text(px, W, H, 1, 1, `${made}/${shots}`, 0xffffff)

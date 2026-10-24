@@ -464,9 +464,10 @@ const hoops: Maker = (W, H, rng) => {
         dot(px, W, H, 1, y, 0x3a3a6a)
         dot(px, W, H, W - 2, y, 0x3a3a6a)
       }
-      slab(px, W, H, rimX - 7, rimY - 12, 14, 10, 0xf0f0f8, 0x6a6a8a)
-      rect(px, W, H, rimX - 3, rimY - 7, 7, 5, 0xe83a3a)
-      rect(px, W, H, rimX - 2, rimY - 6, 5, 4, 0xf0f0f8)
+      // the backboard comes down to the rim, which is bolted under its red square
+      slab(px, W, H, rimX - 7, rimY - 10, 14, 10, 0xf0f0f8, 0x6a6a8a)
+      rect(px, W, H, rimX - 3, rimY - 5, 7, 5, 0xe83a3a)
+      rect(px, W, H, rimX - 2, rimY - 4, 5, 4, 0xf0f0f8)
       // the rim and its net, which swishes when a ball goes through
       rect(px, W, H, rimX - 3, rimY, 7, 1, 0xff7a20)
       for (let k = 0; k < 4; k++) {

@@ -204,6 +204,9 @@ const bossfight: Maker = (W, H, rng) => {
         // the golem: a stone body, arms, glowing eyes and core
         const lift = boss.slam ? -2 : 0
         const col = boss.hit ? 0xffffff : 0x7a6a6a
+        // two stumpy stone legs down to the floor, so it stands rather than floats
+        slab(px, W, H, bx - 4, floor - 6, 3, 6, boss.hit ? 0xffffff : 0x6a5a5a, 0x2a1e1e)
+        slab(px, W, H, bx + 1, floor - 6, 3, 6, boss.hit ? 0xffffff : 0x6a5a5a, 0x2a1e1e)
         lit(px, W, H, bx, floor - 12, 6, 8, col, 0x2a1e1e)
         lit(px, W, H, bx, floor - 22 + lift * 0.5, 4, 3.5, col, 0x2a1e1e)
         slab(px, W, H, bx - 10, floor - 16 + lift, 4, 10, boss.hit ? 0xffffff : 0x6a5a5a, 0x2a1e1e)
