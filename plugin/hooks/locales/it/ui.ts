@@ -93,6 +93,7 @@ export const themes: Locale['themes'] = {
   simulations: 'simulazioni',
   destruction: 'distruzione',
   robots: 'robot',
+  fluids: 'fluidi e sabbia',
 }
 
 export const comments: Locale['comments'] = {
@@ -139,5 +140,6 @@ export const comments: Locale['comments'] = {
     simulations: ['potrei fissarlo per sempre', 'sim city ma in piccolo', 'guardare il sistema che lavora'],
     destruction: ['tanta distruzione, poco tempo', 'se l’è cercata', 'di nuovo ma più lento'],
     robots: ['la rivolta dei robot è adorabile', 'bip bup', 'ci sta mettendo tutto se stesso'],
+    fluids: ['come trova il suo livello', 'lo sento scorrere', 'ASMR liquido'],
   },
 }

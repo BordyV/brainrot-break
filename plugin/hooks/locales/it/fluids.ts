@@ -1,0 +1,12 @@
+import type { Locale } from '../../i18n'
+
+export const FLUIDS: Locale['videos'] = {
+  dambreak: { name: 'crollo della diga', captions: ['vedi la crepa? troppo tardi', 'la valle aveva tre case…', 'l’onda sbatte in fondo e torna indietro', 'l’acqua trova sempre il suo livello'], sounds: ['acqua che irrompe', 'suono originale - crack.in.the.dam', 'trailer di film catastrofico'] },
+  tiltglass: { name: 'bicchiere inclinato', captions: ['l’acqua resta in piano. il bicchiere no.', 'guarda l’onda che lo insegue', 'i cubetti si fanno il giro', 'mezzo pieno, sempre'], sounds: ['sciabordio d’acqua (ASMR)', 'suono originale - slosh.physics', 'atmosfera tranquilla di cucina'] },
+  sandart: { name: 'bottiglia di sabbia colorata', captions: ['le onde vengono dal tubo che si muove', 'ogni colore un nuovo strato', 'aspetta il tappo', 'un ricordo della spiaggia fatto alla scrivania'], sounds: ['sabbia che scende (ASMR)', 'suono originale - sand.layers', 'ukulele da negozio sulla spiaggia'] },
+  cavefill: { name: 'grotta che si riempie', captions: ['la camera più bassa si riempie per prima', 'una camera alla volta', 'aspetta che arrivi a quella in alto', 'poi il fondo cede'], sounds: ['gocce e rivoli nella grotta', 'suono originale - cave.flood', 'ambient profondo'] },
+  sandmaze: { name: 'labirinto di sabbia', captions: ['le paratie rosse la trattengono, poi la lasciano', 'sabbia arcobaleno giù per lo zigzag', 'il barattolo si riempie… e si svuota', 'guarderei le paratie tutto il giorno'], sounds: ['fruscio di sabbia (ASMR)', 'suono originale - funnel.maze', 'carillon'] },
+  snowglobe: { name: 'palla di neve', captions: ['scuotila, poi aspetta', 'la percentuale è quanta neve si è posata', 'un inverno minuscolo in un barattolo', 'l’attesa è la parte migliore'], sounds: ['vetro e scosse leggere', 'suono originale - shake.and.wait', 'ninna nanna da carillon'] },
+  canallock: { name: 'chiusa', captions: ['la barca sale una collina sull’acqua', 'si chiude dietro, si apre davanti', 'l’ascensore più lento del mondo', 'e ora si riscende'], sounds: ['acqua che scroscia dalla paratia', 'suono originale - lock.keeper', 'folk della domenica sul canale'] },
+  fizzypour: { name: 'bibita che trabocca', captions: ['fino all’orlo… e oltre', 'la schiuma vince sempre', 'ho detto di versare PIANO', 'ora aspettiamo che la schiuma scenda'], sounds: ['frizzante e scoppiettio (ASMR)', 'suono originale - foam.to.the.brim', 'pop estivo'] },
+}

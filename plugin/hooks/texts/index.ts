@@ -22,6 +22,7 @@ import { SIMULATIONS } from './simulations'
 import { SPACE } from './space'
 import { SPORTS } from './sports'
 import { VERSUS } from './versus'
+import { FLUIDS } from './fluids'
 
 // The texts of the videos in hooks/themes/, one file per theme.
 
@@ -50,4 +51,5 @@ export const THEME_TEXTS = {
   ...SIMULATIONS,
   ...DESTRUCTION,
   ...ROBOTS,
+  ...FLUIDS,
 }

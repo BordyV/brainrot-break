@@ -6,6 +6,7 @@ import { COZY } from './cozy'
 import { CRAFTS } from './crafts'
 import { DESTRUCTION } from './destruction'
 import { DEV } from './dev'
+import { FLUIDS } from './fluids'
 import { FOOD } from './food'
 import { GENERATIVE } from './generative'
 import { MACHINES } from './machines'
@@ -34,6 +35,7 @@ export const VIDEOS: Locale['videos'] = {
   ...CRAFTS,
   ...DESTRUCTION,
   ...DEV,
+  ...FLUIDS,
   ...FOOD,
   ...GENERATIVE,
   ...MACHINES,

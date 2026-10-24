@@ -375,6 +375,14 @@ export type Kind =
   | 'barrelchain'
   | 'laserheist'
   | 'robowalk'
+  | 'dambreak'
+  | 'tiltglass'
+  | 'sandart'
+  | 'cavefill'
+  | 'sandmaze'
+  | 'snowglobe'
+  | 'canallock'
+  | 'fizzypour'
 
 export type Video = {
   id: string
