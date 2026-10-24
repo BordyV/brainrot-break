@@ -363,6 +363,12 @@ export type Kind =
   | 'mirrors'
   | 'arrows'
   | 'triplematch'
+  | 'particlelife'
+  | 'geneticcars'
+  | 'learncars'
+  | 'ropebridge'
+  | 'softbody'
+  | 'ragdoll'
 
 export type Video = {
   id: string
