@@ -23,6 +23,7 @@ import { SPACE } from './space'
 import { SPORTS } from './sports'
 import { VERSUS } from './versus'
 import { FLUIDS } from './fluids'
+import { IDLE } from './idle'
 
 // The texts of the videos in hooks/themes/, one file per theme.
 
@@ -52,4 +53,5 @@ export const THEME_TEXTS = {
   ...DESTRUCTION,
   ...ROBOTS,
   ...FLUIDS,
+  ...IDLE,
 }

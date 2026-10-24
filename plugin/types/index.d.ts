@@ -383,6 +383,11 @@ export type Kind =
   | 'snowglobe'
   | 'canallock'
   | 'fizzypour'
+  | 'factory'
+  | 'idlemine'
+  | 'autobattler'
+  | 'mergearmy'
+  | 'horde'
 
 export type Video = {
   id: string

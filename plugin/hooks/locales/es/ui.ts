@@ -94,6 +94,7 @@ export const themes: Locale['themes'] = {
   destruction: 'destrucción',
   robots: 'robots',
   fluids: 'fluidos y arena',
+  idle: 'idle y estrategia',
 }
 
 export const comments: Locale['comments'] = {
@@ -141,5 +142,6 @@ export const comments: Locale['comments'] = {
     destruction: ['tanta destrucción, tan poco tiempo', 'se lo estaba buscando', 'otra vez pero más lento'],
     robots: ['la rebelión de los robots es adorable', 'bip bup', 'lo está intentando de verdad'],
     fluids: ['cómo encuentra su nivel', 'lo oigo caer', 'ASMR líquido'],
+    idle: ['el número sube', 'jugaría a esto 400 horas', 'la economía va como un cohete'],
   },
 }

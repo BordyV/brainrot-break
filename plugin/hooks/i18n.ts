@@ -86,6 +86,7 @@ const SOURCE_COMMENTS: { handles: string[]; generic: Record<SourceLang, string[]
     destruction: { en: ['so much destruction, so little time', 'it had it coming', 'again but slower'], fr: ['tant de destruction, si peu de temps', 'il l’avait cherché', 'encore mais au ralenti'] },
     robots: { en: ['the robot uprising is cute', 'beep boop', 'he’s trying his best'], fr: ['la révolte des robots est mignonne', 'bip boup', 'il fait de son mieux'] },
     fluids: { en: ['the way it finds its level', 'I can hear it pouring', 'liquid ASMR'], fr: ['la façon dont ça trouve son niveau', 'je l’entends couler', 'ASMR liquide'] },
+    idle: { en: ['number go up', 'I’d play this for 400 hours', 'the economy is booming'], fr: ['le nombre monte', 'j’y jouerais 400 heures', 'l’économie est en plein boom'] },
   },
 }
 
@@ -117,6 +118,7 @@ const SOURCE_THEME_NAMES: Record<SourceLang, Record<Theme, string>> = {
     destruction: 'destruction',
     robots: 'robots',
     fluids: 'fluids & sand',
+    idle: 'idle & strategy',
   },
   fr: {
     satisfying: 'satisfaisant',
@@ -144,6 +146,7 @@ const SOURCE_THEME_NAMES: Record<SourceLang, Record<Theme, string>> = {
     destruction: 'destruction',
     robots: 'robots',
     fluids: 'fluides et sable',
+    idle: 'idle et stratégie',
   },
 }
 

@@ -25,6 +25,7 @@ import { SPACE } from './space'
 import { SPORTS } from './sports'
 import { VERSUS } from './versus'
 import { FLUIDS } from './fluids'
+import { IDLE } from './idle'
 
 // The videos added by theme, one file per theme. Their texts live in
 // hooks/texts/, under the same theme and kind names.
@@ -55,6 +56,7 @@ export const THEMES = {
   destruction: DESTRUCTION,
   robots: ROBOTS,
   fluids: FLUIDS,
+  idle: IDLE,
 }
 
 export const THEME_MAKERS = {
@@ -83,6 +85,7 @@ export const THEME_MAKERS = {
   ...DESTRUCTION,
   ...ROBOTS,
   ...FLUIDS,
+  ...IDLE,
 }
 
 /** Every video of the feed, by kind. */

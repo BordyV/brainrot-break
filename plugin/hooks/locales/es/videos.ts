@@ -9,6 +9,7 @@ import { DEV } from './dev'
 import { FLUIDS } from './fluids'
 import { FOOD } from './food'
 import { GENERATIVE } from './generative'
+import { IDLE } from './idle'
 import { MACHINES } from './machines'
 import { MEMES } from './memes'
 import { MOBILE } from './mobile'
@@ -38,6 +39,7 @@ export const VIDEOS: Locale['videos'] = {
   ...FLUIDS,
   ...FOOD,
   ...GENERATIVE,
+  ...IDLE,
   ...MACHINES,
   ...MEMES,
   ...MOBILE,
