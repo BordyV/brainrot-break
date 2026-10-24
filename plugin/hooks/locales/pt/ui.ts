@@ -96,6 +96,7 @@ export const themes: Locale['themes'] = {
   fluids: 'fluidos e areia',
   idle: 'idle e estratégia',
   ocean: 'oceano',
+  insects: 'insetos',
 }
 
 export const comments: Locale['comments'] = {
@@ -145,5 +146,6 @@ export const comments: Locale['comments'] = {
     fluids: ['o jeito que ele acha o nível', 'dá pra ouvir escorrendo', 'ASMR líquido'],
     idle: ['número sobe', 'eu jogaria isso por 400 horas', 'a economia tá bombando'],
     ocean: ['o oceano dá medo e eu amo', 'dá pra ouvir as ondas', 'a gente conhece mais o espaço que isso'],
+    insects: ['pequeno mas poderoso', 'as perninhas!!', 'documentário de natureza às 2 da manhã'],
   },
 }

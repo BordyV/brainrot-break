@@ -88,6 +88,7 @@ const SOURCE_COMMENTS: { handles: string[]; generic: Record<SourceLang, string[]
     fluids: { en: ['the way it finds its level', 'I can hear it pouring', 'liquid ASMR'], fr: ['la façon dont ça trouve son niveau', 'je l’entends couler', 'ASMR liquide'] },
     idle: { en: ['number go up', 'I’d play this for 400 hours', 'the economy is booming'], fr: ['le nombre monte', 'j’y jouerais 400 heures', 'l’économie est en plein boom'] },
     ocean: { en: ['the ocean is scary and I love it', 'I can hear the waves', 'we know more about space than this'], fr: ['l’océan fait peur et j’adore', 'j’entends les vagues', 'on connaît mieux l’espace que ça'] },
+    insects: { en: ['tiny but mighty', 'the little legs!!', 'nature documentary at 2 a.m.'], fr: ['petit mais costaud', 'les petites pattes !!', 'documentaire animalier à 2 h du mat'] },
   },
 }
 
@@ -121,6 +122,7 @@ const SOURCE_THEME_NAMES: Record<SourceLang, Record<Theme, string>> = {
     fluids: 'fluids & sand',
     idle: 'idle & strategy',
     ocean: 'ocean',
+    insects: 'insects',
   },
   fr: {
     satisfying: 'satisfaisant',
@@ -150,6 +152,7 @@ const SOURCE_THEME_NAMES: Record<SourceLang, Record<Theme, string>> = {
     fluids: 'fluides et sable',
     idle: 'idle et stratégie',
     ocean: 'océan',
+    insects: 'insectes',
   },
 }
 

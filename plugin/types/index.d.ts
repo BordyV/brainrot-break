@@ -393,6 +393,11 @@ export type Kind =
   | 'deepsea'
   | 'hatchlings'
   | 'shellswap'
+  | 'butterfly'
+  | 'dungbeetle'
+  | 'mosquito'
+  | 'flywindow'
+  | 'antmill'
 
 export type Video = {
   id: string

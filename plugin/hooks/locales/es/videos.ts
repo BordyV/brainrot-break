@@ -10,6 +10,7 @@ import { FLUIDS } from './fluids'
 import { FOOD } from './food'
 import { GENERATIVE } from './generative'
 import { IDLE } from './idle'
+import { INSECTS } from './insects'
 import { MACHINES } from './machines'
 import { MEMES } from './memes'
 import { MOBILE } from './mobile'
@@ -41,6 +42,7 @@ export const VIDEOS: Locale['videos'] = {
   ...FOOD,
   ...GENERATIVE,
   ...IDLE,
+  ...INSECTS,
   ...MACHINES,
   ...MEMES,
   ...MOBILE,
