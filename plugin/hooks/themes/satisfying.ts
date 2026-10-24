@@ -1698,7 +1698,6 @@ const tiling: Maker = (W, H, rng) => {
   let timer = 0
   let style = irand(rng, 4)
   let hold = 0
-  let lift = 0
   let seed = irand(rng, 1e6)
 
   const colour = (i: number, j: number) => {
@@ -1714,14 +1713,10 @@ const tiling: Maker = (W, H, rng) => {
 
   return {
     step() {
+      // the finished floor holds a moment, then on to the next room: tiles are never pulled back up
       if (hold > 0) {
-        if (--hold === 0) lift = 1
-        return
-      }
-      if (lift > 0) {
-        laid = laid.slice(0, Math.max(0, laid.length - 3))
-        if (!laid.length) {
-          lift = 0
+        if (--hold === 0) {
+          laid = []
           k = 0
           style = (style + 1) % 4
           seed = irand(rng, 1e6)
@@ -1746,7 +1741,7 @@ const tiling: Maker = (W, H, rng) => {
         const i = id % cols
         const j = Math.floor(id / cols)
         const age = laid.length - n
-        const drop = lift > 0 ? 0 : Math.max(0, 3 - age)
+        const drop = Math.max(0, 3 - age)
         const c = colour(i, j)
         const x = i * p
         const y = j * p - drop

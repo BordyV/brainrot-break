@@ -267,8 +267,9 @@ const bottling: Maker = (W, H, rng) => {
   return {
     step() {
       t++
+      // the belt indexes: it all stops while the bottle under the nozzle fills, so none runs into it
+      const moving = !bs.some(b => Math.abs(b.x - filler) < 0.3 && b.fill < 1)
       for (const b of bs) {
-        const moving = !(Math.abs(b.x - filler) < 0.3 && b.fill < 1)
         if (moving) b.x += 0.3
         if (Math.abs(b.x - filler) < 0.3) b.fill = Math.min(1, b.fill + 0.05)
         if (Math.abs(b.x - capper) < 0.5) b.cap = true

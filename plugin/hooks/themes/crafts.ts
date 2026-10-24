@@ -30,6 +30,17 @@ const PICS: { rows: string[]; pal: Record<string, number> }[] = [
   },
 ]
 
+// The cells of a picture in the order a person fills them: colour by colour, the darkest first
+// (usually the outline), each colour row by row.
+const byColour = (p: { rows: string[]; pal: Record<string, number> }): number[] => {
+  const cols = (p.rows[0] as string).length
+  const lum = (c: number) => ((c >> 16) & 255) * 0.3 + ((c >> 8) & 255) * 0.59 + (c & 255) * 0.11
+  const cells: { i: number; l: number }[] = []
+  p.rows.forEach((row, y) => [...row].forEach((ch, x) => ch !== '.' && cells.push({ i: y * cols + x, l: lum(p.pal[ch] as number) })))
+  return cells.sort((a, b) => a.l - b.l || a.i - b.i).map(c => c.i)
+}
+
+
 // --- brick build ------------------------------------------------------------------
 
 const brickbuild: Maker = (W, H, rng) => {
@@ -107,7 +118,7 @@ const brickbuild: Maker = (W, H, rng) => {
 
 // --- pixel art drawing ------------------------------------------------------------
 
-const pixeldraw: Maker = (W, H, rng) => {
+const pixeldraw: Maker = (W, H) => {
   let pi = 0
   let k = 0
   let hold = 0
@@ -115,10 +126,7 @@ const pixeldraw: Maker = (W, H, rng) => {
   const scaleK = 3
 
   function start() {
-    const p = PICS[pi] as { rows: string[] }
-    const n = p.rows.length * (p.rows[0] as string).length
-    order = Array.from({ length: n }, (_, i) => i)
-    if (rng() < 0.5) shuffle(rng, order)
+    order = byColour(PICS[pi] as { rows: string[]; pal: Record<string, number> })
     k = 0
   }
   start()
@@ -300,7 +308,7 @@ const crossstitch: Maker = (W, H) => {
 
 // --- fuse beads -------------------------------------------------------------------
 
-const fusebeads: Maker = (W, H, rng) => {
+const fusebeads: Maker = (W, H) => {
   const pitch = 3
   let pi = 1
   let k = 0
@@ -309,11 +317,7 @@ const fusebeads: Maker = (W, H, rng) => {
   let order: number[] = []
 
   function start() {
-    const p = PICS[pi] as { rows: string[] }
-    const cols = (p.rows[0] as string).length
-    order = []
-    p.rows.forEach((row, y) => [...row].forEach((ch, x) => ch !== '.' && order.push(y * cols + x)))
-    shuffle(rng, order)
+    order = byColour(PICS[pi] as { rows: string[]; pal: Record<string, number> })
     k = 0
     iron = -1
   }
@@ -457,7 +461,7 @@ const loom: Maker = (W, H, rng) => {
         const r = rows.length
         const band = Math.floor(r / 4) % pal.length
         rows.push(Array.from({ length: W }, (_, x) => ((x + r) % 6 < 3 && r % 8 > 3 ? pal[(band + 1) % pal.length] : pal[band]) as number))
-        if (top + rows.length > H - 4) reset()
+        if (H - 4 - rows.length < top + 1) reset()
       }
     },
     draw(px) {
@@ -467,11 +471,12 @@ const loom: Maker = (W, H, rng) => {
         line(px, W, H, x, top - 2, x, H - 3, 0xe8e0d0)
         line(px, W, H, x + 1, top - 2, x + 1, H - 3, 0x4a321a)
       }
+      // woven from the bottom beam up: each pass is beaten down onto the last, and what is woven stays put
       rows.forEach((r, i) => {
-        const y = top + rows.length - 1 - i
+        const y = H - 4 - i
         for (let x = 1; x < W - 1; x++) dot(px, W, H, x, y, (x + i) % 2 ? (r[x] as number) : scale(r[x] as number, 0.85))
       })
-      const y = top + rows.length
+      const y = H - 4 - rows.length
       line(px, W, H, 1, y, W - 2, y, 0x9a8a7a)
       slab(px, W, H, shuttle - 3, y - 1, 6, 2, 0xc8964e)
       dot(px, W, H, shuttle - 4, y, 0x8a6030)

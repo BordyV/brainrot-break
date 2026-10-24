@@ -492,6 +492,11 @@ const crane: Maker = (W, H, rng) => {
         rect(px, W, H, bx + bw - 1, y + 1, 1, 2, scale(colour, 0.7))
         for (let wx = bx + 1; wx < bx + bw - 1; wx += 3) dot(px, W, H, wx, y + 1, f % 2 ? 0x3a5a8a : 0x5a8aba)
       }
+      // the next slab waits on the ground at the mast's foot until the hook comes down for it
+      if (phase === 0) {
+        rect(px, W, H, mast + 4 - bw / 2, ground - 2, bw, 2, colour)
+        rect(px, W, H, mast + 4 - bw / 2, ground - 2, bw, 1, scale(colour, 0.8))
+      }
       line(px, W, H, trolley, jibY + 1, trolley, hook, 0x3a3a3a)
       if (phase >= 1 && phase <= 3) {
         rect(px, W, H, trolley - bw / 2, hook + 1, bw, 2, colour)
