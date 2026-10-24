@@ -263,4 +263,17 @@ export const SPORTS = {
       fr: ['rugissement de moteur deux-temps', 'son original - round.the.wall', 'orgue de fête foraine'],
     },
   },
+  speedbag: {
+    name: { en: 'speed bag', fr: 'poire de frappe' },
+    authors: ['@speed.bag.rhythm', '@ratatat.gloves', '@boxing.gym.asmr'],
+    tags: ['#boxing #speedbag #training', '#rhythm #asmr', '#fyp #foryou'],
+    captions: {
+      en: ['three bounces a punch, count them', 'it turns into a drumroll', 'the rhythm is the whole skill', 'try this before your coffee'],
+      fr: ['trois rebonds par coup, compte-les', 'ça devient un roulement de tambour', 'tout le talent est dans le rythme', 'essaie ça avant ton café'],
+    },
+    sounds: {
+      en: ['ratatat-ratatat (original sound)', 'original sound - speed.bag.rhythm', 'training montage music'],
+      fr: ['ratatat-ratatat (son original)', 'son original - speed.bag.rhythm', 'musique de montage d’entraînement'],
+    },
+  },
 } satisfies Record<string, Entry>

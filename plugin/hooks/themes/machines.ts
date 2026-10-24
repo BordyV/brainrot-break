@@ -1367,6 +1367,127 @@ const metalcast: Maker = (W, H, rng) => {
   }
 }
 
+// --- recycling plant ----------------------------------------------------------------
+
+const recycling: Maker = (W, H, rng) => {
+  // waste rides a belt; a magnet, air jets and a pusher each send their material down to its bin
+  const belt = Math.round(H * 0.42)
+  const binTop = Math.round(H * 0.66)
+  const full = Math.max(4, H - binTop - 3)
+  const binW = Math.floor(W / 4)
+  // metal, plastic, paper, glass: a colour, a size, and the station above its bin
+  const KINDS = [
+    { c: 0xb8bcc8, w: 4, h: 5, bin: 0x8a8e9a },
+    { c: 0x4a9ae8, w: 4, h: 6, bin: 0x2a6ac0 },
+    { c: 0xe0d0a8, w: 5, h: 4, bin: 0xc8a860 },
+    { c: 0x4ab86a, w: 3, h: 6, bin: 0x2a8a4a },
+  ]
+  type Item = { x: number; y: number; vy: number; k: number; fall: boolean; lift: number }
+  let items: Item[] = []
+  let fill = [0, 0, 0, 0]
+  let fire = [0, 0, 0, 0]
+  let sorted = 0
+  let t = 0
+  let fx: Spark[] = []
+  const station = (k: number) => k * binW + binW / 2
+
+  return {
+    step() {
+      t++
+      fx = sparks(fx, 0.04)
+      for (let k = 0; k < 4; k++) if (fire[k] as number > 0) fire[k] = (fire[k] as number) - 1
+      if (t % 14 === 0 && rng() < 0.85) items.push({ x: -4, y: belt, vy: 0, k: irand(rng, 4), fall: false, lift: 0 })
+      for (const it of items) {
+        if (it.fall) {
+          it.vy += 0.15
+          it.y += it.vy
+          continue
+        }
+        it.x += 0.45
+        const s = station(it.k)
+        if (Math.abs(it.x + KINDS[it.k]!.w / 2 - s) < 0.3) {
+          fire[it.k] = 8
+          if (it.k === 0) it.lift = 1
+          else {
+            it.fall = true
+            it.vy = 0.3
+            // a puff from the jets, or the pusher's knock
+            for (let n = 0; n < 5; n++) fx.push({ x: s + (rng() - 0.5) * 3, y: belt - 6, vx: (rng() - 0.5) * 0.6, vy: 0.4 + rng() * 0.4, l: 8, c: it.k === 1 ? 0xe8f4ff : 0xd8c8a0 })
+          }
+        }
+        // the magnet lifts the can, carries it a moment, then lets it drop behind the belt's edge
+        if (it.lift > 0) {
+          it.lift++
+          it.y = belt - Math.min(5, it.lift)
+          if (it.lift > 12) {
+            it.fall = true
+            it.lift = 0
+            it.vy = 0.5
+          }
+        }
+      }
+      for (const it of items) if (it.fall && it.y >= H - 2 - fill[it.k]!) {
+        fill[it.k] = fill[it.k]! + 1
+        sorted++
+        it.y = H + 10
+      }
+      items = items.filter(it => it.y < H && it.x < W + 4)
+      // a full bin is emptied
+      for (let k = 0; k < 4; k++) if (fill[k]! >= full) fill[k] = 0
+    },
+    draw(px) {
+      // the hall: a dark wall, a catwalk rail, the stations on a beam
+      sky(px, W, H, 0x24303a, 0x1a2228)
+      for (let x = 0; x < W; x++) if (x % 5 === 0) for (let y = 4; y < 9; y++) dot(px, W, H, x, y, 0x3a4a54)
+      rect(px, W, H, 0, 4, W, 1, 0x4a5a64)
+      rect(px, W, H, 0, Math.round(H * 0.2), W, 2, 0x5a5a40)
+      for (let k = 0; k < 4; k++) {
+        const s = station(k)
+        const on = (fire[k] as number) > 0
+        const top = Math.round(H * 0.2) + 2
+        // each station's tool, with its lamp: a magnet, an air jet, a pusher, a flap
+        rect(px, W, H, s - 0.5, top, 1, 4, 0x6a6a74)
+        if (k === 0) {
+          slab(px, W, H, s - 3, top + 4, 7, 3, 0xd03a3a, 0x501010)
+          rect(px, W, H, s - 3, top + 7, 2, 2, 0xc8c8d0)
+          rect(px, W, H, s + 2, top + 7, 2, 2, 0xc8c8d0)
+        } else if (k === 1) {
+          slab(px, W, H, s - 2, top + 4, 5, 3, 0x8a9aa8, 0x2a3440)
+          rect(px, W, H, s, top + 7, 1, 2, 0x5a6a78)
+        } else {
+          slab(px, W, H, s - 2, top + 4 + (on ? 3 : 0), 5, 3, k === 2 ? 0xf0b030 : 0x7ac08a, 0x3a2a10)
+        }
+        dot(px, W, H, s + 2, top + 1, on ? 0x8aff8a : 0x2a4a2a)
+      }
+      // the belt: rollers turning under a dark band
+      rect(px, W, H, 0, belt + 1, W, 2, 0x2a2a30)
+      for (let x = 0; x < W; x++) if ((x + Math.floor(t * 0.45)) % 4 === 0) dot(px, W, H, x, belt + 1, 0x4a4a52)
+      rect(px, W, H, 0, belt + 3, W, 1, 0x14141a)
+      // the items: cans, bottles, paper, glass
+      for (const it of items) {
+        const K = KINDS[it.k]!
+        const y = Math.round(it.y) - K.h + 1
+        slab(px, W, H, it.x, y, K.w, K.h, K.c)
+        if (it.k === 0) rect(px, W, H, it.x, y + 1, K.w, 1, 0xd83a3a)
+        if (it.k === 1 || it.k === 3) dot(px, W, H, it.x + K.w / 2 - 0.5, y - 1, it.k === 1 ? 0xf0f0f0 : 0x2a6a3a)
+      }
+      // the bins, filling up, each with a coloured front
+      for (let k = 0; k < 4; k++) {
+        const x = k * binW
+        const K = KINDS[k]!
+        rect(px, W, H, x + 1, binTop, binW - 2, H - binTop - 1, 0x10141a)
+        const lvl = fill[k]!
+        for (let j = 0; j < lvl; j++) for (let i = 2; i < binW - 2; i++) dot(px, W, H, x + i, H - 2 - j, (i + j) % 3 ? K.c : mix(K.c, 0x101010, 0.3))
+        slab(px, W, H, x + 1, binTop, 1, H - binTop - 1, K.bin)
+        slab(px, W, H, x + binW - 2, binTop, 1, H - binTop - 1, K.bin)
+        rect(px, W, H, x + 1, binTop, binW - 2, 1, mix(K.bin, 0xffffff, 0.3))
+      }
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+      text(px, W, H, 1, H * 0.2 - 7, String(sorted), 0xd8e8f0)
+    },
+  }
+}
+
 export const MACHINES = {
   claw,
   vending,
@@ -1386,5 +1507,6 @@ export const MACHINES = {
   pinart,
   warehouse,
   metalcast,
+  recycling,
 }
 

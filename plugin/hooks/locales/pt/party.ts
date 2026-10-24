@@ -8,4 +8,5 @@ export const PARTY: Locale['videos'] = {
   hoops: { name: 'basquete de fliperama', captions: ['swish. swish. swish.', 'abaixo de vinte segundos a cesta começa a mexer', 'vale três pontos quando ela mexe', 'vença o cronômetro'], sounds: ['swish e a buzina', 'som original - swish.machine', 'batida animada de fliperama'] },
   cupshuffle: { name: 'jogo dos copos', captions: ['qual copo? comenta antes da revelação', 'perdi na quarta troca', 'só 1 % seguem a bolinha', 'o bot nunca erra… né?'], sounds: ['copos deslizando no feltro', 'som original - follow.the.ball', 'rufar de tambores de suspense'] },
   bottleflip: { name: 'bottle flip', captions: ['é tudo no pulso', 'espera a aterrissagem na tampa', 'conta os acertos', 'joga como em 2016'], sounds: ['baque da garrafa (som original)', 'som original - flip.and.stick', 'gritos da turma'] },
+  shootgallery: { name: 'barraca de tiro', captions: ['quantos patos com dez tiros?', 'a mira é torta, todo mundo sabe', 'ele antecipa o pato. jogada de pro.', 'ganha o urso gigante ou vai pra casa'], sounds: ['pá. tim. (som original)', 'som original - tin.duck.sniper', 'órgão de parque de diversões'] },
 }

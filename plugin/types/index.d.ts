@@ -446,6 +446,10 @@ export type Kind =
   | 'metalcast'
   | 'tanghulu'
   | 'laundromat'
+  | 'shootgallery'
+  | 'speedbag'
+  | 'fishinggame'
+  | 'recycling'
 
 export type Video = {
   id: string

@@ -1,6 +1,6 @@
 import { dot, hsv, mix, rect, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, clamp, ellipse, irand, line, lit, ring, slab, sparks, textWidth, tint, tones } from '../kit'
+import { beam, burst, clamp, ellipse, irand, line, lit, litSprite, ring, slab, sparks, textWidth, tint, tones } from '../kit'
 import type { Spark } from '../kit'
 
 // Party, board & fair games: chips, wheels, discs and pucks.
@@ -743,6 +743,112 @@ const bottleflip: Maker = (W, H, rng) => {
   }
 }
 
+// --- shooting gallery ---------------------------------------------------------------
+
+const shootgallery: Maker = (W, H, rng) => {
+  // tin ducks file along three rails; the sight takes aim, a hit duck tips over backwards
+  const rails = [H * 0.37, H * 0.53, H * 0.69].map(Math.round)
+  const DUCK = ['..yy...', '.yyey..', '.yyyybb', 'yyyyy..', 'yyyyyy.', '.yyyy..']
+  const flip = DUCK.map(r => r.split('').reverse().join(''))
+  type Duck = { x: number; row: number; down: number }
+  let ducks: Duck[] = []
+  for (let row = 0; row < 3; row++) for (let k = 0; k < 3; k++) ducks.push({ x: k * (W / 3 + 4) + row * 5, row, down: 0 })
+  let aim = { x: W / 2, y: H / 2 }
+  let target: Duck | null = null
+  let off = { x: 0, y: 0 }
+  let settle = 0
+  let flash = 0
+  let score = 0
+  let shots = 10
+  let reload = 0
+  let fx: Spark[] = []
+  const span = W + 14
+  const dir = (row: number) => (row === 1 ? -1 : 1)
+
+  return {
+    step() {
+      fx = sparks(fx, 0.08)
+      if (flash > 0) flash--
+      for (const d of ducks) {
+        d.x += dir(d.row) * (0.35 + d.row * 0.1)
+        if (d.x > W + 7) d.x -= span
+        if (d.x < -7) d.x += span
+        // a knocked duck stays down for a lap, then pops back up
+        if (d.down > 0 && ++d.down > 120) d.down = 0
+      }
+      if (reload > 0) {
+        if (--reload === 0) shots = 10
+        return
+      }
+      if (!target || target.down || target.x < 2 || target.x > W - 8) {
+        const up = ducks.filter(d => !d.down && d.x > 4 && d.x < W - 12)
+        target = up.length ? (up[irand(rng, up.length)] as Duck) : null
+        // the aim is off now and then
+        off = rng() < 0.22 ? { x: (rng() - 0.5) * 9, y: (rng() - 0.5) * 6 } : { x: 0, y: 0 }
+        settle = 0
+        if (!target) return
+      }
+      // lead the duck a little, glide to it, steady, then fire
+      const tx = target.x + 3 + dir(target.row) * 2 + off.x
+      const ty = (rails[target.row] as number) - 3 + off.y
+      aim.x += (tx - aim.x) * 0.25
+      aim.y += (ty - aim.y) * 0.25
+      if (Math.hypot(tx - aim.x, ty - aim.y) < 1 && ++settle > 4) {
+        flash = 3
+        shots--
+        const hit = ducks.find(d => !d.down && Math.abs(aim.x - (d.x + 3)) < 3.5 && Math.abs(aim.y - ((rails[d.row] as number) - 3)) < 3.5)
+        if (hit) {
+          hit.down = 1
+          score++
+          burst(fx, rng, aim.x, aim.y, 0xfff0a0, 8, 0.9)
+        } else fx.push({ x: aim.x, y: aim.y, vx: 0, vy: 0, l: 10, c: 0x2a1a10 })
+        target = null
+        if (shots <= 0) reload = 30
+      }
+    },
+    draw(px) {
+      // the booth: a dark back wall, a striped awning, the counter in front
+      sky(px, W, H, 0x2a1830, 0x1a1020)
+      rect(px, W, H, 0, 0, W, 6, 0x1a1020)
+      for (let y = 6; y < 11; y++) for (let x = 0; x < W; x++) px[y * W + x] = Math.floor(x / 4) % 2 ? 0xf4f0e8 : 0xd8342e
+      for (let x = 0; x < W; x++) if (Math.floor(x / 4) % 2 === 0) dot(px, W, H, x, 11, 0xa82422)
+      // bulbs under the awning
+      for (let x = 2; x < W; x += 6) dot(px, W, H, x, 13, 0xffe080)
+      for (const [i, y] of rails.entries()) {
+        rect(px, W, H, 0, y, W, 2, i % 2 ? 0x6a4a2a : 0x7a5530)
+        rect(px, W, H, 0, y, W, 1, 0xa87a48)
+      }
+      for (const d of ducks) {
+        const y = rails[d.row] as number
+        const rows = dir(d.row) > 0 ? DUCK : flip
+        if (d.down) {
+          // tipped over backwards: a flat strip on the rail
+          rect(px, W, H, d.x, y - 1, 7, 1, 0x8a7a2a)
+          continue
+        }
+        litSprite(px, W, H, Math.round(d.x), y - 6, rows, { y: 0xf0c830, e: 0x1a1a1a, b: 0xf07a20 })
+      }
+      // the counter and the rifle, aimed at the sight
+      for (let y = Math.round(H * 0.8); y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = y === Math.round(H * 0.8) ? 0xc89060 : mix(0x8a5a34, 0x4a2c18, (y - H * 0.8) / (H * 0.2))
+      const bx = W - 3
+      const by = H - 3
+      const dx = aim.x - bx
+      const dy = aim.y - by
+      const d = Math.hypot(dx, dy) || 1
+      beam(px, W, H, bx, by, bx + (dx / d) * 11, by + (dy / d) * 11, 0x5a3a24)
+      line(px, W, H, bx + (dx / d) * 8, by + (dy / d) * 8, bx + (dx / d) * 15, by + (dy / d) * 15, 0x3a3a44)
+      // the sight: a ring and a dot, white when it fires
+      const c = flash ? 0xffffff : 0xff4a4a
+      ring(px, W, H, aim.x, aim.y, 2.5, c)
+      dot(px, W, H, aim.x, aim.y, c)
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+      // the score and the pellets left, over the awning
+      text(px, W, H, 1, 1, String(score), 0xf0e0c0)
+      for (let k = 0; k < shots; k++) rect(px, W, H, W - 2 - k * 2, 1, 1, 3, 0xd8b040)
+    },
+  }
+}
+
 export const PARTY = {
   plinko,
   prizewheel,
@@ -751,4 +857,5 @@ export const PARTY = {
   hoops,
   cupshuffle,
   bottleflip,
+  shootgallery,
 }

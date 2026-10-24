@@ -1,6 +1,6 @@
 import { dot, hsv, mix, rect, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, clamp, collide, ellipse, irand, line, lit, ring, slab, sparks, tint, tones, wallCircle } from '../kit'
+import { beam, burst, clamp, collide, ellipse, irand, line, lit, ring, slab, sparks, tint, tones, wallCircle } from '../kit'
 import type { Ball, Spark } from '../kit'
 
 // Toys & desk toys: the things on a desk that keep moving.
@@ -370,9 +370,126 @@ const battletops: Maker = (W, H, rng) => {
   }
 }
 
+// --- fishing game -------------------------------------------------------------------
+
+const fishinggame: Maker = (W, H, rng) => {
+  // the turning pond of the 90s toy: the fish open and close their mouths, two rods hook them one by one
+  const cx = W / 2
+  const cy = Math.round(H * 0.62)
+  const rx = W * 0.42
+  const ry = H * 0.13
+  const N = 8
+  type Fish = { a: number; c: number; out: boolean }
+  type Catch = { c: number; side: number; k: number; x0: number; y0: number }
+  let fish: Fish[] = []
+  let rot = 0
+  let caught: Catch[] = []
+  let score = [0, 0]
+  let wait = 0
+  let t = 0
+  const hooks = [cx - rx * 0.45, cx + rx * 0.45]
+  const COLORS = [0xe84a4a, 0x4a8ae8, 0xf0c030, 0x5ac25a]
+  const reset = () => {
+    fish = Array.from({ length: N }, (_, i) => ({ a: (i / N) * Math.PI * 2, c: COLORS[i % 4] as number, out: false }))
+    caught = []
+    wait = 20
+  }
+  reset()
+  // a fish's mouth opens and shuts as the cam under the pond turns
+  const open = (f: Fish) => Math.sin((f.a + rot) * 3 + 0.5) > 0.2
+
+  return {
+    step() {
+      t++
+      rot += 0.025
+      for (const c of caught) c.k = Math.min(1, c.k + 0.04)
+      if (wait > 0) {
+        wait--
+        return
+      }
+      if (fish.every(f => f.out)) {
+        if (caught.every(c => c.k >= 1)) reset()
+        return
+      }
+      // a hook dangles at the front; a fish with its mouth open right under it may bite
+      for (const [side, hx] of hooks.entries()) {
+        if (caught.some(c => c.side === side && c.k < 1)) continue
+        for (const f of fish) {
+          if (f.out) continue
+          const a = f.a + rot
+          const x = cx + Math.cos(a) * rx * 0.75
+          const front = Math.sin(a) > 0.3
+          if (front && open(f) && Math.abs(x - hx) < 1.2 && rng() < 0.3) {
+            f.out = true
+            score[side] = (score[side] as number) + 1
+            caught.push({ c: f.c, side, k: 0, x0: x, y0: cy + Math.sin(a) * ry * 0.75 })
+          }
+        }
+      }
+    },
+    draw(px) {
+      // a playroom carpet, the toy's base, the blue pond on top
+      sky(px, W, H, 0x5a6aa0, 0x3a4a7a)
+      for (let y = Math.round(H * 0.45); y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = mix(0x6a4a8a, 0x4a2e66, (y - H * 0.45) / (H * 0.55))
+      ellipse(px, W, H, cx, cy + 5, rx + 1, ry + 2, 0x2a1a40)
+      for (let y = Math.round(cy - ry - 1); y <= cy + 5; y++) {
+        const k = (y - cy) / (ry + 1)
+        const half = (rx + 1) * Math.sqrt(Math.max(0, 1 - Math.min(1, k * k)))
+        for (let x = Math.round(cx - half); x <= cx + half; x++) dot(px, W, H, x, y, y > cy ? (x < cx ? 0xf0d040 : 0xc8a020) : 0xf0d040)
+      }
+      ellipse(px, W, H, cx, cy, rx, ry, 0x2a7ad0)
+      ellipse(px, W, H, cx, cy - 1, rx - 2, ry - 1.5, 0x4a9ae8)
+      // the fish, back ones first, heads up out of the water, mouths opening and shutting
+      const order = fish.filter(f => !f.out).sort((p, q) => Math.sin(p.a + rot) - Math.sin(q.a + rot))
+      for (const f of order) {
+        const a = f.a + rot
+        const x = cx + Math.cos(a) * rx * 0.75
+        const y = cy + Math.sin(a) * ry * 0.75
+        const back = Math.sin(a) < 0
+        const col = back ? mix(f.c, 0x1a2a50, 0.3) : f.c
+        lit(px, W, H, x, y - 3, 2.2, 3.2, col, mix(col, 0x100818, 0.6))
+        dot(px, W, H, x - 1, y - 4, 0xffffff)
+        dot(px, W, H, x - 1, y - 4 + 0, 0x101018)
+        if (open(f)) {
+          rect(px, W, H, x - 1, y - 7, 3, 2, 0x401018)
+          dot(px, W, H, x - 2, y - 7, mix(col, 0xffffff, 0.4))
+          dot(px, W, H, x + 2, y - 7, mix(col, 0xffffff, 0.4))
+        } else rect(px, W, H, x - 1, y - 6, 3, 1, mix(col, 0xffffff, 0.3))
+      }
+      // the rods: poles from the top corners, a line down to each hook
+      for (const [side, hx] of hooks.entries()) {
+        const tipX = side ? W - 7 : 7
+        const tipY = Math.round(H * 0.25)
+        beam(px, W, H, side ? W + 2 : -2, H * 0.17, tipX, tipY, side ? 0x3a8ae8 : 0xe84a4a)
+        const hy = cy + ry * 0.75 - 8 + Math.sin(t * 0.2 + side) * 0.6
+        const reel = caught.find(c => c.side === side && c.k < 1)
+        if (reel) {
+          // the catch rises up the line and swings over to its side's pile
+          const k = reel.k
+          const fx = reel.x0 + (tipX - reel.x0) * k
+          const fy = reel.y0 - 3 - (reel.y0 - tipY - 6) * Math.sin(k * Math.PI * 0.5)
+          line(px, W, H, tipX, tipY, fx, fy - 4, 0xe8e8f0)
+          lit(px, W, H, fx, fy, 2.2, 3.2, reel.c)
+        } else {
+          line(px, W, H, tipX, tipY, hx, hy, 0xe8e8f0)
+          dot(px, W, H, hx, hy + 1, 0xa0a0b0)
+        }
+      }
+      // each side's catch, stacked at the bottom
+      for (const c of caught) if (c.k >= 1) {
+        const i = caught.filter(o => o.side === c.side && o.k >= 1).indexOf(c)
+        lit(px, W, H, c.side ? W - 4 - i * 3 : 3 + i * 3, H - 5, 1.6, 2.4, c.c)
+      }
+      text(px, W, H, 1, 1, String(score[0]), 0xffb0b0)
+      text(px, W, H, W - 4, 1, String(score[1]), 0xb0d0ff)
+    },
+  }
+}
+
 export const TOYS = {
   slinky,
   drinkingbird,
   ringtoss,
   battletops,
+  fishinggame,
 }

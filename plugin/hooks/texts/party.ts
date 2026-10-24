@@ -94,4 +94,17 @@ export const PARTY = {
       fr: ['bruit sourd de bouteille (son original)', 'son original - flip.and.stick', 'cris de la classe'],
     },
   },
+  shootgallery: {
+    name: { en: 'shooting gallery', fr: 'stand de tir' },
+    authors: ['@tin.duck.sniper', '@fair.shot', '@knock.em.down'],
+    tags: ['#funfair #shootinggallery #carnival', '#aim #ducks', '#fyp #foryou'],
+    captions: {
+      en: ['how many ducks with ten shots?', 'the sights are bent, everyone knows', 'he leads the duck. pro move.', 'win the giant teddy or go home'],
+      fr: ['combien de canards en dix tirs ?', 'la mire est faussée, tout le monde le sait', 'il anticipe le canard. geste de pro.', 'gagne la peluche géante ou rentre chez toi'],
+    },
+    sounds: {
+      en: ['pop. ting. (original sound)', 'original sound - tin.duck.sniper', 'funfair organ'],
+      fr: ['pop. ting. (son original)', 'son original - tin.duck.sniper', 'orgue de fête foraine'],
+    },
+  },
 } satisfies Record<string, Entry>

@@ -1,6 +1,7 @@
 import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, ellipse, irand, line, lit, litSprite, pick, poly, slab, textWidth, tones } from '../kit'
+import { beam, clamp, ellipse, irand, line, lit, litSprite, pick, poly, slab, sparks, textWidth, tones } from '../kit'
+import type { Spark } from '../kit'
 
 // Sports: a clear goal and a decisive moment.
 
@@ -1528,6 +1529,100 @@ const wallofdeath: Maker = (W, H, rng) => {
   }
 }
 
+// --- speed bag ----------------------------------------------------------------------
+
+const speedbag: Maker = (W, H, rng) => {
+  // the bag rebounds off the board under two fists, three swings a hit, faster and faster
+  const px0 = W * 0.6
+  const py0 = Math.round(H * 0.2)
+  const L = Math.max(8, Math.round(H * 0.3))
+  const R = Math.max(3, W * 0.19)
+  const A = 0.85
+  let phase = 0
+  let period = 16 + rng() * 4
+  let hits = 0
+  let hand = 0
+  let fx: Spark[] = []
+  let t = 0
+  // the bag's swing: struck back at phase 0, then it rebounds three times off the board
+  const angle = () => -A * Math.cos(phase * Math.PI * 2 * 3) * (0.55 + 0.45 * Math.cos(phase * Math.PI * 2))
+
+  return {
+    step() {
+      t++
+      fx = sparks(fx, 0.05)
+      phase += 1 / period
+      if (phase >= 1) {
+        phase -= 1
+        hits++
+        hand = 1 - hand
+        // the rhythm tightens to a blur, then eases off for a breath
+        period = hits % 30 < 24 ? Math.max(7, period - 0.5) : Math.min(18, period + 2)
+        const a = angle()
+        fx.push({ x: px0 + Math.sin(a) * L - 2, y: py0 + Math.cos(a) * L, vx: -0.6, vy: -0.2, l: 5, c: 0xffffff })
+      }
+    },
+    draw(px) {
+      // a gym: a dim brick wall, the platform board, its bracket
+      for (let y = 0; y < H; y++) {
+        const row = Math.floor(y / 4)
+        for (let x = 0; x < W; x++) {
+          const mortar = y % 4 === 0 || (x + (row % 2) * 4) % 8 === 0
+          px[y * W + x] = mortar ? 0x2a1c1c : mix(0x5a3430, 0x3a2422, y / H)
+        }
+      }
+      rect(px, W, H, W - 3, 0, 3, py0 - 2, 0x3a3a44)
+      slab(px, W, H, W * 0.15, py0 - 4, W * 0.85, 3, 0x9a6a3a, 0x3a2410)
+      rect(px, W, H, px0 - 1, py0 - 1, 3, 2, 0x8a8a94)
+      // the bag: a leather teardrop hanging from the swivel, drawn in its own frame
+      const a = angle()
+      const c = Math.cos(a)
+      const s = Math.sin(a)
+      const [hi, base, sh, deep] = tones(0xa8442a)
+      for (let y = py0 - 2; y < py0 + L + R + 2; y++)
+        for (let x = Math.floor(px0 - L - R); x < px0 + L + R; x++) {
+          const dx = x + 0.5 - px0
+          const dy = y + 0.5 - py0
+          const u = dx * s + dy * c
+          const v = dx * c - dy * s
+          if (u < 0 || u > L) continue
+          const k = u / L
+          // a teardrop: a narrow neck, widening, rounded at the bottom
+          const w = k < 0.12 ? 1 : R * Math.sqrt((k - 0.1) / 0.9) * (k > 0.72 ? Math.sqrt(Math.max(0, 1 - ((k - 0.72) / 0.28) ** 2)) : 1)
+          if (Math.abs(v) > w) continue
+          const l = -v / Math.max(1, w)
+          let col = l > 0.45 ? hi : l > -0.2 ? base : l > -0.7 ? sh : deep
+          if (Math.abs(v) > w - 0.8) col = 0x3a140c
+          if (k < 0.12) col = 0x6a2a1a
+          if (Math.abs(v) < 0.5 && k > 0.3) col = mix(col, 0xe8c8a0, 0.35)
+          dot(px, W, H, x, y, col)
+        }
+      // the gloves circle in turn; the front one hits on each beat
+      for (const g of [1 - hand, hand]) {
+        const front = g === hand
+        const p = front ? phase : (phase + 0.5) % 1
+        const orbit = Math.PI * 2 * p
+        const gx = px0 - L * 0.62 + Math.cos(orbit) * 4 - (front ? 0 : 3)
+        const gy = py0 + L * 0.95 + Math.sin(orbit) * 4 + (front ? 0 : 2)
+        const col = front ? 0xe02a2a : 0x9a1a1e
+        // the forearm, up from the bottom of the frame, then the glove and its white cuff
+        const ax = front ? W * 0.32 : W * 0.12
+        beam(px, W, H, ax, H, gx - 1, gy + 3, front ? 0xc88a62 : 0x8a5a40)
+        beam(px, W, H, ax + 1, H, gx, gy + 3, front ? 0xc88a62 : 0x8a5a40)
+        lit(px, W, H, gx, gy, 4.5, 3.8, col, mix(col, 0x200810, 0.6))
+        dot(px, W, H, gx - 2, gy - 2, mix(col, 0xffffff, 0.5))
+        rect(px, W, H, gx - 3, gy + 3, 5, 2, 0xf0f0f0)
+      }
+      for (const f of fx) {
+        line(px, W, H, f.x, f.y, f.x - 2, f.y + 1, 0xffffff)
+      }
+      // speed lines on the fastest rally
+      if (period < 9) for (let k = 0; k < 3; k++) dot(px, W, H, px0 + 6 + k * 2, py0 + L * 0.5 + ((t + k * 3) % 6), 0xf0e0d0)
+      text(px, W, H, 1, 1, String(hits), 0xf0e0d0)
+    },
+  }
+}
+
 export const SPORTS = {
   trickshots,
   penalty,
@@ -1549,5 +1644,6 @@ export const SPORTS = {
   bungee,
   juggling,
   wallofdeath,
+  speedbag,
 }
 

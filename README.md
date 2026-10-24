@@ -83,13 +83,13 @@ The language can also be set in the plugin's config (`language`: `en`, `fr`, `es
 
 ## The videos
 
-450 of them, in 33 themes:
+454 of them, in 33 themes:
 
-![The 450 videos of the feed](assets/preview.png)
+![The 454 videos of the feed](assets/preview.png)
 
 - **Satisfying & ASMR** (24): hourglass, bubbles, paint mixing, dominoes, kinetic sand, soap cubes, slime stretch, pressure washing, carpet cleaning, perfect fit, laser rust removal, ball sort, paint bucket, screen film peel, wood planer, bubble wrap, fridge restock, lawn stripes, snow plough, window squeegee, floor tiling, zen garden, folding laundry, dishwasher Tetris.
 - **Ball & marble physics** (25): marbles, double pendulum, growing ball, escape the rings, marble race, ball splits, string art bounce, which colour wins, spinning hexagon, marble funnel, balls vs saws, bounce flashes, marble machine, gravity maze, 100 balls one hole, snooker, pinball, peg breaker, colour gates, sky track, will it make it, rainbow ball, sled on a drawn line, Plinko*, pendulum wave*.
-- **Retro arcade** (32): runner, Tetris, brick breaker, racing, Snake, Chrome dino, Pac-Man, Geometry Dash, space invaders, asteroids, frog crossing, pong, galaxy dive, missile defence, barrel climber, lunar lander, centipede, bomber maze, minesweeper, light cycles, lemmings, platformer, bubble shooter, falling jewels, sokoban, solitaire win, speedrun, rage climb, closing hexagon, horde survivor*, air hockey*, arcade hoops*.
+- **Retro arcade** (33): runner, Tetris, brick breaker, racing, Snake, Chrome dino, Pac-Man, Geometry Dash, space invaders, asteroids, frog crossing, pong, galaxy dive, missile defence, barrel climber, lunar lander, centipede, bomber maze, minesweeper, light cycles, lemmings, platformer, bubble shooter, falling jewels, sokoban, solitaire win, speedrun, rage climb, closing hexagon, horde survivor*, air hockey*, arcade hoops*, shooting gallery*.
 - **Mobile games** (30): flappy bird, 2048, stack tower, fruit slicing, road crossing, helix jump, colour switch, hole in the city, territory, cell eater, match-3, block blast, zigzag, knife throw, crowd runner, pull the pin, parking jam, water sort, doodle jump, slingshot birds, merge watermelon, screw jam, hexa sort, colour block jam, runner*, sky track*, flow connect*, unblock the arrows*, triple tile match*, merge army*.
 - **Versus & battles** (21): rock paper scissors, flag battle royale, pong wars, ant colony war, red vs blue armies, colour spirals, snake vs snake, stick duel, big fish, zombie outbreak, tank duel, space dogfight, immune system, tower defence, colour tournament, sumo bots, fire vs water, foxes and rabbits, last ball standing, fire water grass, battling tops*.
 - **Generative art & maths** (16): Game of Life, Langton’s ant, boids, spirograph, fractal tree, maze solver, A* pathfinding, Voronoi growth, dragon curve, Hilbert curve, spinning cube, spinning donut, wave function collapse, water Pythagoras, pendulum wave, travelling salesman.
@@ -98,10 +98,10 @@ The language can also be set in the plugin's config (`language`: `en`, `fr`, `es
 - **Nature & weather** (16): northern lights, sunset at sea, thunderstorm, tornado, surfer, volcano, waterfall, four seasons tree, flower bloom, forest fire, geyser, falling leaves, mushrooms after rain, coral reef, caterpillar to butterfly*, salmon run*.
 - **Space & sci-fi** (14): rocket landing, solar system, black hole, warp speed, UFO abduction, planet formation, Mars rover, space docking, meteor shower, test flight, Kessler cascade, terraforming, wormhole, three-body problem.
 - **Cozy & lo-fi** (24): lava lamp, fireworks, campfire, snowy cabin, rainy window, lo-fi study desk, aquarium, windowsill plant, café window, train window, bookshelf tidy, night city windows, knitting, hot air balloons, lantern festival, fishing dock, farm crops, toasting marshmallows, jellyfish, ferris wheel, sailing, lighthouse, laundromat at night, snow globe*.
-- **Sports** (27): trick shots, penalty shootout, bowling strike, hole in one, ski slalom, skate halfpipe, pit stop, table tennis, curling, archery, beach volleyball, ski jump, horse race, cup stacking, speed cube, keepy-uppy, parkour, bungee jump, juggling, wall of death, drag race*, monster truck*, snooker*, pinball*, stadium wave*, surfer*, arcade hoops*.
+- **Sports** (28): trick shots, penalty shootout, bowling strike, hole in one, ski slalom, skate halfpipe, pit stop, table tennis, curling, archery, beach volleyball, ski jump, horse race, cup stacking, speed cube, keepy-uppy, parkour, bungee jump, juggling, wall of death, speed bag, drag race*, monster truck*, snooker*, pinball*, stadium wave*, surfer*, arcade hoops*.
 - **Vehicles & city** (18): cyberpunk city, traffic lights, roundabout, parallel parking, level crossing, runway, car wash, tower crane, city builder, metro map, drag race, monster truck, container port, drawbridge, night highway, rollercoaster, building demolition, scramble crossing.
 - **Music & dance** (13): audio visualiser, piano tiles, trend dance, guitar highway, bass drop, DJ decks, rhythm circles, disco floor, stadium wave, conga line, dancing fountain, marble xylophone, dancing robot.
-- **Machines & how it's made** (21): claw machine, vending machine, assembly line, bottling line, Rube Goldberg machine, coin pusher, gumball machine, laser cutter, 3D printer, colour sorter, crayon factory, wood chipper, paper shredder, gacha machine, robot arm, pin art, warehouse robots, metal casting, factory automation*, combine harvester*, canal lock*.
+- **Machines & how it's made** (22): claw machine, vending machine, assembly line, bottling line, Rube Goldberg machine, coin pusher, gumball machine, laser cutter, 3D printer, colour sorter, crayon factory, wood chipper, paper shredder, gacha machine, robot arm, pin art, warehouse robots, metal casting, recycling plant, factory automation*, combine harvester*, canal lock*.
 - **Crafts & makers** (14): brick build, pixel art drawing, pottery wheel, cross-stitch, fuse beads, mosaic, weaving loom, mural, sandcastle, block house, card tower, Jenga collapse, flip-book, rug tufting.
 - **Science experiments** (17): elephant toothpaste, Mentos and cola, Newton’s cradle, Tesla coil, mousetrap chain reaction, baking soda volcano, crystal growth, water balloon slow-mo, Chladni plate, gas in a box, water rocket, egg drop, coil train, ant farm, pendulum wave*, water Pythagoras*, drinking bird*.
 - **Developer humour** (26): sorting, Matrix rain, stuck at 99%, git branches, merge conflict, CI pipeline, stack overflow, whack-a-bug, server rack, loading spinners, network packets, garbage collector, memory leak, rubber duck debugging, pipes screensaver, flying toasters, disk defragmenter, test suite, robot coder, neural network, node_modules, error cascade, calendar Tetris, bar chart race, cat on the keyboard*, touch grass*.
@@ -117,9 +117,9 @@ The language can also be set in the plugin's config (`language`: `en`, `fr`, `es
 - **Insects & tiny worlds** (10): caterpillar to butterfly, dung beetle, mosquito vs swatter, fly at the window, ant mill, bees*, leafcutter ants*, ant farm*, ant colony war*, spider web*.
 - **Birds, sky & flight** (7): paper plane, drone light show, seagull heist, hot air balloons*, bird feeder*, bats at dusk*, lantern festival*.
 - **Farm, garden & plants** (5): combine harvester, sheepdog, Venus flytrap, farm crops*, pumpkin patch*.
-- **Toys & desk toys** (6): slinky on the stairs, drinking bird, water ring toss, battling tops, Newton’s cradle*, coil train*.
+- **Toys & desk toys** (7): slinky on the stairs, drinking bird, water ring toss, battling tops, fishing game, Newton’s cradle*, coil train*.
 - **Fantasy & RPG** (5): slime merge, boss fight, forging a sword, inventory packing, witch’s cauldron*.
-- **Party, board & fair games** (12): Plinko, wheel of prizes, four in a row, air hockey, arcade hoops, cup shuffle, bottle flip, claw machine*, coin pusher*, gumball machine*, gacha machine*, piñata*.
+- **Party, board & fair games** (13): Plinko, wheel of prizes, four in a row, air hockey, arcade hoops, cup shuffle, bottle flip, shooting gallery, claw machine*, coin pusher*, gumball machine*, gacha machine*, piñata*.
 
 \* Also in this theme, though its home is another one: a video can have several themes.
 

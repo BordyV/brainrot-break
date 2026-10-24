@@ -55,4 +55,17 @@ export const TOYS = {
       fr: ['choc de métal contre métal', 'son original - let.it.rip.arena', 'thème de combat d’anime'],
     },
   },
+  fishinggame: {
+    name: { en: 'fishing game', fr: 'pêche aux poissons' },
+    authors: ['@turning.pond', '@magnet.fishing.90s', '@open.mouth.now'],
+    tags: ['#90s #toys #nostalgia', '#fishinggame #childhood', '#fyp #foryou'],
+    captions: {
+      en: ['you had this one, admit it', 'wait for the mouth to open…', 'red rod or blue rod?', 'the last fish takes forever'],
+      fr: ['tu l’avais, avoue', 'attends que la bouche s’ouvre…', 'canne rouge ou canne bleue ?', 'le dernier poisson prend une éternité'],
+    },
+    sounds: {
+      en: ['the toy’s little tune', 'original sound - turning.pond', '90s toy commercial'],
+      fr: ['la petite musique du jouet', 'son original - turning.pond', 'pub de jouets des années 90'],
+    },
+  },
 } satisfies Record<string, Entry>

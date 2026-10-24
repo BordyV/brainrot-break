@@ -21,4 +21,5 @@ export const SPORTS: Locale['videos'] = {
   bungee: { name: 'bungee jumping', captions: ['3… 2… 1…', 'il numero è quanto è sceso', 'e rimbalza, e rimbalza', 'urlerei per tutto il tempo'], sounds: ['vento e un urlo', 'suono originale - three.two.one.jump', 'rock da action cam'] },
   juggling: { name: 'giocoleria', captions: ['la cascata non si ferma mai', 'tre palline, poi cinque', 'il numero è quante sono in aria', 'io ci ho messo una settimana a farne due'], sounds: ['prese morbide a ritmo', 'suono originale - three.ball.cascade', 'valzer da circo'] },
   wallofdeath: { name: 'muro della morte', captions: ['più va veloce, più sale', 'il pubblico si sporge dal bordo', 'il numero è la velocità', 'come fa a essere legale'], sounds: ['rombo di motore a due tempi', 'suono originale - round.the.wall', 'organo da luna park'] },
+  speedbag: { name: 'pera da boxe', captions: ['tre rimbalzi a colpo, contali', 'diventa un rullo di tamburi', 'tutta la bravura è nel ritmo', 'prova questo prima del caffè'], sounds: ['ratatà-ratatà (suono originale)', 'suono originale - speed.bag.rhythm', 'musica da montaggio di allenamento'] },
 }

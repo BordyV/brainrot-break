@@ -214,6 +214,7 @@ export const EXTRA_THEMES: Record<string, Theme[]> = {
   hexasort: ['puzzles'],
   blockjam: ['puzzles'],
   salmon: ['nature'],
+  shootgallery: ['arcade'],
 }
 
 /** A video's themes: its home theme first, then any others. */

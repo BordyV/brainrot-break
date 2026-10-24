@@ -19,4 +19,5 @@ export const MACHINES: Locale['videos'] = {
   pinart: { name: 'pin art', captions: ['mão, coração, rosto', 'o brinquedo de mesa que todo mundo teve', 'empurra, puxa de volta', 'estranhamente satisfatório'], sounds: ['pinos deslizando (ASMR)', 'som original - pin.press', 'lofi calmo'] },
   warehouse: { name: 'robôs de armazém', captions: ['as prateleiras vêm até você', 'seu pedido, separado por robôs', 'eles nunca batem (quase)', 'logística é hipnotizante'], sounds: ['bipes de robô (som original)', 'som original - warehouse.bots', 'techno minimal'] },
   metalcast: { name: 'fundição de metal', captions: ['do branco incandescente à prata em segundos', 'espera o de ouro', 'a pilha de lingotes cresce', 'o despejo é a melhor parte'], sounds: ['chiado do metal derretido', 'som original - molten.pour', 'tema épico de forja'] },
+  recycling: { name: 'central de reciclagem', captions: ['cada material acha sua lixeira', 'o ímã pega as latas', 'pra onde vai sua garrafa depois?', 'separar o lixo, só que satisfatório'], sounds: ['ronco da esteira e batidas', 'som original - sort.the.waste', 'techno de fábrica'] },
 }

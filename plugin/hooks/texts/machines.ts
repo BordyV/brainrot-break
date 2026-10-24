@@ -237,4 +237,17 @@ export const MACHINES = {
       fr: ['sifflement du métal en fusion', 'son original - molten.pour', 'thème épique de forge'],
     },
   },
+  recycling: {
+    name: { en: 'recycling plant', fr: 'centre de tri' },
+    authors: ['@sort.the.waste', '@magnet.and.jets', '@bin.by.colour'],
+    tags: ['#recycling #howitsmade #satisfying', '#sorting #factory', '#fyp #foryou'],
+    captions: {
+      en: ['every material finds its bin', 'the magnet grabs the cans', 'where does your bottle go next?', 'sorting, but make it satisfying'],
+      fr: ['chaque matière trouve son bac', 'l’aimant attrape les canettes', 'où va ta bouteille ensuite ?', 'le tri, mais satisfaisant'],
+    },
+    sounds: {
+      en: ['conveyor rumble and clanks', 'original sound - sort.the.waste', 'factory techno'],
+      fr: ['grondement du tapis et cliquetis', 'son original - sort.the.waste', 'techno d’usine'],
+    },
+  },
 } satisfies Record<string, Entry>
