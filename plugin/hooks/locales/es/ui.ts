@@ -100,6 +100,8 @@ export const themes: Locale['themes'] = {
   sky: 'cielo y vuelo',
   farm: 'granja y jardín',
   toys: 'juguetes',
+  fantasy: 'fantasía',
+  party: 'juegos de feria',
 }
 
 export const comments: Locale['comments'] = {
@@ -153,5 +155,7 @@ export const comments: Locale['comments'] = {
     sky: ['el cielo es el límite', 'quiero volar', '¡arriba y a volar!'],
     farm: ['la vida en la granja es la mejor', 'huelo el heno', 'cottagecore desbloqueado'],
     toys: ['¡yo tenía esto de pequeño!', 'dónde se compra', 'mi escritorio necesita esto'],
+    fantasy: ['+10 XP por mirar', 'la misión secundaria que necesitaba', 'tira iniciativa'],
+    party: ['¡otra ronda!', 'esto está amañado', 'energía de noche de juegos'],
   },
 }

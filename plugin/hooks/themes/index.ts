@@ -31,6 +31,8 @@ import { INSECTS } from './insects'
 import { SKY } from './sky'
 import { FARM } from './farm'
 import { TOYS } from './toys'
+import { FANTASY } from './fantasy'
+import { PARTY } from './party'
 
 // The videos added by theme, one file per theme. Their texts live in
 // hooks/texts/, under the same theme and kind names.
@@ -67,6 +69,8 @@ export const THEMES = {
   sky: SKY,
   farm: FARM,
   toys: TOYS,
+  fantasy: FANTASY,
+  party: PARTY,
 }
 
 export const THEME_MAKERS = {
@@ -101,6 +105,8 @@ export const THEME_MAKERS = {
   ...SKY,
   ...FARM,
   ...TOYS,
+  ...FANTASY,
+  ...PARTY,
 }
 
 /** Every video of the feed, by kind. */

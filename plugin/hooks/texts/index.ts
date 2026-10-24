@@ -29,6 +29,8 @@ import { INSECTS } from './insects'
 import { SKY } from './sky'
 import { FARM } from './farm'
 import { TOYS } from './toys'
+import { FANTASY } from './fantasy'
+import { PARTY } from './party'
 
 // The texts of the videos in hooks/themes/, one file per theme.
 
@@ -64,4 +66,6 @@ export const THEME_TEXTS = {
   ...SKY,
   ...FARM,
   ...TOYS,
+  ...FANTASY,
+  ...PARTY,
 }

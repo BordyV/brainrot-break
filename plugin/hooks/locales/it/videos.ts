@@ -6,6 +6,7 @@ import { COZY } from './cozy'
 import { CRAFTS } from './crafts'
 import { DESTRUCTION } from './destruction'
 import { DEV } from './dev'
+import { FANTASY } from './fantasy'
 import { FARM } from './farm'
 import { FLUIDS } from './fluids'
 import { FOOD } from './food'
@@ -18,6 +19,7 @@ import { MOBILE } from './mobile'
 import { MUSIC } from './music'
 import { NATURE } from './nature'
 import { OCEAN } from './ocean'
+import { PARTY } from './party'
 import { PHYSICS } from './physics'
 import { PUZZLES } from './puzzles'
 import { ROBOTS } from './robots'
@@ -41,6 +43,7 @@ export const VIDEOS: Locale['videos'] = {
   ...CRAFTS,
   ...DESTRUCTION,
   ...DEV,
+  ...FANTASY,
   ...FARM,
   ...FLUIDS,
   ...FOOD,
@@ -53,6 +56,7 @@ export const VIDEOS: Locale['videos'] = {
   ...MUSIC,
   ...NATURE,
   ...OCEAN,
+  ...PARTY,
   ...PHYSICS,
   ...PUZZLES,
   ...ROBOTS,

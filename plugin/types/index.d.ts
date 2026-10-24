@@ -407,6 +407,15 @@ export type Kind =
   | 'slinky'
   | 'drinkingbird'
   | 'ringtoss'
+  | 'slimemerge'
+  | 'bossfight'
+  | 'forge'
+  | 'inventory'
+  | 'plinko'
+  | 'prizewheel'
+  | 'connect4'
+  | 'airhockey'
+  | 'hoops'
 
 export type Video = {
   id: string
