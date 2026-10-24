@@ -26,6 +26,7 @@ import { SPORTS } from './sports'
 import { VERSUS } from './versus'
 import { FLUIDS } from './fluids'
 import { IDLE } from './idle'
+import { OCEAN } from './ocean'
 
 // The videos added by theme, one file per theme. Their texts live in
 // hooks/texts/, under the same theme and kind names.
@@ -57,6 +58,7 @@ export const THEMES = {
   robots: ROBOTS,
   fluids: FLUIDS,
   idle: IDLE,
+  ocean: OCEAN,
 }
 
 export const THEME_MAKERS = {
@@ -86,6 +88,7 @@ export const THEME_MAKERS = {
   ...ROBOTS,
   ...FLUIDS,
   ...IDLE,
+  ...OCEAN,
 }
 
 /** Every video of the feed, by kind. */

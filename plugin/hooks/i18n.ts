@@ -87,6 +87,7 @@ const SOURCE_COMMENTS: { handles: string[]; generic: Record<SourceLang, string[]
     robots: { en: ['the robot uprising is cute', 'beep boop', 'he’s trying his best'], fr: ['la révolte des robots est mignonne', 'bip boup', 'il fait de son mieux'] },
     fluids: { en: ['the way it finds its level', 'I can hear it pouring', 'liquid ASMR'], fr: ['la façon dont ça trouve son niveau', 'je l’entends couler', 'ASMR liquide'] },
     idle: { en: ['number go up', 'I’d play this for 400 hours', 'the economy is booming'], fr: ['le nombre monte', 'j’y jouerais 400 heures', 'l’économie est en plein boom'] },
+    ocean: { en: ['the ocean is scary and I love it', 'I can hear the waves', 'we know more about space than this'], fr: ['l’océan fait peur et j’adore', 'j’entends les vagues', 'on connaît mieux l’espace que ça'] },
   },
 }
 
@@ -119,6 +120,7 @@ const SOURCE_THEME_NAMES: Record<SourceLang, Record<Theme, string>> = {
     robots: 'robots',
     fluids: 'fluids & sand',
     idle: 'idle & strategy',
+    ocean: 'ocean',
   },
   fr: {
     satisfying: 'satisfaisant',
@@ -147,6 +149,7 @@ const SOURCE_THEME_NAMES: Record<SourceLang, Record<Theme, string>> = {
     robots: 'robots',
     fluids: 'fluides et sable',
     idle: 'idle et stratégie',
+    ocean: 'océan',
   },
 }
 

@@ -388,6 +388,11 @@ export type Kind =
   | 'autobattler'
   | 'mergearmy'
   | 'horde'
+  | 'baitball'
+  | 'whale'
+  | 'deepsea'
+  | 'hatchlings'
+  | 'shellswap'
 
 export type Video = {
   id: string

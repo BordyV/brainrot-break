@@ -15,6 +15,7 @@ import { MEMES } from './memes'
 import { MOBILE } from './mobile'
 import { MUSIC } from './music'
 import { NATURE } from './nature'
+import { OCEAN } from './ocean'
 import { PHYSICS } from './physics'
 import { PUZZLES } from './puzzles'
 import { ROBOTS } from './robots'
@@ -45,6 +46,7 @@ export const VIDEOS: Locale['videos'] = {
   ...MOBILE,
   ...MUSIC,
   ...NATURE,
+  ...OCEAN,
   ...PHYSICS,
   ...PUZZLES,
   ...ROBOTS,
