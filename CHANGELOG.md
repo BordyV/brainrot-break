@@ -2,6 +2,11 @@
 
 The project follows [Semantic Versioning](https://semver.org/) and [Conventional Commits](https://www.conventionalcommits.org/).
 
+## 1.5.1
+
+- 2048: numbers of three and four digits now read on their tiles, wrapped onto two rows (12 over 8, 20 over 48).
+- Things are made the way they really are: the card tower gets each storey's leaning cards before its floor, the 3D printer lays each layer from the edge it starts at instead of seeming to rub it out, the loom weaves from the bottom up, pixel art and fuse beads fill colour by colour, the tower crane picks its slab up off the ground, the bottling belt stops while a bottle fills, and a finished tiled floor is no longer pulled back up.
+
 ## 1.5.0
 
 - 96 new videos, from 358 to 454, and nine new themes, from 24 to 33: water and sand, idle and strategy games, the ocean, insects, the sky, the farm, toys, fantasy, and party and fairground games. The puzzles, simulations, destruction and robots themes get new videos too, among them a cup shuffle, a cat chasing a laser pointer, battling tops, mochi pounding, a screw puzzle, rug tufting, a salmon run, a rage climb, a scramble crossing, metal casting, a shooting gallery and a recycling plant.
