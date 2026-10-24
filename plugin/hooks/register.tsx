@@ -517,12 +517,15 @@ function settingsRows(): Row[] {
 }
 
 // The menu's rows, as many as fit in the height; the rest scrolls.
+// Themes come in the alphabetical order of their names in the current language.
 function themeRows(width: number): Row[] {
+  const names = THEME_NAMES[lang]
+  const sorted = [...THEME_LIST].sort((a, b) => names[a].localeCompare(names[b], lang, { sensitivity: 'base' }))
   return [
     { text: S().menuBack, act: 'sheet', dim: true },
     { text: `${hidden.length === 0 ? '✓' : ' '} ${S().showAll}`, act: 'all', bold: true },
     { text: `  ${S().hideAll}`, act: 'none', bold: true },
-    ...THEME_LIST.map(t => {
+    ...sorted.map(t => {
       const isOn = !hidden.includes(t)
       const name = THEME_NAMES[lang][t]
       const count = String(THEME_COUNTS[t])
