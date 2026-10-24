@@ -18,4 +18,7 @@ export const SPORTS: Locale['videos'] = {
   speedcube: { name: 'speedcubing', captions: ['embaralha... e resolve', 'olha o cronômetro', 'como eles FAZEM isso', 'eu só consigo fazer uma face'], sounds: ['cliques do cubo (ASMR)', 'som original - cube.solve', 'música pra focar'] },
   keepyuppy: { name: 'embaixadinhas', captions: ['pé, joelho, cabeça, repete', 'recorde novo?', 'ele deixou cair no...', 'habilidades de pracinha'], sounds: ['toques na bola (som original)', 'som original - keepy.uppy', 'beat de futebol de rua'] },
   parkour: { name: 'parkour', captions: ['de telhado em telhado', 'o rolamento no pouso', 'não olha pra baixo', 'conta os vãos'], sounds: ['vento e passos (som original)', 'som original - rooftop.run', 'drum and bass'] },
+  bungee: { name: 'bungee jump', captions: ['3… 2… 1…', 'o número é o quanto desceu', 'e quica, e quica', 'eu ia gritar o caminho todo'], sounds: ['vento forte e um grito', 'som original - three.two.one.jump', 'rock de câmera esportiva'] },
+  juggling: { name: 'malabarismo', captions: ['a cascata nunca para', 'três bolinhas, depois cinco', 'o número é quantas estão no ar', 'eu levei uma semana pra fazer com duas'], sounds: ['pegadas suaves no ritmo', 'som original - three.ball.cascade', 'valsa de circo'] },
+  wallofdeath: { name: 'globo da morte', captions: ['quanto mais rápido, mais alto sobe', 'o público se debruça na borda', 'o número é a velocidade', 'como isso é permitido'], sounds: ['ronco de motor dois tempos', 'som original - round.the.wall', 'órgão de parque de diversões'] },
 }

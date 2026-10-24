@@ -23,4 +23,6 @@ export const SATISFYING: Locale['videos'] = {
   squeegee: { name: 'rodo de janela', captions: ['nenhuma marquinha', 'a vista volta', 'turno do dia, turno da noite', 'ele já fez isso 10000 vezes'], sounds: ['rangido do rodo (ASMR)', 'som original - window.pro', 'lofi da cidade'] },
   tiling: { name: 'assentar piso', captions: ['qual é seu padrão favorito?', 'perfeitamente nivelados, todos', 'satisfação de reforma', 'o último piso...'], sounds: ['batidinhas no piso (ASMR)', 'som original - tile.setter', 'playlist de reforma'] },
   zen: { name: 'jardim zen', captions: ['respira com o ancinho', 'os círculos em volta das pedras...', 'seu sinal pra desacelerar', 'alisa e começa de novo'], sounds: ['ancinho na areia (ASMR)', 'som original - zen.garden', 'flauta de bambu'] },
+  laundry: { name: 'dobrando roupa', captions: ['esquerda, direita, cima. perfeito.', 'a pilha cresce, o estresse vai embora', 'se minha roupa fizesse isso sozinha', 'olha as mangas dobrando'], sounds: ['tecido farfalhando (ASMR)', 'som original - fold.it.right', 'playlist de faxina de domingo'] },
+  dishwasher: { name: 'Tetris da lava-louças', captions: ['pratos atrás, xícaras em cima. sem discussão.', 'cada espaço usado', 'o brilho quando abre', 'quem mora comigo carrega diferente e dói'], sounds: ['tilintar e um zumbido', 'som original - load.it.properly', 'rádio de cozinha'] },
 }

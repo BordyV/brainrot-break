@@ -27,4 +27,5 @@ export const ARCADE: Locale['videos'] = {
   jewels: { name: 'fallende Juwelen', captions: ['drei in einer Reihe, egal welche Richtung', 'Kettenreaktion im Anmarsch', 'Diagonalen zählen auch', 'er plant jeden Fall'], sounds: ['Edelstein-Klingeln (Originalton)', 'Originalton - jewel.drop', 'Rätselthema in 16-Bit'] },
   sokoban: { name: 'Sokoban', captions: ['mit den wenigsten Zügen gelöst', 'jede Kiste an ihrem Platz', 'erst denken, dann schieben', 'Level geschafft, das nächste'], sounds: ['Kistenschaben (Originalton)', 'Originalton - box.pusher', 'Rätsel-Lo-Fi'] },
   solitaire: { name: 'Solitär-Sieg', captions: ['die beste Animation der 90er', 'diesen Bildschirm vergisst man nie', 'jede Karte hüpft', 'Erinnerungen an den Computerraum der Schule'], sounds: ['Kartenflattern (Originalton)', 'Originalton - solitaire.win', 'Windows-95-Nostalgie'] },
+  speedrun: { name: 'Speedrun', captions: ['Wände sind nur ein Vorschlag', 'der graue Geist nahm den normalen Weg', 'neue persönliche Bestzeit', 'framegenauer Clip, jedes Mal'], sounds: ['Glitch-Zapps', 'Originalton - frame.perfect', '8-Bit-Siegesjingle'] },
 }

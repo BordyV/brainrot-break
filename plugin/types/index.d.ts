@@ -416,6 +416,19 @@ export type Kind =
   | 'connect4'
   | 'airhockey'
   | 'hoops'
+  | 'errors'
+  | 'calendar'
+  | 'barrace'
+  | 'laundry'
+  | 'dishwasher'
+  | 'speedrun'
+  | 'flipbook'
+  | 'pythagoras'
+  | 'pendulumwave'
+  | 'salesman'
+  | 'bungee'
+  | 'juggling'
+  | 'wallofdeath'
 
 export type Video = {
   id: string

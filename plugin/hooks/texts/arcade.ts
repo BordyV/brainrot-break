@@ -341,4 +341,17 @@ export const ARCADE = {
       fr: ['cartes qui volent (son original)', 'son original - solitaire.win', 'nostalgie Windows 95'],
     },
   },
+  speedrun: {
+    name: { en: 'speedrun', fr: 'speedrun' },
+    authors: ['@frame.perfect', '@clip.through.it', '@any.percent'],
+    tags: ['#speedrun #gaming #glitch', '#worldrecord #retrogaming', '#fyp #foryou'],
+    captions: {
+      en: ['walls are a suggestion', 'the grey ghost took the normal route', 'new personal best', 'frame perfect clip, every time'],
+      fr: ['les murs, c’est une suggestion', 'le fantôme gris a pris le chemin normal', 'nouveau record perso', 'clip au frame près, à chaque fois'],
+    },
+    sounds: {
+      en: ['glitch zaps', 'original sound - frame.perfect', '8-bit victory jingle'],
+      fr: ['zaps de bug', 'son original - frame.perfect', 'jingle de victoire 8 bits'],
+    },
+  },
 } satisfies Record<string, Entry>

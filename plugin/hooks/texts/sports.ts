@@ -224,4 +224,43 @@ export const SPORTS = {
       fr: ['vent et pas (son original)', 'son original - rooftop.run', 'drum and bass'],
     },
   },
+  bungee: {
+    name: { en: 'bungee jump', fr: 'saut à l’élastique' },
+    authors: ['@three.two.one.jump', '@cord.stretch', '@gorge.drop'],
+    tags: ['#bungee #extreme #adrenaline', '#stunt #travel', '#fyp #foryou'],
+    captions: {
+      en: ['3… 2… 1…', 'the number is how far down', 'and bounces, and bounces', 'I’d scream the whole way'],
+      fr: ['3… 2… 1…', 'le nombre, c’est la profondeur', 'et ça rebondit, et ça rebondit', 'je hurlerais tout le long'],
+    },
+    sounds: {
+      en: ['wind rush and a scream', 'original sound - three.two.one.jump', 'action cam rock'],
+      fr: ['souffle du vent et un cri', 'son original - three.two.one.jump', 'rock de caméra embarquée'],
+    },
+  },
+  juggling: {
+    name: { en: 'juggling', fr: 'jonglage' },
+    authors: ['@three.ball.cascade', '@keep.them.up', '@five.ball.dream'],
+    tags: ['#juggling #skill #satisfying', '#circus #talent', '#fyp #foryou'],
+    captions: {
+      en: ['the cascade never stops', 'three balls, then five', 'the number is how many in the air', 'it took me a week to do two'],
+      fr: ['la cascade ne s’arrête jamais', 'trois balles, puis cinq', 'le nombre, c’est combien en l’air', 'il m’a fallu une semaine pour en faire deux'],
+    },
+    sounds: {
+      en: ['soft catches in rhythm', 'original sound - three.ball.cascade', 'circus waltz'],
+      fr: ['réceptions douces en rythme', 'son original - three.ball.cascade', 'valse de cirque'],
+    },
+  },
+  wallofdeath: {
+    name: { en: 'wall of death', fr: 'mur de la mort' },
+    authors: ['@round.the.wall', '@motordrome.nights', '@fair.stunt.rider'],
+    tags: ['#wallofdeath #motorbike #stunt', '#funfair #adrenaline', '#fyp #foryou'],
+    captions: {
+      en: ['the faster it goes, the higher it climbs', 'the crowd leans over the rim', 'the number is the speed', 'how is this legal'],
+      fr: ['plus elle va vite, plus elle monte', 'le public se penche par-dessus le bord', 'le nombre, c’est la vitesse', 'comment c’est légal ça'],
+    },
+    sounds: {
+      en: ['two-stroke engine roar', 'original sound - round.the.wall', 'funfair organ'],
+      fr: ['rugissement de moteur deux-temps', 'son original - round.the.wall', 'orgue de fête foraine'],
+    },
+  },
 } satisfies Record<string, Entry>

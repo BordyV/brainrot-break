@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, burst, clamp, hash, irand, line, lit, litSprite, pick, ring, shuffle, slab, sparks, textWidth } from '../kit'
+import { DIRS, burst, clamp, hash, irand, line, lit, litSprite, pick, ring, shuffle, slab, sparks, textWidth, tones } from '../kit'
 import type { Spark } from '../kit'
 
 // Developer humour: in-jokes for the people waiting on Claude.
@@ -1254,6 +1254,226 @@ const matrix: Maker = (W, H, rng) => {
   }
 }
 
+// --- error cascade ----------------------------------------------------------------
+
+const errors: Maker = (W, H, rng) => {
+  const ww = Math.max(8, Math.round(W * 0.6))
+  const wh = Math.max(6, Math.round(ww * 0.62))
+  // every copy dragged across the screen stays painted, as on the old desktops
+  const trail = new Uint32Array(W * H)
+  let t = 0
+  let bsod = 0
+  let ph = rng() * 6
+  const pos = (tt: number): [number, number] => [
+    (W - ww) / 2 + Math.sin(tt * 0.045 + ph) * (W - ww) * 0.5,
+    (H - wh) / 2 + Math.sin(tt * 0.031 + ph * 2) * (H - wh - 4) * 0.5 + 2,
+  ]
+  const windowAt = (px: Uint32Array, x: number, y: number) => {
+    x = Math.round(x)
+    y = Math.round(y)
+    rect(px, W, H, x, y, ww, wh, 0xc0c0c0)
+    rect(px, W, H, x, y, ww, 1, 0xffffff)
+    rect(px, W, H, x, y, 1, wh, 0xffffff)
+    rect(px, W, H, x + ww - 1, y, 1, wh, 0x404040)
+    rect(px, W, H, x, y + wh - 1, ww, 1, 0x404040)
+    for (let k = 1; k < ww - 1; k++) rect(px, W, H, x + k, y + 1, 1, 2, mix(0x000080, 0x1084d0, k / ww))
+    rect(px, W, H, x + ww - 3, y + 1, 2, 2, 0xc0c0c0)
+    dot(px, W, H, x + ww - 3, y + 1, 0x000000)
+    dot(px, W, H, x + ww - 2, y + 2, 0x000000)
+    // the red X icon, a line of text, the OK button
+    disc(px, W, H, x + 3, y + 5, 1.3, 0xe02020)
+    dot(px, W, H, x + 3, y + 5, 0xffffff)
+    rect(px, W, H, x + 6, y + 4, ww - 9, 1, 0x404040)
+    rect(px, W, H, x + 6, y + 6, ww - 12, 1, 0x404040)
+    rect(px, W, H, x + ww / 2 - 2, y + wh - 3, 5, 2, 0xd0d0d0)
+    rect(px, W, H, x + ww / 2 - 2, y + wh - 2, 5, 1, 0x808080)
+  }
+  const reset = () => {
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) trail[y * W + x] = 0x008080
+    t = 0
+    bsod = 0
+    ph = rng() * 6
+  }
+  reset()
+
+  return {
+    step() {
+      if (bsod) {
+        if (++bsod > 70) reset()
+        return
+      }
+      t++
+      // more and more copies, faster and faster
+      const n = 1 + Math.floor(t / 90)
+      if (t % Math.max(1, 4 - n) === 0) {
+        const [x, y] = pos(t * n)
+        windowAt(trail, x, y)
+      }
+      if (t > 330) bsod = 1
+    },
+    draw(px) {
+      if (bsod) {
+        px.fill(0x0a3ab0)
+        // :( and a progress line
+        rect(px, W, H, 4, 12, 2, 2, 0xffffff)
+        rect(px, W, H, 4, 17, 2, 2, 0xffffff)
+        for (let k = 0; k < 5; k++) dot(px, W, H, 10 + Math.abs(k - 2) * 0.6, 11 + k * 2, 0xffffff)
+        for (let k = 0; k < 4; k++) rect(px, W, H, 4, 26 + k * 3, W - 8 - k * 5, 1, 0x8aa8e8)
+        text(px, W, H, 4, H - 10, `${Math.min(100, bsod * 2)}%`, 0xffffff)
+        return
+      }
+      px.set(trail)
+      const n = 1 + Math.floor(t / 90)
+      const [x, y] = pos(t * n)
+      windowAt(px, x, y)
+      // the taskbar
+      rect(px, W, H, 0, H - 4, W, 4, 0xc0c0c0)
+      rect(px, W, H, 0, H - 4, W, 1, 0xffffff)
+      rect(px, W, H, 1, H - 3, 6, 2, 0x808080)
+      dot(px, W, H, 2, H - 3, 0x20a020)
+    },
+  }
+}
+
+// --- calendar Tetris --------------------------------------------------------------
+
+const calendar: Maker = (W, H, rng) => {
+  const days = 5
+  const hours = 9
+  const left = 8
+  const cw = Math.max(2, Math.floor((W - left - 1) / days))
+  const ch = Math.max(2, Math.floor((H - 12) / hours))
+  const oy = H - hours * ch - 2
+  const COLOURS = [0x4a8ae8, 0x3ab878, 0xe8a03a, 0xd84a6a, 0x8a5ae0, 0x3ab8c8]
+  let grid: number[] = []
+  let falling: { day: number; len: number; y: number; c: number } | null = null
+  let t = 0
+  let full = 0
+  const reset = () => {
+    grid = new Array(days * hours).fill(-1)
+    falling = null
+    full = 0
+  }
+  reset()
+  // the lowest free slot: meetings stack from the end of the day up
+  const top = (day: number) => {
+    let free = hours
+    for (let y = hours - 1; y >= 0; y--) if (grid[y * days + day] >= 0) free = y
+    return free
+  }
+
+  return {
+    step() {
+      t++
+      if (full) {
+        if (++full > 60) reset()
+        return
+      }
+      if (!falling) {
+        const open = [...Array(days).keys()].filter(d => top(d) > 0)
+        if (!open.length) {
+          full = 1
+          return
+        }
+        const day = open[irand(rng, open.length)]
+        const room = top(day)
+        falling = { day, len: Math.min(room, 1 + irand(rng, 3)), y: -3, c: COLOURS[irand(rng, COLOURS.length)] }
+        return
+      }
+      falling.y += 0.5
+      const land = top(falling.day) - falling.len
+      if (falling.y >= land) {
+        for (let k = 0; k < falling.len; k++) grid[(land + k) * days + falling.day] = falling.c
+        falling = null
+      }
+    },
+    draw(px) {
+      sky(px, W, H, 0xf4f6fa, 0xe8ecf4)
+      // the hours down the side, a line per hour
+      for (let h = 0; h < hours; h++) {
+        const y = oy + h * ch
+        rect(px, W, H, left, y, W - left, 1, 0xd8dce8)
+        if (h % 2 === 0) text(px, W, H, 0, y + 1, String(9 + h).slice(-1), 0x9aa0b0)
+      }
+      for (let d = 0; d <= days; d++) rect(px, W, H, left + d * cw, oy, 1, hours * ch, 0xd8dce8)
+      const meeting = (d: number, y: number, len: number, c: number) => {
+        const x = left + d * cw + 1
+        slab(px, W, H, x, y, cw - 1, len * ch - 1, c)
+        rect(px, W, H, x, y, 1, len * ch - 1, tones(c)[3])
+      }
+      for (let d = 0; d < days; d++)
+        for (let h = 0; h < hours; h++) {
+          const c = grid[h * days + d]
+          if (c < 0) continue
+          // a run of the same meeting draws as one block
+          if (h > 0 && grid[(h - 1) * days + d] === c) continue
+          let len = 1
+          while (h + len < hours && grid[(h + len) * days + d] === c) len++
+          meeting(d, oy + h * ch, len, c)
+        }
+      if (falling) meeting(falling.day, Math.round(oy + falling.y * ch), falling.len, falling.c)
+      // today, and how booked the week is
+      rect(px, W, H, left, oy - 3, W - left, 2, 0xffffff)
+      for (let d = 0; d < days; d++) rect(px, W, H, left + d * cw + 1, oy - 3, cw - 1, 2, d === 2 ? 0xe84a4a : 0xb8c0d0)
+      const used = grid.filter(c => c >= 0).length
+      const pct = `${Math.round((used / grid.length) * 100)}%`
+      text(px, W, H, W - 1 - textWidth(pct), 1, pct, full && full % 10 < 5 ? 0xe84a4a : 0x4a5068)
+    },
+  }
+}
+
+// --- bar chart race ---------------------------------------------------------------
+
+const barrace: Maker = (W, H, rng) => {
+  const N = 6
+  const bh = Math.max(2, Math.floor((H - 14) / (N + 1)))
+  let vals: number[] = []
+  let rate: number[] = []
+  let shown: number[] = []
+  let year = 2000
+  let t = 0
+  const hues = [...Array(N).keys()].map(i => i / N + rng() * 0.05)
+  const reset = () => {
+    vals = [...Array(N)].map(() => 5 + rng() * 10)
+    rate = [...Array(N)].map(() => 0.2 + rng() * 0.6)
+    shown = vals.map((_, i) => i)
+    year = 2000
+    t = 0
+  }
+  reset()
+
+  return {
+    step() {
+      t++
+      // each year the rates change: someone surges, someone fades
+      if (t % 30 === 0) {
+        year++
+        for (let i = 0; i < N; i++) rate[i] = Math.max(0.05, rate[i] + (rng() - 0.5) * 0.5)
+        if (year > 2025) reset()
+      }
+      for (let i = 0; i < N; i++) vals[i] += rate[i] * 0.3
+      const order = vals.map((v, i) => i).sort((a, b) => vals[b] - vals[a])
+      order.forEach((i, rank) => (shown[i] += (rank - shown[i]) * 0.15))
+    },
+    draw(px) {
+      sky(px, W, H, 0x1a1e2a, 0x141822)
+      const max = Math.max(...vals)
+      for (let x = 2; x < W; x += Math.max(4, Math.round(W / 5))) for (let y = 10; y < H - 2; y += 2) dot(px, W, H, x, y, 0x2a3040)
+      for (let i = 0; i < N; i++) {
+        const y = Math.round(10 + shown[i] * (bh + 1))
+        const w = Math.max(2, Math.round(((W - 4) * vals[i]) / max))
+        const col = hsv(hues[i], 0.6, 0.95)
+        slab(px, W, H, 2, y, w, bh, col)
+        // a little logo at the end of the bar
+        lit(px, W, H, 2 + w - bh / 2, y + bh / 2 - 0.5, bh * 0.35, bh * 0.35, mix(col, 0xffffff, 0.5))
+      }
+      text(px, W, H, 1, 1, String(year), 0xe8e8f0)
+      const lead = String(Math.round(max))
+      text(px, W, H, W - 1 - textWidth(lead), H - 7, lead, 0x8a90a8)
+    },
+  }
+}
+
 export const DEV = {
   tri,
   matrix,
@@ -1276,5 +1496,8 @@ export const DEV = {
   robotcoder,
   neuralnet,
   nodemodules,
+  errors,
+  calendar,
+  barrace,
 }
 

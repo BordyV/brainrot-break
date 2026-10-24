@@ -276,4 +276,43 @@ export const DEV = {
       fr: ['bips de téléchargement (son original)', 'son original - node.modules', 'ambiance trou noir'],
     },
   },
+  errors: {
+    name: { en: 'error cascade', fr: 'cascade d’erreurs' },
+    authors: ['@ok.ok.ok.ok', '@win98.nostalgia', '@not.responding'],
+    tags: ['#windows98 #nostalgia #error', '#retro #bsod', '#fyp #foryou'],
+    captions: {
+      en: ['dragging the error window like it’s 1998', 'it leaves a trail. it always did.', 'and then… the blue screen', 'clicking OK fixes nothing'],
+      fr: ['déplacer la fenêtre d’erreur comme en 1998', 'elle laisse une traînée. elle l’a toujours fait.', 'et puis… l’écran bleu', 'cliquer sur OK ne répare rien'],
+    },
+    sounds: {
+      en: ['the error chime, again and again', 'original sound - ok.ok.ok.ok', 'dial-up modem'],
+      fr: ['le son d’erreur, encore et encore', 'son original - ok.ok.ok.ok', 'modem 56k'],
+    },
+  },
+  calendar: {
+    name: { en: 'calendar Tetris', fr: 'Tetris d’agenda' },
+    authors: ['@this.could.be.an.email', '@back.to.back.meetings', '@calendar.tetris'],
+    tags: ['#meetings #corporate #relatable', '#officelife #tetris', '#fyp #foryou'],
+    captions: {
+      en: ['when does the actual work happen?', '100% booked, 0% done', 'the red one is today', 'this meeting could have been an email'],
+      fr: ['le vrai travail, c’est quand ?', '100 % réservé, 0 % fait', 'le rouge, c’est aujourd’hui', 'cette réunion aurait pu être un mail'],
+    },
+    sounds: {
+      en: ['calendar notification pings', 'original sound - this.could.be.an.email', 'Tetris theme but sad'],
+      fr: ['notifications d’agenda', 'son original - this.could.be.an.email', 'thème de Tetris mais triste'],
+    },
+  },
+  barrace: {
+    name: { en: 'bar chart race', fr: 'course de barres' },
+    authors: ['@data.is.beautiful.ish', '@chart.racer', '@year.over.year'],
+    tags: ['#datavisualization #barchartrace #data', '#statistics #satisfying', '#fyp #foryou'],
+    captions: {
+      en: ['pick a colour and watch it climb', 'the overtake in the middle!', 'the year is top left', 'I have no idea what we’re measuring'],
+      fr: ['choisis une couleur et regarde-la grimper', 'le dépassement au milieu !', 'l’année est en haut à gauche', 'je n’ai aucune idée de ce qu’on mesure'],
+    },
+    sounds: {
+      en: ['epic orchestral build-up', 'original sound - data.is.beautiful.ish', 'ticking clock'],
+      fr: ['montée orchestrale épique', 'son original - data.is.beautiful.ish', 'horloge qui fait tic-tac'],
+    },
+  },
 } satisfies Record<string, Entry>

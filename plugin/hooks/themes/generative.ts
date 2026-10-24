@@ -1,6 +1,6 @@
-import { disc, dot, hsv, mix, rect, scale, sky } from '../draw'
+import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, clamp, ellipse, irand, line, lit, pick, ring, shuffle } from '../kit'
+import { DIRS, clamp, ellipse, irand, line, lit, pick, poly, ring, shuffle, textWidth, tones } from '../kit'
 
 // Generative art & maths: rules on a grid, endless variety, no art to draw.
 
@@ -1091,6 +1091,183 @@ const wfc: Maker = (W, H, rng) => {
   }
 }
 
+// --- water Pythagoras ---------------------------------------------------------------
+
+const pythagoras: Maker = (W, H) => {
+  const cx = W / 2
+  const cy = H * 0.5
+  const k = Math.min(W, H) / 9.5
+  // a 3-4-5 triangle; a square on each side, as tanks joined at the triangle
+  const A: [number, number] = [-2 * k, 1.5 * k]
+  const B: [number, number] = [2 * k, 1.5 * k]
+  const C: [number, number] = [-2 * k + 4 * k * 0.36, 1.5 * k - 4 * k * 0.48]
+  const square = (p: [number, number], q: [number, number]): [number, number][] => {
+    // the square built outward on side p→q
+    const dx = q[0] - p[0]
+    const dy = q[1] - p[1]
+    return [p, q, [q[0] - dy, q[1] + dx], [p[0] - dy, p[1] + dx]]
+  }
+  const big = square(A, B)
+  const s1 = square(C, A)
+  const s2 = square(B, C)
+  let t = 0
+  const T = 220
+
+  return {
+    step() {
+      t = (t + 1) % (T * 2)
+    },
+    draw(px) {
+      sky(px, W, H, 0x1a2a3a, 0x0e1822)
+      for (let y = 0; y < H; y += 6) for (let x = 0; x < W; x++) px[y * W + x] = 0x162432
+      // half a turn, a pause, half a turn back; the water flows as the tanks tip
+      const phase = t % T
+      const turn = Math.min(1, Math.max(0, (phase - 40) / 140))
+      const e = turn * turn * (3 - 2 * turn)
+      const ang = (t < T ? e : 1 + e) * Math.PI
+      const flow = t < T ? e : 1 - e
+      const ca = Math.cos(ang)
+      const sa = Math.sin(ang)
+      const P = ([x, y]: [number, number]): [number, number] => [cx + x * ca - y * sa, cy + x * sa + y * ca]
+      // each tank: its pixels on screen, the water filling the lowest of them
+      const fill = (pts: [number, number][], level: number, col: number) => {
+        const tmp = new Uint32Array(W * H)
+        poly(tmp, W, H, pts.map(P), 1)
+        const cells: number[] = []
+        for (let i = 0; i < W * H; i++) if (tmp[i]) cells.push(i)
+        cells.sort((a, b) => b - a)
+        const n = Math.round(cells.length * level)
+        cells.forEach((i, j) => (px[i] = j < n ? (j > n - W * 0.3 ? 0x8ad8ff : col) : 0x24384a))
+        const q = pts.map(P)
+        for (let j = 0; j < 4; j++) line(px, W, H, ...q[j], ...q[(j + 1) % 4], 0xd8e8f8)
+      }
+      fill(big, flow, 0x3a90e0)
+      fill(s1, 1 - flow, 0x3a90e0)
+      fill(s2, 1 - flow, 0x3a90e0)
+      const tri = [A, B, C].map(P)
+      poly(px, W, H, tri, 0x5a6a7a)
+      for (let j = 0; j < 3; j++) line(px, W, H, ...tri[j], ...tri[(j + 1) % 3], 0xf0d060)
+      text(px, W, H, 1, 1, 'A+B', 0xf0d060)
+      text(px, W, H, W - textWidth('C') - 1, 1, 'C', 0xf0d060)
+    },
+  }
+}
+
+// --- pendulum wave ------------------------------------------------------------------
+
+const pendulumwave: Maker = (W, H) => {
+  const N = 15
+  const top = 5
+  const A = W * 0.36
+  let t = 0
+  // in 60 seconds the shortest swings 51 times, the longest 65: they drift in and out of step
+  const period = 60 * 15
+
+  return {
+    step() {
+      t = (t + 1) % period
+    },
+    draw(px) {
+      sky(px, W, H, 0x101424, 0x1a1e34)
+      rect(px, W, H, 1, top - 2, W - 2, 2, 0x8a8a9a)
+      rect(px, W, H, 1, top - 2, W - 2, 1, 0xc8c8d8)
+      for (let i = 0; i < N; i++) {
+        const y = top + 4 + i * ((H - top - 9) / (N - 1))
+        const f = (51 + i) / period
+        const x = W / 2 + Math.sin(2 * Math.PI * f * t) * A
+        for (let s = 0; s < 1; s += 0.08) {
+          const lx = W / 2 + (x - W / 2) * s
+          const ly = top + (y - top) * s
+          const at = Math.round(ly) * W + Math.round(lx)
+          if (lx >= 0 && lx < W && ly >= 0 && ly < H) px[at] = mix(px[at], 0x6a6e88, 0.25)
+        }
+        const col = hsv(i / N, 0.7, 1)
+        lit(px, W, H, x, y, 1.6, 1.6, col, tones(col)[3])
+      }
+    },
+  }
+}
+
+// --- travelling salesman ------------------------------------------------------------
+
+const salesman: Maker = (W, H, rng) => {
+  const N = 16
+  let pts: [number, number][] = []
+  let tour: number[] = []
+  let t = 0
+  let hold = 0
+  let swaps = 0
+  let flash: [number, number] = [-1, -1]
+  const len = () => {
+    let s = 0
+    for (let i = 0; i < N; i++) {
+      const [ax, ay] = pts[tour[i]]
+      const [bx, by] = pts[tour[(i + 1) % N]]
+      s += Math.hypot(bx - ax, by - ay)
+    }
+    return s
+  }
+  const reset = () => {
+    pts = []
+    for (let i = 0; i < N; i++) pts.push([3 + rng() * (W - 6), 10 + rng() * (H - 14)])
+    tour = shuffle(rng, [...Array(N).keys()])
+    t = 0
+    hold = 0
+    swaps = 0
+  }
+  reset()
+  const d = (a: number, b: number) => Math.hypot(pts[a][0] - pts[b][0], pts[a][1] - pts[b][1])
+  // one 2-opt move: undo the first crossing it finds, which makes the tour shorter
+  const improve = () => {
+    for (let i = 0; i < N - 1; i++)
+      for (let j = i + 2; j < N; j++) {
+        if (i === 0 && j === N - 1) continue
+        const a = tour[i]
+        const b = tour[i + 1]
+        const c = tour[j]
+        const e = tour[(j + 1) % N]
+        if (d(a, c) + d(b, e) < d(a, b) + d(c, e) - 0.01) {
+          const mid = tour.slice(i + 1, j + 1).reverse()
+          tour.splice(i + 1, mid.length, ...mid)
+          flash = [i + 1, j]
+          return true
+        }
+      }
+    return false
+  }
+
+  return {
+    step() {
+      t++
+      if (hold) {
+        if (++hold > 70) reset()
+        return
+      }
+      if (t % 9 === 0) {
+        if (improve()) swaps++
+        else hold = 1
+      }
+    },
+    draw(px) {
+      sky(px, W, H, 0xf0ead8, 0xe0d6bc)
+      // a map: faint grid, the route in red, the cities as pins
+      for (let y = 0; y < H; y += 5) for (let x = 0; x < W; x++) px[y * W + x] = mix(px[y * W + x], 0xc8b890, 0.3)
+      for (let i = 0; i < N; i++) {
+        const [ax, ay] = pts[tour[i]]
+        const [bx, by] = pts[tour[(i + 1) % N]]
+        const hot = (i === flash[0] - 1 || i === flash[1]) && t % 9 < 5
+        line(px, W, H, ax, ay, bx, by, hold ? (t % 10 < 5 ? 0x3aa04a : 0x2a8a3a) : hot ? 0xffa020 : 0xd83a3a)
+      }
+      for (const [x, y] of pts) {
+        dot(px, W, H, x, y, 0x2a2a3a)
+        dot(px, W, H, x, y - 1, 0x4a5ad8)
+        dot(px, W, H, x - 1, y - 1, 0x6a7af0)
+      }
+      text(px, W, H, 1, 1, String(Math.round(len())), 0x5a3a1a)
+    },
+  }
+}
+
 export const GENERATIVE = {
   life,
   langton,
@@ -1105,4 +1282,7 @@ export const GENERATIVE = {
   cube,
   donut,
   wfc,
+  pythagoras,
+  pendulumwave,
+  salesman,
 }

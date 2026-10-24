@@ -289,4 +289,30 @@ export const SATISFYING = {
       fr: ['râteau dans le sable (ASMR)', 'son original - zen.garden', 'flûte en bambou'],
     },
   },
+  laundry: {
+    name: { en: 'folding laundry', fr: 'plier le linge' },
+    authors: ['@fold.it.right', '@laundry.day', '@konmari.mode'],
+    tags: ['#laundry #folding #satisfying', '#cleantok #organizing', '#fyp #foryou'],
+    captions: {
+      en: ['left, right, up. perfect.', 'the stack grows, the stress goes', 'if only my laundry did this itself', 'watch the sleeves tuck in'],
+      fr: ['gauche, droite, en haut. parfait.', 'la pile grandit, le stress s’en va', 'si seulement mon linge faisait ça tout seul', 'regarde les manches qui se rentrent'],
+    },
+    sounds: {
+      en: ['fabric swishes (ASMR)', 'original sound - fold.it.right', 'sunday cleaning playlist'],
+      fr: ['froissements de tissu (ASMR)', 'son original - fold.it.right', 'playlist de ménage du dimanche'],
+    },
+  },
+  dishwasher: {
+    name: { en: 'dishwasher Tetris', fr: 'Tetris du lave-vaisselle' },
+    authors: ['@load.it.properly', '@plates.at.the.back', '@rinse.cycle'],
+    tags: ['#dishwasher #satisfying #cleantok', '#organizing #tetris', '#fyp #foryou'],
+    captions: {
+      en: ['plates at the back, cups on top. no debate.', 'every slot used', 'the sparkle when it opens', 'my partner loads it differently and it hurts'],
+      fr: ['les assiettes au fond, les tasses en haut. pas de débat.', 'chaque place utilisée', 'les étincelles quand ça s’ouvre', 'mon coloc le remplit autrement et ça me fait mal'],
+    },
+    sounds: {
+      en: ['clinks and a hum', 'original sound - load.it.properly', 'kitchen radio'],
+      fr: ['tintements et ronron', 'son original - load.it.properly', 'radio de cuisine'],
+    },
+  },
 } satisfies Record<string, Entry>

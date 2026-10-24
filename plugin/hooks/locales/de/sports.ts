@@ -18,4 +18,7 @@ export const SPORTS: Locale['videos'] = {
   speedcube: { name: 'Speedcubing', captions: ['verdrehen... dann lösen', 'schau auf den Timer', 'wie MACHEN die das', 'ich schaff nur eine Seite'], sounds: ['Würfelklicks (ASMR)', 'Originalton - cube.solve', 'Fokusmusik'] },
   keepyuppy: { name: 'Ball hochhalten', captions: ['Fuß, Knie, Kopf, wiederholen', 'neuer Rekord?', 'er hat ihn fallen lassen bei...', 'Bolzplatz-Skills'], sounds: ['Balltipps (Originalton)', 'Originalton - keepy.uppy', 'Straßenfußball-Beat'] },
   parkour: { name: 'Parkour', captions: ['von Dach zu Dach', 'die Rolle bei der Landung', 'nicht nach unten schauen', 'zähl die Lücken'], sounds: ['Wind und Schritte (Originalton)', 'Originalton - rooftop.run', 'Drum and Bass'] },
+  bungee: { name: 'Bungee-Sprung', captions: ['3… 2… 1…', 'die Zahl ist, wie tief es geht', 'und federt, und federt', 'ich würde die ganze Zeit schreien'], sounds: ['Windrauschen und ein Schrei', 'Originalton - three.two.one.jump', 'Actioncam-Rock'] },
+  juggling: { name: 'Jonglieren', captions: ['die Kaskade hört nie auf', 'drei Bälle, dann fünf', 'die Zahl ist, wie viele in der Luft sind', 'ich habe eine Woche für zwei gebraucht'], sounds: ['sanftes Fangen im Takt', 'Originalton - three.ball.cascade', 'Zirkuswalzer'] },
+  wallofdeath: { name: 'Steilwand', captions: ['je schneller, desto höher', 'das Publikum lehnt sich über den Rand', 'die Zahl ist die Geschwindigkeit', 'wie ist das legal'], sounds: ['Zweitaktmotor-Gebrüll', 'Originalton - round.the.wall', 'Jahrmarktsorgel'] },
 }

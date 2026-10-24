@@ -1,6 +1,7 @@
 import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, ellipse, hash, irand, line, lit, litSprite, shuffle, slab } from '../kit'
+import { clamp, ellipse, hash, irand, line, lit, litSprite, shuffle, slab, sparks, tint, tones } from '../kit'
+import type { Spark } from '../kit'
 
 // Satisfying & ASMR: one motion that turns a mess into order.
 
@@ -2216,6 +2217,217 @@ const dominos: Maker = (W, H, rng) => {
   }
 }
 
+// --- folding laundry ----------------------------------------------------------------
+
+const laundry: Maker = (W, H, rng) => {
+  const sw = Math.max(9, Math.round(W * 0.5)) - (Math.round(W * 0.5) % 3)
+  const sh = Math.max(10, Math.round(H * 0.32))
+  const ox = Math.round((W - sw) / 2)
+  const oy = Math.round(H * 0.18)
+  const sleeve = Math.max(2, Math.round(sw * 0.28))
+  // the shirt laid flat: the body, sleeves out to the sides, a neck at the top
+  const shape: [number, number][] = []
+  for (let y = 0; y < sh; y++)
+    for (let x = -sleeve; x < sw + sleeve; x++) {
+      const body = x >= 0 && x < sw
+      const arm = y < sleeve + 1 && (x < 0 ? -x <= sleeve - y * 0.3 : x >= sw ? x - sw < sleeve - y * 0.3 : false)
+      const neck = y === 0 && Math.abs(x - (sw - 1) / 2) < sw * 0.18
+      if ((body || arm) && !neck) shape.push([x, y])
+    }
+  let hue = rng()
+  let t = 0
+  let pile: number[] = []
+  const P = { arrive: 16, left: 34, right: 52, up: 72, away: 92 }
+  const ease = (k: number) => (k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k))
+
+  return {
+    step() {
+      t++
+      if (t > P.away + 6) {
+        t = 0
+        pile.push(hue)
+        if (pile.length > 6) pile = []
+        hue = (hue + 0.2 + rng() * 0.5) % 1
+      }
+    },
+    draw(px) {
+      // a wooden table with long planks
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = y % 9 === 0 ? 0x9a6a40 : (x * 3 + y * 11) % 37 === 0 ? 0xb07a4a : 0xc08a58
+      // the pile of folded shirts, bottom right
+      const fw = sw / 3 + 2
+      const fh = Math.round(sh / 2)
+      const px0 = W - fw - 2
+      const py0 = H - fh - 3
+      pile.forEach((h, i) => {
+        const c = hsv(h, 0.55, 0.85)
+        rect(px, W, H, px0 + 1, py0 - i * 2 + 1, fw, fh, 0x7a5030)
+        slab(px, W, H, px0, py0 - i * 2, fw, fh, c, tones(c)[3])
+        rect(px, W, H, px0 + 2, py0 - i * 2 + 1, fw - 4, 1, tones(c)[2])
+      })
+      const front = hsv(hue, 0.6, 0.9)
+      const back = tones(front)[2]
+      const a = (sw / 3) | 0
+      const b = sw - a
+      const mid = Math.round(sh / 2)
+      const pL = ease((t - P.arrive) / (P.left - P.arrive))
+      const pR = ease((t - P.left) / (P.right - P.left))
+      const pU = ease((t - P.right) / (P.up - P.right))
+      const slide = t < P.arrive ? (1 - t / P.arrive) * -W : 0
+      const away = ease((t - P.up - 4) / (P.away - P.up - 4))
+      const dx = slide + away * (px0 - ox - a + 1)
+      const dy = away * (py0 - pile.length * 2 - oy)
+      type Px = { x: number; y: number; c: number; layer: number }
+      const out: Px[] = []
+      for (const [x0, y0] of shape) {
+        let x = x0
+        let y = y0
+        let up = true
+        let layer = 0
+        // the left third folds over, then the right, then the bottom half up
+        if (x < a) {
+          x = a - (a - x) * Math.cos(Math.PI * pL)
+          if (pL > 0.5) up = !up
+          layer = 1
+        } else if (x >= b) {
+          x = b - (b - x) * Math.cos(Math.PI * pR)
+          if (pR > 0.5) up = !up
+          layer = 2
+        }
+        if (y >= mid) {
+          y = mid - (mid - y) * Math.cos(Math.PI * pU)
+          if (pU > 0.5) {
+            up = !up
+            layer += 3
+          }
+        }
+        const shade = up ? front : back
+        const edge = y0 === sh - 1 || x0 === -sleeve || x0 === sw + sleeve - 1
+        out.push({ x: ox + x + dx, y: oy + y + dy, c: edge ? tones(front)[3] : y0 === 1 && Math.abs(x0 - (sw - 1) / 2) < sw * 0.25 ? tones(front)[2] : shade, layer })
+      }
+      out.sort((p, q) => p.layer - q.layer)
+      for (const p of out) dot(px, W, H, p.x, p.y, p.c)
+      // a little print on the chest, while it shows
+      if (pU < 0.5 && t < P.away) dot(px, W, H, ox + sw / 2 + dx, oy + sh * 0.3 + dy, 0xffffff)
+      text(px, W, H, 1, 1, String(pile.length), 0x5a3a1a)
+    },
+  }
+}
+
+// --- dishwasher Tetris -------------------------------------------------------------
+
+const dishwasher: Maker = (W, H, rng) => {
+  const x0 = 2
+  const x1 = W - 2
+  const topRack = Math.round(H * 0.38)
+  const lowRack = Math.round(H * 0.72)
+  type Dish = { kind: 'plate' | 'cup' | 'glass' | 'fork'; x: number; y: number; c: number }
+  let slots: Dish[] = []
+  let filled = 0
+  let fly = 0
+  let phase: 'load' | 'close' | 'wash' | 'open' | 'unload' = 'load'
+  let t = 0
+  let door = 0
+  let shine: Spark[] = []
+  const build = () => {
+    slots = []
+    const plates = Math.floor((x1 - x0 - 8) / 2.5)
+    for (let k = 0; k < plates; k++) slots.push({ kind: 'plate', x: x0 + 2 + k * 2.5, y: lowRack, c: k % 3 === 2 ? 0xd8e8f8 : 0xf4f4f8 })
+    for (let k = 0; k < 3; k++) slots.push({ kind: 'fork', x: x1 - 5 + k, y: lowRack, c: 0xb8c0cc })
+    const cups = Math.floor((x1 - x0 - 2) / 5)
+    for (let k = 0; k < cups; k++) slots.push({ kind: k % 2 ? 'glass' : 'cup', x: x0 + 3 + k * 5, y: topRack, c: k % 2 ? 0xc8e8f8 : hsv(rng(), 0.4, 0.9) })
+    filled = 0
+    fly = 0
+    phase = 'load'
+    t = 0
+    door = 0
+  }
+  build()
+  // the order: plates from the back, then the cups, then cutlery: no wasted space
+  const order = () => slots
+
+  return {
+    step() {
+      t++
+      shine = sparks(shine, 0)
+      if (phase === 'load') {
+        if (++fly >= 9) {
+          fly = 0
+          filled++
+          if (filled >= order().length) {
+            phase = 'close'
+            t = 0
+          }
+        }
+      } else if (phase === 'close') {
+        door = Math.min(1, door + 0.05)
+        if (door >= 1) {
+          phase = 'wash'
+          t = 0
+        }
+      } else if (phase === 'wash') {
+        if (t > 70) phase = 'open'
+      } else if (phase === 'open') {
+        door = Math.max(0, door - 0.05)
+        if (door <= 0) {
+          phase = 'unload'
+          t = 0
+          for (const s of slots) shine.push({ x: s.x, y: s.y - 3 - irand(rng, 3), vx: 0, vy: 0, l: 20 + irand(rng, 30), c: 0xffffff })
+        }
+      } else if (phase === 'unload' && t > 50) build()
+    },
+    draw(px) {
+      sky(px, W, H, 0xe8e4dc, 0xd8d2c8)
+      // the dishwasher: steel tub, two wire racks
+      slab(px, W, H, 0, 6, W, H - 6, 0xb8bcc4, 0x5a5e68)
+      rect(px, W, H, x0, 8, x1 - x0, H - 10, 0x8a909c)
+      for (let y = 9; y < H - 2; y += 3) rect(px, W, H, x0, y, x1 - x0, 1, 0x9aa0ac)
+      for (const ry of [topRack, lowRack]) {
+        rect(px, W, H, x0, ry, x1 - x0, 1, 0xd8dce4)
+        rect(px, W, H, x0, ry + 1, x1 - x0, 1, 0x5a5e68)
+        for (let x = x0 + 1; x < x1; x += 2) dot(px, W, H, x, ry - 1, 0xd8dce4)
+      }
+      const dish = (d: Dish, x: number, y: number) => {
+        if (d.kind === 'plate') {
+          rect(px, W, H, x, y - 8, 1, 8, d.c)
+          rect(px, W, H, x + 1, y - 7, 1, 6, tones(d.c)[2])
+          dot(px, W, H, x, y - 8, 0x6a8ab0)
+        } else if (d.kind === 'cup') {
+          slab(px, W, H, x - 1.5, y - 4, 4, 4, d.c, tones(d.c)[3])
+          dot(px, W, H, x + 2.5, y - 2, tones(d.c)[2])
+        } else if (d.kind === 'glass') {
+          rect(px, W, H, x - 1, y - 5, 3, 5, d.c)
+          rect(px, W, H, x - 1, y - 5, 1, 5, 0xffffff)
+        } else {
+          rect(px, W, H, x, y - 6, 1, 6, d.c)
+          dot(px, W, H, x, y - 7, 0xe0e4ec)
+        }
+      }
+      const showing = phase === 'load' ? filled : slots.length
+      for (let k = 0; k < showing; k++) dish(slots[k], slots[k].x, slots[k].y)
+      if (phase === 'load' && filled < slots.length) {
+        // the next one flies in from the top right and drops into place
+        const d = slots[filled]
+        const k = fly / 9
+        const sx = W + 4
+        const sy = 2
+        dish(d, Math.round(sx + (d.x - sx) * k), Math.round(sy + (d.y - sy) * k - Math.sin(k * Math.PI) * 6))
+      }
+      // the door swings up to close; a blue light while it washes
+      if (door > 0) {
+        const h = Math.round(door * (H - 6))
+        slab(px, W, H, 0, H - h, W, h, 0xd0d4dc, 0x6a6e78)
+        rect(px, W, H, 2, H - h + 1, W - 4, 2, 0x3a3e48)
+        if (phase === 'wash') {
+          dot(px, W, H, W - 5, H - h + 2, t % 20 < 14 ? 0x4ac0ff : 0x2a6a8a)
+          for (let k = 0; k < 3; k++) tint(px, W, H, 2 + ((t + k * 9) % (W - 4)), H - h - 1, 0xffffff, 0.5)
+        }
+      }
+      for (const s of shine) if (s.l % 10 < 5) dot(px, W, H, s.x, s.y, s.c)
+      text(px, W, H, 1, 0, `${Math.min(filled, slots.length)}/${slots.length}`, 0x5a5e68)
+    },
+  }
+}
+
 export const SATISFYING = {
   sable,
   bulles,
@@ -2239,5 +2451,7 @@ export const SATISFYING = {
   squeegee,
   tiling,
   zen,
+  laundry,
+  dishwasher,
 }
 

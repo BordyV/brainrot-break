@@ -27,7 +27,8 @@ const KIND_COUNT = Object.keys(META).length
 const kindOf = (author: string | undefined) =>
   Object.entries(META).find(([, m]) => author !== undefined && m.authors.includes(author))?.[0]
 
-test('likes, scrolls, and shows every kind once before any repeats', async ($, on) => {
+// It scrolls through every video once: give it the time that takes.
+test('likes, scrolls, and shows every kind once before any repeats', { timeoutMs: 20000 }, async ($, on) => {
   mock.clock(on)
   mock.store(on)
   on('ui.open', () => ({ value: { isPlaced: true as const } }))
@@ -179,7 +180,8 @@ test('the theme menu hides themes, keeps the last one, and shows them all again'
   on('ui.toast', () => ({ value: undefined }))
 
   await brainrot($, '')
-  const ui = await $.ui.mount({ plugin: 'brainrot-break', surface: 'terminal', component: 'Pane', requestId: 'brainrot-break', props: PANE })
+  // a pane tall enough to list every theme at once (a shorter one scrolls)
+  const ui = await $.ui.mount({ plugin: 'brainrot-break', surface: 'terminal', component: 'Pane', requestId: 'brainrot-break', props: { ...PANE, scroll: { offset: 0, bodyRows: 60 } } })
   const author = async () => (await ui.find({ type: 'Text', text: /^@/ }))?.text
   const rows = async () => ((await ui.find({ key: 'menu' }))?.props.props as { rows: MenuRow[] }).rows
   const click = (y: number) => ui.pointer({ type: 'down', x: 1, y, button: 'left', in: 'menu' })

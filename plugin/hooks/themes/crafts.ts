@@ -1,6 +1,6 @@
-import { disc, dot, hsv, mix, rect, scale, sky, sprite } from '../draw'
+import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, ellipse, hash, line, lit, pick, shuffle, slab, tones } from '../kit'
+import { clamp, ellipse, hash, line, lit, pick, shuffle, slab, tint, tones } from '../kit'
 
 // Crafts & makers: watching something get built, piece by piece.
 
@@ -873,6 +873,80 @@ const jenga: Maker = (W, H, rng) => {
   }
 }
 
+// --- flip-book --------------------------------------------------------------------
+
+const flipbook: Maker = (W, H) => {
+  const pl = 2
+  const pt = 6
+  const pw = W - 5
+  const ph = Math.round(H * 0.72)
+  let page = 0
+  let t = 0
+  let flip = 0
+  const pencil = 0x3a3a48
+  // a stick figure runs in, kicks a ball, the ball comes back down on its head
+  const pose = (n: number) => {
+    const k = n % 48
+    const run = Math.min(k, 20)
+    const x = pl + 4 + run * ((pw - 14) / 20)
+    const ground = pt + ph - 5
+    const stride = k < 20 ? Math.sin(k * 1.1) : 0
+    const kick = k >= 20 && k < 26 ? (k - 20) / 6 : 0
+    const ballK = k - 24
+    const ball: [number, number] = ballK < 0 ? [x + 6, ground] : ballK < 16 ? [x + 6 + ballK * 0.2, ground - Math.sin((ballK / 16) * Math.PI) * (ph * 0.6)] : [x + 9, ground]
+    const fall = k >= 40 ? Math.min(1, (k - 40) / 3) : 0
+    return { x, ground, stride, kick, ball, fall }
+  }
+
+  return {
+    step() {
+      t++
+      // a new page every two frames, a curl that sweeps across
+      if (t % 2 === 0) {
+        page++
+        flip = 2
+      } else if (flip) flip--
+    },
+    draw(px) {
+      sky(px, W, H, 0x4a5a6a, 0x3a4858)
+      // the stack of pages under and to the right, the spiral at the top
+      for (let k = 3; k >= 1; k--) slab(px, W, H, pl + k, pt + k, pw, ph, 0xe8e4d8)
+      rect(px, W, H, pl, pt, pw, ph, 0xfaf8f0)
+      for (let y = pt + 4; y < pt + ph; y += 4) rect(px, W, H, pl, y, pw, 1, 0xc8d8f0)
+      rect(px, W, H, pl + 4, pt, 1, ph, 0xf0b0b0)
+      for (let x = pl + 2; x < pl + pw; x += 3) {
+        dot(px, W, H, x, pt - 1, 0x9aa0a8)
+        dot(px, W, H, x, pt - 2, 0xd0d4dc)
+      }
+      const p = pose(page)
+      const g = p.ground
+      const lean = p.fall * 1.4
+      const hip: [number, number] = [p.x, g - 5 + p.fall * 4]
+      const neck: [number, number] = [p.x + Math.sin(lean) * 5, hip[1] - Math.cos(lean) * 5]
+      line(px, W, H, ...hip, ...neck, pencil)
+      for (let a = 0; a < 10; a++) dot(px, W, H, neck[0] + Math.sin(lean) * 2 + Math.cos(a) * 1.6, neck[1] - Math.cos(lean) * 2 + Math.sin(a) * 1.6, pencil)
+      line(px, W, H, ...hip, hip[0] + 2 * p.stride + p.kick * 4, g - p.kick * 3, pencil)
+      line(px, W, H, ...hip, hip[0] - 2 * p.stride, g, pencil)
+      line(px, W, H, ...neck, neck[0] + 3, neck[1] + 2 + p.stride, pencil)
+      line(px, W, H, ...neck, neck[0] - 3, neck[1] + 2 - p.stride, pencil)
+      line(px, W, H, pl + 1, g + 1, pl + pw - 1, g + 1, 0x8a8a98)
+      // the ball, and stars when it lands on the head
+      for (let a = 0; a < 8; a++) dot(px, W, H, p.ball[0] + Math.cos(a) * 1.3, p.ball[1] - 1.3 + Math.sin(a) * 1.3, 0xd04040)
+      if (p.fall > 0) for (let k = 0; k < 3; k++) dot(px, W, H, neck[0] - 3 + k * 3, neck[1] - 5 - (k % 2), 0xe0b020)
+      // the page turning: a curl sweeping across, and the thumb holding the corner
+      if (flip) {
+        const cx = pl + pw - (2 - flip) * (pw / 2)
+        for (let y = pt; y < pt + ph; y++) {
+          tint(px, W, H, cx, y, 0x8a8a98, 0.5)
+          tint(px, W, H, cx + 1, y, 0xffffff, 0.6)
+        }
+      }
+      lit(px, W, H, pl + pw + 1, pt + ph - 3, 3, 4, 0xf0c8a0, 0x8a5a3a)
+      text(px, W, H, 1, H - 7, String(page % 1000), 0xd0d8e0)
+    },
+  }
+}
+
 export const CRAFTS = {
   brickbuild,
   pixeldraw,
@@ -886,5 +960,6 @@ export const CRAFTS = {
   blockhouse,
   cardtower,
   jenga,
+  flipbook,
 }
 

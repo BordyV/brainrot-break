@@ -172,4 +172,43 @@ export const GENERATIVE = {
       fr: ['clics de tuiles (son original)', 'son original - wave.collapse', 'musique de city builder'],
     },
   },
+  pythagoras: {
+    name: { en: 'water Pythagoras', fr: 'Pythagore à l’eau' },
+    authors: ['@a.squared.plus.b', '@proof.by.water', '@hypotenuse.tank'],
+    tags: ['#pythagoras #maths #satisfying', '#geometry #proof', '#fyp #foryou'],
+    captions: {
+      en: ['the two small squares fill the big one. exactly.', 'a² + b² = c², with water', 'the proof you can watch', 'my maths teacher never showed us this'],
+      fr: ['les deux petits carrés remplissent le grand. exactement.', 'a² + b² = c², avec de l’eau', 'la démonstration qu’on peut regarder', 'mon prof de maths ne nous a jamais montré ça'],
+    },
+    sounds: {
+      en: ['water sloshing', 'original sound - a.squared.plus.b', 'classroom piano'],
+      fr: ['clapotis d’eau', 'son original - a.squared.plus.b', 'piano de salle de classe'],
+    },
+  },
+  pendulumwave: {
+    name: { en: 'pendulum wave', fr: 'onde de pendules' },
+    authors: ['@fifteen.pendulums', '@in.and.out.of.sync', '@physics.dance'],
+    tags: ['#pendulumwave #physics #satisfying', '#science #hypnotic', '#fyp #foryou'],
+    captions: {
+      en: ['fifteen pendulums, each a little slower', 'snakes, then chaos, then back in line', 'wait for them to line up again', 'physics doing choreography'],
+      fr: ['quinze pendules, chacun un peu plus lent', 'des serpents, puis le chaos, puis de nouveau alignés', 'attends qu’ils se réalignent', 'la physique qui fait de la chorégraphie'],
+    },
+    sounds: {
+      en: ['soft clicks in rhythm', 'original sound - fifteen.pendulums', 'minimal piano loop'],
+      fr: ['petits clics en rythme', 'son original - fifteen.pendulums', 'boucle de piano minimaliste'],
+    },
+  },
+  salesman: {
+    name: { en: 'travelling salesman', fr: 'voyageur de commerce' },
+    authors: ['@two.opt.untangle', '@shortest.route', '@np.hard.and.chill'],
+    tags: ['#algorithm #travellingsalesman #satisfying', '#computerscience #optimization', '#fyp #foryou'],
+    captions: {
+      en: ['every crossing it undoes makes the trip shorter', 'the number is the total distance', 'green means no more crossings', 'my delivery driver’s route, probably'],
+      fr: ['chaque croisement défait raccourcit le trajet', 'le nombre, c’est la distance totale', 'vert veut dire plus aucun croisement', 'le trajet de mon livreur, sûrement'],
+    },
+    sounds: {
+      en: ['map pins clicking', 'original sound - two.opt.untangle', 'road trip lo-fi'],
+      fr: ['clics de punaises sur la carte', 'son original - two.opt.untangle', 'lo-fi de road trip'],
+    },
+  },
 } satisfies Record<string, Entry>

@@ -13,4 +13,5 @@ export const CRAFTS: Locale['videos'] = {
   blockhouse: { name: 'casa a blocchi', captions: ['la prima casa prima che scenda la notte', 'angoli di pietra, pareti di assi', 'il tetto è la parte più difficile', 'speedrun della casa iniziale'], sounds: ['blocco piazzato (suono originale)', 'suono originale - block.builder', 'piano rilassante (vibe C418)'] },
   cardtower: { name: 'castello di carte', captions: ['non respirare...', 'l’ultima carta...', 'e poi il vento', 'pazienza livello 100'], sounds: ['carte mescolate (ASMR)', 'suono originale - card.tower', 'musica di tensione'] },
   jenga: { name: 'crollo del Jenga', captions: ['quale blocco sarà l’ultimo?', 'traballa...', 'CROLLA', 'caos della serata giochi'], sounds: ['blocchi di legno (ASMR)', 'suono originale - jenga.pull', 'tamburi di suspense'] },
+  flipbook: { name: 'flipbook', captions: ['un disegno per pagina, poi sfogli', 'la palla sta tornando giù…', 'tutti i margini del quaderno di matematica', '48 pagine per 3 secondi di gloria'], sounds: ['frrrrr delle pagine', 'suono originale - margin.doodles', 'musica da cartone comico'] },
 }

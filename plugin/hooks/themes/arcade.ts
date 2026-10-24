@@ -3542,6 +3542,106 @@ const geodash: Maker = (W, H, rng) => {
   }
 }
 
+// --- speedrun ---------------------------------------------------------------------
+
+const speedrun: Maker = (W, H, rng) => {
+  const ground = Math.round(H * 0.72)
+  const walls = [30, 52, 78, 100, 126]
+  const goal = 150
+  const wallH = (i: number) => 8 + (i % 3) * 4
+  let runner = 0
+  let ghost = { x: 0, y: 0, vy: 0 }
+  let t = 0
+  let done = 0
+  let record = 0
+  let cam = 0
+  let glitch = 0
+  let fx: { x: number; y: number; vx: number; vy: number; l: number; c: number }[] = []
+  const reset = () => {
+    runner = 2
+    ghost = { x: 2, y: 0, vy: 0 }
+    t = 0
+    done = 0
+    cam = 0
+    glitch = 0
+  }
+  reset()
+  const timeText = (f: number) => {
+    const s = f / 15
+    return `${Math.floor(s)}.${String(Math.floor((s % 1) * 100)).padStart(2, '0')}`
+  }
+
+  return {
+    step() {
+      t++
+      fx = fx.filter(s => {
+        s.x += s.vx
+        s.y += s.vy
+        return --s.l > 0
+      })
+      if (glitch) glitch--
+      // the ghost of the normal route: run, jump every wall
+      ghost.vy += 0.15
+      ghost.y = Math.min(0, ghost.y + ghost.vy)
+      if (ghost.x < goal) {
+        const next = walls.find(w => w > ghost.x - 1)
+        if (next !== undefined && next - ghost.x < 6 && ghost.y === 0) ghost.vy = -2.4 - wallH(walls.indexOf(next)) * 0.05
+        const blocked = next !== undefined && next - ghost.x < 1.5 && -ghost.y < wallH(walls.indexOf(next))
+        if (!blocked) ghost.x += 0.45
+      }
+      if (done) {
+        if (++done > 90) reset()
+        cam += (runner - W * 0.6 - cam) * 0.1
+        return
+      }
+      // the runner: straight through the walls, with a glitch each time
+      const before = runner
+      runner += 0.8
+      for (const w of walls)
+        if (before < w && runner >= w) {
+          glitch = 6
+          for (let k = 0; k < 6; k++) fx.push({ x: w, y: ground - 3 - rng() * 4, vx: (rng() - 0.5) * 1.2, vy: rng() - 0.5, l: 8, c: k % 2 ? 0xff40ff : 0x40ffff })
+        }
+      if (runner >= goal) {
+        done = 1
+        record = record ? Math.min(record, t) : t
+        for (let k = 0; k < 20; k++) fx.push({ x: goal, y: ground - 10, vx: (rng() - 0.5) * 2, vy: (rng() - 0.5) * 2, l: 20, c: 0xffe060 })
+      }
+      cam += (runner - W * 0.4 - cam) * 0.2
+    },
+    draw(px) {
+      sky(px, W, H, 0x5a8ad8, 0xa8d0f0, ground)
+      for (let x = 0; x < W; x++) {
+        const wx = x + cam
+        const hill = ground - 6 - Math.sin(wx * 0.05) * 4
+        for (let y = Math.round(hill); y < ground; y++) px[y * W + x] = 0x6aa86a
+        for (let y = ground; y < H; y++) px[y * W + x] = y === ground ? 0x7ad04a : (Math.floor(wx) + y) % 6 === 0 ? 0x8a5a30 : 0xa87040
+      }
+      walls.forEach((w, i) => slab(px, W, H, w - cam, ground - wallH(i), 3, wallH(i), 0xb86a3a, 0x4a2a14))
+      // the flag at the end
+      const fx0 = goal - cam
+      rect(px, W, H, fx0, ground - 14, 1, 14, 0xd0d0d8)
+      rect(px, W, H, fx0 + 1, ground - 14, 5, 3, done ? 0xffe060 : 0xe03a3a)
+      // the ghost, faint; the runner, a green blob that tears when it clips
+      const gx = ghost.x - cam
+      for (let k = 0; k < 9; k++) {
+        const x = Math.round(gx - 1 + (k % 3))
+        const y = Math.round(ground - 3 + Math.floor(k / 3) + ghost.y)
+        if (x >= 0 && x < W && y >= 0 && y < H) px[y * W + x] = mix(px[y * W + x], 0xffffff, 0.35)
+      }
+      const rx = Math.round(runner - cam)
+      if (glitch) {
+        lit(px, W, H, rx - 1, ground - 2, 2, 2, 0xff40ff)
+        lit(px, W, H, rx + 1, ground - 2, 2, 2, 0x40ffff)
+      }
+      lit(px, W, H, rx, ground - 2, 2, 2, 0x4ae04a, 0x1a5a1a)
+      dot(px, W, H, rx + 1, ground - 3, 0xffffff)
+      for (const s of fx) dot(px, W, H, s.x - cam, s.y, s.c)
+      text(px, W, H, 1, 1, timeText(done ? record : t), done ? 0xffe060 : 0xffffff)
+    },
+  }
+}
+
 export const ARCADE = {
   runner,
   tetris,
@@ -3569,5 +3669,6 @@ export const ARCADE = {
   jewels,
   sokoban,
   solitaire,
+  speedrun,
 }
 

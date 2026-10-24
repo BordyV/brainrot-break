@@ -159,4 +159,17 @@ export const CRAFTS = {
       fr: ['blocs de bois (ASMR)', 'son original - jenga.pull', 'tambours de suspense'],
     },
   },
+  flipbook: {
+    name: { en: 'flip-book', fr: 'folioscope' },
+    authors: ['@margin.doodles', '@flip.it.fast', '@one.page.at.a.time'],
+    tags: ['#flipbook #animation #art', '#drawing #satisfying', '#fyp #foryou'],
+    captions: {
+      en: ['one drawing per page, then flip', 'the ball is coming back down…', 'all the margins of my maths book', '48 pages for 3 seconds of glory'],
+      fr: ['un dessin par page, puis on feuillette', 'le ballon redescend…', 'toutes les marges de mon cahier de maths', '48 pages pour 3 secondes de gloire'],
+    },
+    sounds: {
+      en: ['prrrrrt of pages', 'original sound - margin.doodles', 'cartoon slapstick music'],
+      fr: ['frrrrrt des pages', 'son original - margin.doodles', 'musique de dessin animé burlesque'],
+    },
+  },
 } satisfies Record<string, Entry>

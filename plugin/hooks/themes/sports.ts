@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, ellipse, irand, line, lit, litSprite, pick, poly, slab, textWidth } from '../kit'
+import { clamp, ellipse, irand, line, lit, litSprite, pick, poly, slab, textWidth, tones } from '../kit'
 
 // Sports: a clear goal and a decisive moment.
 
@@ -1286,6 +1286,248 @@ const parkour: Maker = (W, H, rng) => {
   }
 }
 
+// --- bungee jump --------------------------------------------------------------------
+
+const bungee: Maker = (W, H, rng) => {
+  const deck = 8
+  const rest = H * 0.3
+  let y = deck
+  let vy = 0
+  let t = 0
+  let phase: 'ready' | 'fall' | 'up' = 'ready'
+  let spin = 0
+  const hue = rng()
+  const reset = () => {
+    y = deck
+    vy = 0
+    t = 0
+    phase = 'ready'
+  }
+  reset()
+
+  return {
+    step() {
+      t++
+      if (phase === 'ready') {
+        if (t > 30) {
+          phase = 'fall'
+          vy = 0.3
+        }
+        return
+      }
+      // free fall, then the cord stretches past its length and throws the jumper back up
+      vy += 0.09
+      const stretch = y - deck - rest
+      if (stretch > 0) vy -= stretch * 0.03
+      vy *= 0.993
+      y += vy
+      spin += vy * 0.05
+      if (phase === 'fall' && t > 360) {
+        phase = 'up'
+      }
+      if (phase === 'up') {
+        // winched back up to the bridge
+        vy = 0
+        y -= 0.5
+        if (y <= deck) reset()
+      }
+    },
+    draw(px) {
+      // a deep gorge: sky, cliffs, a river far below
+      sky(px, W, H, 0x6ab0f0, 0xc8e4f8)
+      for (let yy = 0; yy < H; yy++) {
+        const l = 4 + Math.sin(yy * 0.2) * 1.5 + yy * 0.05
+        const r = W - 4 - Math.sin(yy * 0.17 + 1) * 1.5 - yy * 0.05
+        for (let x = 0; x < W; x++) if (x < l || x > r) px[yy * W + x] = x < l ? (x > l - 1 ? 0xa88a6a : 0x7a6048) : x < r + 1 ? 0x5a4434 : 0x6a523e
+      }
+      for (let yy = H - 5; yy < H; yy++) for (let x = 0; x < W; x++) px[yy * W + x] = (x + yy + Math.floor(t / 4)) % 6 === 0 ? 0xc8ecff : 0x3a8ac8
+      // the bridge deck and its railing
+      slab(px, W, H, 0, deck - 3, W, 3, 0x8a8a98, 0x3a3a48)
+      for (let x = 1; x < W; x += 3) rect(px, W, H, x, deck - 6, 1, 3, 0x6a6a78)
+      rect(px, W, H, 0, deck - 6, W, 1, 0x9a9aa8)
+      // the cord: slack while falling, straight when stretched
+      const jx = W / 2
+      const stretched = y - deck > rest
+      if (stretched) line(px, W, H, jx, deck, jx, y, 0xf0d040)
+      else for (let k = 0; k <= 12; k++) dot(px, W, H, jx + Math.sin((k / 12) * Math.PI) * (rest - (y - deck)) * 0.15, deck + ((y - deck) * k) / 12 + Math.sin((k / 12) * Math.PI) * 2, 0xf0d040)
+      // the jumper, head down once falling, arms out
+      const col = hsv(hue, 0.7, 0.9)
+      const flipY = phase === 'ready' ? -1 : 1
+      const bx = Math.round(jx)
+      const by = Math.round(y)
+      if (flipY < 0) {
+        rect(px, W, H, bx - 1, by - 5, 3, 3, col)
+        lit(px, W, H, bx, by - 7, 1.3, 1.3, 0xf0c8a0)
+        rect(px, W, H, bx - 1, by - 2, 1, 2, 0x2a3a6a)
+        rect(px, W, H, bx + 1, by - 2, 1, 2, 0x2a3a6a)
+      } else {
+        rect(px, W, H, bx - 1, by + 2, 3, 3, col)
+        lit(px, W, H, bx, by + 6, 1.3, 1.3, 0xf0c8a0)
+        rect(px, W, H, bx - 1, by, 1, 2, 0x2a3a6a)
+        rect(px, W, H, bx + 1, by, 1, 2, 0x2a3a6a)
+        const arm = Math.sin(spin) * 2
+        line(px, W, H, bx - 1, by + 3, bx - 3, by + 5 + arm, 0xf0c8a0)
+        line(px, W, H, bx + 1, by + 3, bx + 3, by + 5 - arm, 0xf0c8a0)
+      }
+      const m = String(Math.max(0, Math.round((y - deck) * 1.5)))
+      text(px, W, H, W - 1 - textWidth(m), 1, m, 0x1a3a5a)
+    },
+  }
+}
+
+// --- juggling -----------------------------------------------------------------------
+
+const juggling: Maker = (W, H) => {
+  const handY = Math.round(H * 0.62)
+  const span = W * 0.22
+  let n = 3
+  let t = 0
+  let catches = 0
+  let next = 0
+  const flight = 26
+  const colours = [0xe84a4a, 0x4ac0e8, 0xf0c030, 0x6ad04a, 0xd06ae0]
+  // a cascade: each ball leaves one hand and lands in the other, one throw every few frames
+  type B = { from: number; t0: number; c: number }
+  let balls: B[] = []
+  const reset = () => {
+    balls = []
+    t = 0
+    next = 0
+  }
+  reset()
+
+  return {
+    step() {
+      t++
+      const gap = Math.round(flight / n) + 4
+      if (t >= next) {
+        const side = Math.floor(next / gap) % 2
+        balls.push({ from: side, t0: t, c: colours[Math.round(next / gap) % n] })
+        next += gap
+      }
+      balls = balls.filter(b => {
+        if (t - b.t0 >= flight) {
+          catches++
+          return false
+        }
+        return true
+      })
+      if (catches > 60 && n === 3) {
+        n = 5
+        catches = 0
+      } else if (catches > 60 && n === 5) {
+        n = 3
+        catches = 0
+      }
+    },
+    draw(px) {
+      // a stage: curtains, a spotlight on the juggler
+      sky(px, W, H, 0x2a0e18, 0x1a0810)
+      for (let x = 0; x < 4; x++) for (let y = 0; y < H; y++) {
+        px[y * W + x] = (x + y) % 3 === 0 ? 0x6a1020 : 0x8a1a2a
+        px[y * W + W - 1 - x] = (x + y) % 3 === 0 ? 0x6a1020 : 0x8a1a2a
+      }
+      for (let y = 0; y < H; y++) {
+        const half = 3 + y * 0.18
+        for (let x = Math.round(W / 2 - half); x <= W / 2 + half; x++) if (x > 3 && x < W - 4) px[y * W + x] = mix(px[y * W + x], 0xfff0c0, 0.12)
+      }
+      for (let y = H - 6; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = y === H - 6 ? 0xa86a3a : 0x6a4020
+      // the juggler: body, head, arms to the hands
+      const cx = W / 2
+      slab(px, W, H, cx - 3, handY - 2, 6, 10, 0x3a5ad0, 0x1a2a6a)
+      rect(px, W, H, cx - 3, handY + 8, 2, H - 6 - handY - 8, 0x2a2a3a)
+      rect(px, W, H, cx + 1, handY + 8, 2, H - 6 - handY - 8, 0x2a2a3a)
+      lit(px, W, H, cx, handY - 5, 2.5, 2.5, 0xf0c8a0, 0x8a5a3a)
+      const bob = (side: number) => Math.sin(t * 0.25 + side * Math.PI) * 1.5
+      for (const side of [0, 1]) {
+        const hx = cx + (side ? span : -span)
+        const hy = handY + 2 + bob(side)
+        line(px, W, H, cx + (side ? 3 : -3), handY, hx, hy, 0xf0c8a0)
+        dot(px, W, H, hx, hy, 0xf0c8a0)
+      }
+      for (const b of balls) {
+        const k = (t - b.t0) / flight
+        const x0 = cx + (b.from ? span : -span)
+        const x1 = cx + (b.from ? -span : span)
+        const x = x0 + (x1 - x0) * k
+        const y = handY - Math.sin(k * Math.PI) * H * 0.45
+        lit(px, W, H, x, y, 1.8, 1.8, b.c)
+      }
+      text(px, W, H, 1, 1, String(n), 0xffe060)
+    },
+  }
+}
+
+// --- wall of death ------------------------------------------------------------------
+
+const wallofdeath: Maker = (W, H, rng) => {
+  const cx = W / 2
+  const cy = H * 0.52
+  const R = W * 0.44
+  const tilt = 0.32
+  const rimY = cy - H * 0.32
+  const floorY = cy + H * 0.12
+  let a = 0
+  let speed = 0.03
+  let height = 0
+  let t = 0
+  const hue = rng()
+
+  return {
+    step() {
+      t++
+      // faster and faster, and the faster it goes the higher it rides
+      speed = 0.05 + 0.07 * (0.5 - 0.5 * Math.cos(t * 0.012))
+      a += speed
+      height = (speed - 0.05) / 0.07
+    },
+    draw(px) {
+      sky(px, W, H, 0x1a1420, 0x2a1e28)
+      // inside the wooden drum: planks curving round, lit where they face us
+      for (let y = Math.round(rimY); y < H; y++)
+        for (let x = 0; x < W; x++) {
+          const u = (x - cx) / R
+          if (Math.abs(u) > 1) continue
+          const plank = Math.floor((Math.asin(Math.max(-1, Math.min(1, u))) / Math.PI) * 24 + 24)
+          const shadeK = 0.6 + 0.4 * Math.sqrt(1 - u * u)
+          px[y * W + x] = mix(0x2a1a10, plank % 2 ? 0xb8864e : 0xa87a44, shadeK)
+        }
+      // the floor of the pit, the crowd leaning over the rim
+      for (let y = Math.round(floorY); y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = mix(0x5a4430, 0x3a2a1e, (y - floorY) / (H - floorY))
+      for (let x = 0; x < W; x++) {
+        rect(px, W, H, x, rimY - 1, 1, 2, 0x6a4a2a)
+        if (x % 3 === 1) {
+          const c = [0xf0c8a0, 0xd8a070, 0x8a5a3a][x % 3]
+          dot(px, W, H, x, rimY - 3 - (x % 2), c)
+          dot(px, W, H, x, rimY - 2, [0xe84a4a, 0x4a8ae8, 0xf0d040, 0x6ad04a][Math.floor(x / 3) % 4])
+        }
+      }
+      // the rider goes round: big and bright in front, small and dim behind
+      const by = floorY - 4 - height * (floorY - rimY - 10)
+      const x = cx + Math.cos(a) * R * 0.86
+      const y = by + Math.sin(a) * R * tilt
+      const front = Math.sin(a) > 0
+      const size = front ? 1.2 : 0.8
+      const col = hsv(hue, 0.75, front ? 0.95 : 0.6)
+      const dir = -Math.sin(a) >= 0 ? 1 : -1
+      lit(px, W, H, x - dir * 2 * size, y + 1, 1.4 * size, 1.4 * size, 0x2a2a2a)
+      lit(px, W, H, x + dir * 2 * size, y + 1, 1.4 * size, 1.4 * size, 0x2a2a2a)
+      rect(px, W, H, x - 2 * size, y - 1, 4 * size, 2, col)
+      lit(px, W, H, x, y - 3 * size, 1.2 * size, 1.2 * size, front ? 0xf0f0f0 : 0xa0a0a0)
+      // the motion blur behind
+      for (let k = 1; k < 6; k++) {
+        const b = a - speed * k * 0.8
+        const tx = cx + Math.cos(b) * R * 0.86
+        const ty = by + Math.sin(b) * R * tilt
+        const at = Math.round(ty) * W + Math.round(tx)
+        if (tx >= 0 && tx < W && ty >= 0 && ty < H) px[at] = mix(px[at], 0xffffff, 0.3 - k * 0.05)
+      }
+      const kmh = String(Math.round(speed * 900))
+      text(px, W, H, 1, 1, kmh, 0xffe060)
+    },
+  }
+}
+
 export const SPORTS = {
   trickshots,
   penalty,
@@ -1304,5 +1546,8 @@ export const SPORTS = {
   speedcube,
   keepyuppy,
   parkour,
+  bungee,
+  juggling,
+  wallofdeath,
 }
 

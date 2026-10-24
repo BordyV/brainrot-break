@@ -27,4 +27,5 @@ export const ARCADE: Locale['videos'] = {
   jewels: { name: 'joias caindo', captions: ['alinha três, em qualquer direção', 'reação em cadeia chegando', 'diagonal também conta', 'ele planeja cada queda'], sounds: ['sininho de joia (som original)', 'som original - jewel.drop', 'tema de puzzle 16-bit'] },
   sokoban: { name: 'sokoban', captions: ['resolvido com o mínimo de movimentos', 'cada caixa no seu lugar', 'pensa antes de empurrar', 'fase completa, próxima'], sounds: ['caixa arrastando (som original)', 'som original - box.pusher', 'lofi de puzzle'] },
   solitaire: { name: 'vitória no paciência', captions: ['a melhor animação dos anos 90', 'ninguém esquece essa tela', 'cada carta quica', 'memórias da sala de informática'], sounds: ['cartas voando (som original)', 'som original - solitaire.win', 'nostalgia do Windows 95'] },
+  speedrun: { name: 'speedrun', captions: ['parede é só uma sugestão', 'o fantasma cinza foi pelo caminho normal', 'novo recorde pessoal', 'clip no frame exato, toda vez'], sounds: ['zaps de glitch', 'som original - frame.perfect', 'jingle de vitória 8 bits'] },
 }
