@@ -69,7 +69,7 @@ To exercise the feed, open it with `/brainrot`, or ask something that keeps Clau
 - Commit locally. Push only when the user says so.
 - Before a push: `tools/check.ts`, then the plugin-authoring skill's secret scan (`mcp__plugin-authoring__scan_secrets` on this folder). Keep the README's video list, `assets/preview.png` and the project page in step with the videos.
 - Every video is on the project page. It comes from `MAKERS` and `plugin/hooks/i18n.ts` by itself, so never list videos by hand in `site/`; but a new video, or a change to how the feed or the pane looks, is not done until it shows right on the page (`npx tsx tools/site.ts --serve`).
-- Nothing personal or machine-specific goes in the repository: no local paths, names, accounts or keys.
+- Nothing personal or machine-specific goes in the repository: no local paths, names, accounts or keys. The one exception is the owner's donation link in `.github/FUNDING.yml`, there on purpose: leave it.
 
 ## Adding a video
 
