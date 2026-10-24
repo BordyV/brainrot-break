@@ -289,4 +289,17 @@ export const PHYSICS = {
       fr: ['ça accélère (son original)', 'son original - rainbow.trail', 'remix nightcore'],
     },
   },
+  linesled: {
+    name: { en: 'sled on a drawn line', fr: 'luge sur ligne tracée' },
+    authors: ['@draw.the.track', '@sled.rider', '@one.line.run'],
+    tags: ['#linerider #physics #satisfying', '#drawing #sled', '#fyp #foryou'],
+    captions: {
+      en: ['the pen is always one step ahead', 'that jump was too big…', 'how far does it get this time?', 'physics did not agree'],
+      fr: ['le stylo a toujours un coup d’avance', 'ce saut était trop grand…', 'jusqu’où il va cette fois ?', 'la physique n’était pas d’accord'],
+    },
+    sounds: {
+      en: ['pencil scratching paper', 'original sound - draw.the.track', 'classical music, sped up'],
+      fr: ['crayon qui gratte le papier', 'son original - draw.the.track', 'musique classique accélérée'],
+    },
+  },
 } satisfies Record<string, Entry>

@@ -23,4 +23,5 @@ export const COZY: Locale['videos'] = {
   ferris: { name: 'ruota panoramica', captions: ['crepuscolo al luna park', 'le luci si rincorrono', 'in cima alla ruota, in cima al mondo', 'notti d’estate'], sounds: ['musica del luna park (suono originale)', 'suono originale - dusk.wheel', 'synth nostalgico'] },
   sailing: { name: 'in barca a vela', captions: ['lascia decidere al vento', 'gabbiani, sole, onde', 'fuori ufficio', 'vela lenta'], sounds: ['brezza marina (suono originale)', 'suono originale - sail.away', 'yacht rock'] },
   lighthouse: { name: 'faro', captions: ['il guardiano non dorme mai', 'notte di tempesta, luce costante', 'guarda il fascio che gira', 'accogliente da lontano'], sounds: ['tempesta e onde (ASMR)', 'suono originale - light.keeper', 'canto marinaresco (lento)'] },
+  laundromat: { name: 'lavanderia di notte', captions: ['il posto più rilassante alle 2 di notte', 'aspetta la centrifuga', 'scegli una lavatrice e guardala', 'romanticizza il tuo bucato'], sounds: ['ronzio della lavatrice', 'suono originale - laundromat.at.2am', 'beat lo-fi notturni'] },
 }

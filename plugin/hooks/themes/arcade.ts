@@ -3642,6 +3642,252 @@ const speedrun: Maker = (W, H, rng) => {
   }
 }
 
+// --- rage climb ---------------------------------------------------------------------
+
+const rageclimb: Maker = (W, H, rng) => {
+  // charged jumps from ledge to ledge up a tower, and now and then a long fall back down
+  type Ledge = { x: number; y: number; w: number }
+  let ledges: Ledge[] = []
+  const gap = Math.max(8, Math.round(H * 0.2))
+  const addLedge = () => {
+    const last = ledges[ledges.length - 1] as Ledge
+    const w = 6 + irand(rng, 5)
+    const left = last.x + last.w / 2 > W / 2
+    const x = left ? 2 + irand(rng, Math.max(1, W / 2 - w - 2)) : Math.round(W / 2) + irand(rng, Math.max(1, W / 2 - w - 2))
+    ledges.push({ x, y: last.y - gap - irand(rng, 4), w })
+  }
+  let me = { x: 0, y: 0, vx: 0, vy: 0, face: 1 }
+  let on = 0
+  let charge = 0
+  let need = 0
+  let air = false
+  let fellFrom = 0
+  let fallFlash = 0
+  let best = 0
+  let camY = 0
+  let t = 0
+  const reset = () => {
+    ledges = [{ x: 0, y: 0, w: W }]
+    for (let k = 0; k < 8; k++) addLedge()
+    me = { x: W / 2, y: 0, vx: 0, vy: 0, face: 1 }
+    on = 0
+    charge = 0
+    need = 12
+    air = false
+    camY = -H * 0.7
+  }
+  reset()
+  const height = () => Math.max(0, Math.round(-me.y / 4))
+
+  return {
+    step() {
+      t++
+      if (fallFlash > 0) fallFlash--
+      while ((ledges[ledges.length - 1] as Ledge).y > me.y - H) addLedge()
+      if (!air) {
+        // crouch and charge, longer for a longer jump
+        if (++charge >= need) {
+          const next = ledges[on + 1] as Ledge
+          const tx = next.x + next.w / 2
+          const T = 16
+          let vx = (tx - me.x) / T
+          let vy = (next.y - me.y - 0.5 * 0.22 * T * T) / T
+          // a misjudged jump, now and then
+          if (rng() < 0.16) {
+            const k = rng() < 0.5 ? 0.7 : 1.3
+            vx *= k
+            vy *= k
+          }
+          me.vx = vx
+          me.vy = vy
+          me.face = vx >= 0 ? 1 : -1
+          air = true
+          charge = 0
+          fellFrom = on
+        }
+        return
+      }
+      me.vy += 0.22
+      me.x += me.vx
+      me.y += me.vy
+      if (me.x < 2 || me.x > W - 3) {
+        me.vx = -me.vx * 0.5
+        me.x = clamp(me.x, 2, W - 3)
+      }
+      // landing: falling onto the top of any ledge
+      if (me.vy > 0)
+        for (const [i, l] of ledges.entries()) {
+          if (me.y >= l.y && me.y - me.vy <= l.y + 0.01 && me.x >= l.x - 1 && me.x <= l.x + l.w) {
+            me.y = l.y
+            air = false
+            on = i
+            if (i < fellFrom) fallFlash = 30
+            me.vx = 0
+            me.vy = 0
+            const next = ledges[i + 1] as Ledge
+            need = 8 + Math.round(Math.hypot(next.x - me.x, next.y - me.y) * 0.5)
+            break
+          }
+        }
+      best = Math.max(best, height())
+      if (on > 40 && !air) reset()
+      const target = me.y - H * 0.6
+      camY += (target - camY) * (air && me.vy > 2 ? 0.3 : 0.1)
+    },
+    draw(px) {
+      // the tower: stone blocks in rows, darker at the edges
+      for (let y = 0; y < H; y++) {
+        const wy = Math.floor(y + camY)
+        const row = Math.floor(wy / 4)
+        for (let x = 0; x < W; x++) {
+          const mortar = ((wy % 4) + 4) % 4 === 0 || (x + (row % 2) * 4) % 8 === 0
+          const edge = Math.min(x, W - 1 - x) < 3
+          px[y * W + x] = mortar ? 0x1e1a28 : edge ? 0x2e2a3e : 0x3a3650
+        }
+      }
+      // ledges: mossy stone slabs
+      for (const l of ledges) {
+        const y = Math.round(l.y - camY)
+        if (y < -3 || y > H + 3) continue
+        slab(px, W, H, l.x, y, l.w, 3, 0x7a7a8a, 0x2a2a34)
+        rect(px, W, H, l.x + 1, y, l.w - 2, 1, 0x5aa04a)
+      }
+      // the climber: a small knight, crouched while charging, a charge bar over the head
+      const x = Math.round(me.x)
+      const y = Math.round(me.y - camY)
+      const crouch = !air && charge > 0 ? 1 : 0
+      const KNIGHT = crouch ? ['.hhhh.', 'hhvvhh', 'bbbbbb', 'bbbbbb', '.l..l.'] : ['..r...', '.hhhh.', 'hhvvhh', '.hvvh.', 'bbbbbb', 'bbbbbb', '.b..b.', '.l..l.']
+      litSprite(px, W, H, x - 3, y - KNIGHT.length, me.face > 0 ? KNIGHT : KNIGHT.map(r => r.split('').reverse().join('')), { h: 0xc0c4d0, v: 0x2a3040, b: 0x3a6ad0, l: 0x5a3a24, r: 0xe04a4a })
+      if (!air && charge > 0) {
+        const n = Math.round((charge / need) * 6)
+        rect(px, W, H, x - 3, y - 9, 7, 1, 0x1a1020)
+        rect(px, W, H, x - 3, y - 9, n, 1, mix(0x5ae05a, 0xf04a3a, charge / need))
+      }
+      text(px, W, H, 1, 1, String(height()), 0xf0e8ff)
+      if (fallFlash > 0 && fallFlash % 6 < 4) text(px, W, H, W - 4, 1, '!', 0xff5a4a)
+      else text(px, W, H, W - textWidth(String(best)) - 1, 1, String(best), 0x8a86a8)
+    },
+  }
+}
+
+// --- closing hexagon ----------------------------------------------------------------
+
+const hexdodge: Maker = (W, H, rng) => {
+  // walls close in on the centre; a little triangle slips through the gaps while the world spins
+  const cx = W / 2
+  const cy = H * 0.5
+  const core = Math.max(3, Math.min(W, H) * 0.12)
+  const orbit = core + 2.5
+  const SIX = Math.PI / 3
+  type Wall = { d: number; lanes: boolean[]; late: boolean; wrong: number }
+  let walls: Wall[] = []
+  let rot = 0
+  let spin = 0.03
+  let me = 0
+  let speed = 0.35
+  let time = 0
+  let best = 0
+  let dead = 0
+  let gap = 0
+  let t = 0
+  const spawn = (d: number) => {
+    const lanes = [true, true, true, true, true, true]
+    const r = rng()
+    if (r < 0.5) lanes[irand(rng, 6)] = false
+    else if (r < 0.8) {
+      const k = irand(rng, 2)
+      for (let i = 0; i < 6; i++) lanes[i] = i % 2 === k
+    } else {
+      const a = irand(rng, 6)
+      lanes[a] = false
+      lanes[(a + 1) % 6] = false
+    }
+    walls.push({ d, lanes, late: rng() < 0.08, wrong: irand(rng, 6) })
+  }
+  const reset = () => {
+    walls = []
+    for (let k = 0; k < 4; k++) spawn(28 + k * 13)
+    for (const w of walls) w.late = false
+    time = 0
+    speed = 0.35
+    dead = 0
+  }
+  reset()
+  const laneAt = (a: number) => ((Math.floor(a / SIX) % 6) + 6) % 6
+
+  return {
+    step() {
+      t++
+      if (dead) {
+        if (++dead > 30) reset()
+        return
+      }
+      time++
+      speed = Math.min(0.75, 0.35 + time * 0.0006)
+      rot += spin
+      if (t % 150 === 0) spin = -spin * (0.8 + rng() * 0.5)
+      for (const w of walls) w.d -= speed
+      walls = walls.filter(w => w.d > core - 3)
+      if ((walls[walls.length - 1]?.d ?? 0) < 40) spawn(52)
+      // the bot steers toward the open lane of the next wall; it reacts late now and then
+      const next = walls.find(w => w.d + 2 > orbit - 1)
+      if (next) {
+        const open = next.lanes.map((x, i) => (x ? -1 : i)).filter(i => i >= 0)
+        let goal = open[0] as number
+        let bestD = 99
+        for (const i of open) {
+          const c = i * SIX + SIX / 2
+          const dd = Math.abs(Math.atan2(Math.sin(c - me), Math.cos(c - me)))
+          if (dd < bestD) {
+            bestD = dd
+            goal = i
+          }
+        }
+        // a wall it misreads: it heads for the wrong lane until the last moment
+        gap = next.late && next.d - orbit > 1 ? next.wrong : goal
+        const c = gap * SIX + SIX / 2
+        const diff = Math.atan2(Math.sin(c - me), Math.cos(c - me))
+        me += clamp(diff, -0.32, 0.32)
+      }
+      // a wall at the triangle's distance, in its lane: game over
+      for (const w of walls) if (w.d <= orbit + 0.8 && w.d + 2 >= orbit - 0.8 && w.lanes[laneAt(me)]) dead = 1
+      best = Math.max(best, time)
+    },
+    draw(px) {
+      const hue = (t * 0.002) % 1
+      const bgA = hsv(hue, 0.6, 0.22)
+      const bgB = hsv(hue, 0.6, 0.3)
+      const wallC = hsv(hue, 0.55, dead ? 1 : 0.95)
+      for (let y = 0; y < H; y++)
+        for (let x = 0; x < W; x++) {
+          const dx = x + 0.5 - cx
+          const dy = y + 0.5 - cy
+          const r = Math.hypot(dx, dy)
+          const a = Math.atan2(dy, dx) - rot
+          const lane = laneAt(a)
+          // distance in a hexagon's own measure, so the walls come out as hexagons
+          const phi = ((a % SIX) + SIX) % SIX - SIX / 2
+          const h = r * Math.cos(phi)
+          let c = lane % 2 ? bgA : bgB
+          if (h < core) c = h > core - 1.2 ? wallC : mix(bgA, 0x000000, 0.4)
+          for (const w of walls) if (h >= w.d && h < w.d + 2 && w.lanes[lane]) c = wallC
+          px[y * W + x] = c
+        }
+      // the triangle, pointing outward
+      const a = me + rot
+      const tx = cx + Math.cos(a) * orbit
+      const ty = cy + Math.sin(a) * orbit
+      dot(px, W, H, tx + Math.cos(a), ty + Math.sin(a), 0xffffff)
+      dot(px, W, H, tx, ty, 0xffffff)
+      dot(px, W, H, tx - Math.sin(a), ty + Math.cos(a), 0xffffff)
+      dot(px, W, H, tx + Math.sin(a), ty - Math.cos(a), 0xffffff)
+      if (dead && dead % 6 < 3) for (let i = 0; i < W * H; i++) px[i] = mix(px[i] as number, 0xffffff, 0.35)
+      text(px, W, H, 1, 1, (time / 15).toFixed(1), 0xffffff)
+      text(px, W, H, W - textWidth(String(Math.floor(best / 15))) - 1, 1, String(Math.floor(best / 15)), mix(wallC, 0xffffff, 0.3))
+    },
+  }
+}
+
 export const ARCADE = {
   runner,
   tetris,
@@ -3670,5 +3916,7 @@ export const ARCADE = {
   sokoban,
   solitaire,
   speedrun,
+  rageclimb,
+  hexdodge,
 }
 

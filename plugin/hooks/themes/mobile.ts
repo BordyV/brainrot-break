@@ -1,6 +1,6 @@
-import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
+import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, burst, clamp, collide, ellipse, irand, line, lit, litSprite, pick, poly, ring, shiny, shuffle, slab, sparks, textWidth } from '../kit'
+import { DIRS, burst, clamp, collide, ellipse, irand, line, lit, litSprite, pick, poly, ring, shiny, shuffle, slab, sparks, textWidth, tones } from '../kit'
 import type { Ball, Spark } from '../kit'
 
 // Mobile & hyper-casual: phone games everybody has played, each with a bot.
@@ -2647,6 +2647,519 @@ const suika: Maker = (W, H, rng) => {
   }
 }
 
+// --- screw jam ----------------------------------------------------------------------
+
+const screwjam: Maker = (W, H, rng) => {
+  // plates held by coloured screws: each screw undone flies to the box of its colour, and loose plates fall
+  const COLORS = [0xe8423a, 0x3a8ae8, 0xf0c030, 0x4ac25a, 0xb05ae0]
+  type Screw = { x: number; y: number; c: number; gone: boolean }
+  type Plate = { x: number; y: number; y0: number; w: number; h: number; c: number; screws: Screw[]; vy: number; fall: boolean; layer: number }
+  type Box = { c: number; n: number; y: number }
+  type Fly = { s: Screw; x0: number; y0: number; x1: number; y1: number; k: number; to: 'box' | 'tray'; box?: Box }
+  let plates: Plate[] = []
+  let boxes: Box[] = []
+  let queue: number[] = []
+  let tray: (number | null)[] = []
+  let fly: Fly | null = null
+  let turning = 0
+  let wait = 0
+  let fx: Spark[] = []
+  const boxY = 3
+  const trayY = 12
+  const boxX = (i: number) => Math.round(W * (i ? 0.73 : 0.27))
+  const trayX = (i: number) => Math.round(W / 2 + (i - 2) * 5)
+  const reset = () => {
+    const cols = shuffle(rng, COLORS.slice()).slice(0, 4)
+    const bag = shuffle(rng, cols.flatMap(c => [c, c, c]))
+    plates = []
+    const top = 20
+    const bottom = H - 6
+    for (let i = 0; i < 6; i++) {
+      const tall = rng() < 0.4
+      const w = tall ? 7 : 13 + irand(rng, Math.max(1, W - 20))
+      const h = tall ? 14 + irand(rng, 10) : 7
+      const x = 2 + irand(rng, Math.max(1, W - w - 4))
+      const y = top + irand(rng, Math.max(1, bottom - top - h))
+      const ends: [number, number][] = tall ? [[x + 3, y + 3], [x + 3, y + h - 4]] : [[x + 3, y + 3], [x + w - 4, y + 3]]
+      plates.push({ x, y, y0: y, w, h, c: hsv(rng(), 0.25, 0.9), screws: ends.map(([sx, sy]) => ({ x: sx, y: sy, c: bag.pop() as number, gone: false })), vy: 0, fall: false, layer: i })
+    }
+    queue = shuffle(rng, cols.slice())
+    boxes = [0, 1].map(() => ({ c: queue.shift() as number, n: 0, y: boxY }))
+    tray = [null, null, null, null, null]
+    fly = null
+    wait = 20
+  }
+  reset()
+  // a screw can be undone when no plate above it covers it
+  const free = (p: Plate, s: Screw) => !plates.some(q => q.layer > p.layer && !q.fall && s.x >= q.x - 1 && s.x <= q.x + q.w && s.y >= q.y - 1 && s.y <= q.y + q.h)
+  const nextBox = (b: Box) => {
+    b.c = queue.shift() ?? -1
+    b.n = 0
+    b.y = -8
+    // screws waiting in the tray jump into the new box
+    for (let i = 0; i < tray.length; i++) if (tray[i] === b.c && b.n < 3) {
+      tray[i] = null
+      b.n++
+    }
+  }
+
+  return {
+    step() {
+      fx = sparks(fx, 0.06)
+      for (const b of boxes) b.y += (boxY - b.y) * 0.25
+      for (const p of plates) if (p.fall) {
+        p.vy += 0.15
+        p.y += p.vy
+      }
+      if (wait > 0) {
+        wait--
+        return
+      }
+      if (fly) {
+        if (turning > 0) {
+          turning--
+          return
+        }
+        fly.k += 1 / 9
+        if (fly.k >= 1) {
+          if (fly.to === 'box' && fly.box) {
+            fly.box.n++
+            if (fly.box.n >= 3) {
+              burst(fx, rng, boxX(boxes.indexOf(fly.box)), boxY + 3, fly.box.c, 10, 0.9)
+              nextBox(fly.box)
+            }
+          } else tray[tray.indexOf(null)] = fly.s.c
+          fly = null
+          for (const p of plates) if (!p.fall && p.screws.every(s => s.gone)) p.fall = true
+          wait = 4
+        }
+        return
+      }
+      if (plates.every(p => p.fall && p.y > H)) {
+        reset()
+        return
+      }
+      // the bot: a free screw that fits an open box, else one for the tray
+      const options: [Plate, Screw][] = []
+      for (const p of plates) if (!p.fall) for (const s of p.screws) if (!s.gone && free(p, s)) options.push([p, s])
+      if (!options.length) return
+      const fit = options.filter(([, s]) => boxes.some(b => b.c === s.c && b.n < 3))
+      const pick0 = fit.length ? (fit[irand(rng, fit.length)] as [Plate, Screw]) : rng() < 0.85 ? (options[irand(rng, options.length)] as [Plate, Screw]) : null
+      if (!pick0 || (!fit.length && !tray.includes(null))) {
+        // stuck: the tray is full; start over
+        if (!tray.includes(null)) {
+          burst(fx, rng, W / 2, trayY, 0xff4040, 14, 1.2)
+          reset()
+        }
+        return
+      }
+      const [, s] = pick0
+      s.gone = true
+      turning = 6
+      const box = boxes.find(b => b.c === s.c && b.n < 3)
+      if (box) fly = { s, x0: s.x, y0: s.y, x1: boxX(boxes.indexOf(box)) - 3 + box.n * 3, y1: boxY + 3, k: 0, to: 'box', box }
+      else fly = { s, x0: s.x, y0: s.y, x1: trayX(tray.indexOf(null)), y1: trayY, k: 0, to: 'tray' }
+    },
+    draw(px) {
+      sky(px, W, H, 0x2a3a5a, 0x1a2238)
+      // the board: a wooden panel with a lit edge
+      slab(px, W, H, 0, 17, W, H - 18, 0x8a6a4a, 0x3a2a1a)
+      for (let y = 18; y < H - 2; y++) if (y % 6 === 0) for (let x = 1; x < W - 1; x++) px[y * W + x] = 0x7a5a3a
+      // the plates, bottom layer first, translucent so the ones under them show
+      for (const p of plates) {
+        const [hi, base, sh] = tones(p.c)
+        for (let y = Math.round(p.y); y < Math.round(p.y + p.h); y++)
+          for (let x = p.x; x < p.x + p.w; x++) {
+            if (y < 0 || y >= H || x < 0 || x >= W) continue
+            const edge = x === p.x || y === Math.round(p.y) || x === p.x + p.w - 1 || y === Math.round(p.y + p.h) - 1
+            const c = edge ? mix(sh, 0x1a1020, 0.4) : x === p.x + 1 || y === Math.round(p.y) + 1 ? hi : base
+            px[y * W + x] = mix(px[y * W + x] as number, c, edge ? 0.95 : 0.9)
+          }
+        // the screws, or the holes they leave in the plate
+        for (const s of p.screws) {
+          const sy = s.y + Math.round(p.y - p.y0)
+          if (s.gone) {
+            dot(px, W, H, s.x, sy, 0x2a1a10)
+            continue
+          }
+          lit(px, W, H, s.x, sy, 2.2, 2.2, s.c)
+          dot(px, W, H, s.x, sy, mix(s.c, 0x101010, 0.55))
+        }
+      }
+      // the boxes at the top, each with three holes; the tray of spare slots under them
+      for (const [i, b] of boxes.entries()) {
+        if (b.c < 0) continue
+        const x = boxX(i)
+        slab(px, W, H, x - 6, b.y, 13, 7, b.c, mix(b.c, 0x101018, 0.6))
+        for (let k = 0; k < 3; k++) {
+          const hx = x - 3 + k * 3
+          if (k < b.n) lit(px, W, H, hx, b.y + 3, 1.2, 1.2, mix(b.c, 0xffffff, 0.2))
+          else dot(px, W, H, hx, b.y + 3, mix(b.c, 0x101018, 0.5))
+        }
+      }
+      for (let i = 0; i < 5; i++) {
+        rect(px, W, H, trayX(i) - 2, trayY - 2, 5, 5, 0x10182a)
+        const c = tray[i]
+        if (c !== null && c !== undefined) lit(px, W, H, trayX(i), trayY, 1.6, 1.6, c)
+      }
+      // the screw in flight: it spins out, then flies
+      if (fly) {
+        const k = turning > 0 ? 0 : fly.k
+        const e = k * k * (3 - 2 * k)
+        const x = fly.x0 + (fly.x1 - fly.x0) * e
+        const y = fly.y0 + (fly.y1 - fly.y0) * e - Math.sin(k * Math.PI) * 4 - (turning > 0 ? (6 - turning) * 0.3 : 0)
+        lit(px, W, H, x, y, 2.2, 2.2, fly.s.c)
+        const a = turning % 2
+        dot(px, W, H, x - (a ? 1 : 0), y - (a ? 0 : 1), 0x101010)
+        dot(px, W, H, x + (a ? 1 : 0), y + (a ? 0 : 1), 0x101010)
+      }
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+    },
+  }
+}
+
+// --- hexa sort ----------------------------------------------------------------------
+
+const hexasort: Maker = (W, H, rng) => {
+  // stacks of hex tiles land on a grid; tiles slide onto neighbours of the same colour, and ten of a colour clear
+  const COLORS = [0xe84a5a, 0x4a9ae8, 0xf0c03a, 0x5ac86a, 0xb06ae0]
+  const cols = 3
+  const rows = 6
+  const dx = Math.max(6, Math.round(W * 0.25))
+  const dy = Math.max(4, Math.round(H * 0.09))
+  const gx = Math.round((W - (cols - 0.5) * dx - 7) / 2)
+  const gy = Math.round(H * 0.28)
+  const HEX = ['.xxxxx.', 'xxxxxxx', 'xxxxxxx', '.xxxxx.']
+  let grid: number[][] = []
+  let offer: number[][] = []
+  let moving: { c: number; from: [number, number]; to: [number, number]; k: number } | null = null
+  let queue: [number, number][] = []
+  let pops: { x: number; y: number; c: number; n: number; k: number }[] = []
+  let score = 0
+  let wait = 0
+  let fx: Spark[] = []
+  const pos = (i: number): [number, number] => {
+    const r = Math.floor(i / cols)
+    const c = i % cols
+    return [gx + c * dx + (r % 2) * (dx / 2), gy + r * dy]
+  }
+  const nbrs = (i: number) => {
+    const r = Math.floor(i / cols)
+    const c = i % cols
+    const odd = r % 2
+    const list: [number, number][] = [[r, c - 1], [r, c + 1], [r - 1, c - 1 + odd], [r - 1, c + odd], [r + 1, c - 1 + odd], [r + 1, c + odd]]
+    return list.filter(([rr, cc]) => rr >= 0 && rr < rows && cc >= 0 && cc < cols).map(([rr, cc]) => rr * cols + cc)
+  }
+  const top = (s: number[]) => s[s.length - 1] ?? -1
+  const run = (s: number[]) => {
+    let n = 0
+    for (let k = s.length - 1; k >= 0 && s[k] === top(s); k--) n++
+    return n
+  }
+  const newStack = () => {
+    const s: number[] = []
+    const parts = 1 + irand(rng, 3)
+    for (let p = 0; p < parts; p++) {
+      const c = irand(rng, 4)
+      for (let k = 0; k < 1 + irand(rng, 3); k++) s.push(c)
+    }
+    return s
+  }
+  const reset = () => {
+    grid = Array.from({ length: cols * rows }, () => [])
+    offer = [newStack(), newStack(), newStack()]
+    queue = []
+    moving = null
+    wait = 10
+  }
+  reset()
+  // finds the next pair of neighbours with the same top colour: the smaller run moves onto the bigger stack
+  const findMove = (): [number, number] | null => {
+    for (let i = 0; i < grid.length; i++) {
+      const s = grid[i] as number[]
+      if (!s.length) continue
+      for (const j of nbrs(i)) {
+        const o = grid[j] as number[]
+        if (o.length && top(o) === top(s) && (run(s) < run(o) || (run(s) === run(o) && i < j))) return [i, j]
+      }
+    }
+    return null
+  }
+
+  return {
+    step() {
+      fx = sparks(fx, 0.05)
+      pops = pops.filter(p => ++p.k < 14)
+      if (wait > 0) {
+        wait--
+        return
+      }
+      if (moving) {
+        moving.k += 0.25
+        if (moving.k >= 1) {
+          ;(grid[moving.to[0]] as number[]).push(moving.c)
+          moving = null
+        }
+        return
+      }
+      // one tile at a time along the current move
+      const mv = queue[0]
+      if (mv) {
+        const [a, b] = mv
+        const s = grid[a] as number[]
+        const o = grid[b] as number[]
+        if (s.length && o.length && top(s) === top(o)) {
+          moving = { c: s.pop() as number, from: [a, s.length], to: [b, o.length], k: 0 }
+          return
+        }
+        queue.shift()
+        return
+      }
+      // ten or more of one colour on top: they clear
+      for (let i = 0; i < grid.length; i++) {
+        const s = grid[i] as number[]
+        const n = run(s)
+        if (n >= 10) {
+          const c = top(s)
+          s.length -= n
+          score += n
+          const [x, y] = pos(i)
+          pops.push({ x, y, c: COLORS[c] as number, n, k: 0 })
+          burst(fx, rng, x + 3, y - s.length, COLORS[c] as number, 14, 1)
+          wait = 8
+          return
+        }
+      }
+      const m = findMove()
+      if (m) {
+        queue.push(m)
+        return
+      }
+      // the bot: places an offered stack where its top colour has the most neighbours
+      const empty = grid.map((s, i) => (s.length ? -1 : i)).filter(i => i >= 0)
+      if (!empty.length) {
+        burst(fx, rng, W / 2, H / 2, 0xffffff, 20, 1.4)
+        reset()
+        return
+      }
+      const oi = irand(rng, 3)
+      const st = offer[oi] as number[]
+      let bestI = empty[irand(rng, empty.length)] as number
+      let bestN = -1
+      for (const i of empty) {
+        const n = nbrs(i).filter(j => top(grid[j] as number[]) === top(st)).length + rng() * 0.5
+        if (n > bestN) {
+          bestN = n
+          bestI = i
+        }
+      }
+      grid[bestI] = st
+      offer[oi] = newStack()
+      wait = 6
+    },
+    draw(px) {
+      sky(px, W, H, 0x2a2450, 0x4a3a7a)
+      // the empty board cells, a shade lighter than the background
+      for (let i = 0; i < grid.length; i++) {
+        const [x, y] = pos(i)
+        sprite(px, W, H, x, y, HEX, { x: 0x5a4c90 })
+        sprite(px, W, H, x, y + 1, ['', '.xxxxx.', '', ''], { x: 0x4a3e7a })
+      }
+      // a stack: one row of side per tile, the top face full
+      const stack = (x: number, y: number, s: number[], lift = 0) => {
+        for (let k = 0; k < s.length; k++) {
+          const c = COLORS[s[k] as number] as number
+          const [hi, base, sh, deep] = tones(c)
+          const yy = y - k - lift
+          sprite(px, W, H, x, yy + 1, ['', '', '', '.xxxxx.'], { x: deep })
+          sprite(px, W, H, x, yy, HEX, { x: k === s.length - 1 ? base : sh })
+          if (k === s.length - 1) {
+            sprite(px, W, H, x, yy, ['.xxx...', 'x......'], { x: hi })
+          }
+        }
+      }
+      for (let i = 0; i < grid.length; i++) {
+        const [x, y] = pos(i)
+        stack(x, y, (grid[i] as number[]).slice(0, 14))
+      }
+      if (moving) {
+        const [fx0, fy0] = pos(moving.from[0])
+        const [tx, ty] = pos(moving.to[0])
+        const k = moving.k
+        const x = fx0 + (tx - fx0) * k
+        const y = fy0 - moving.from[1] + (ty - moving.to[1] - (fy0 - moving.from[1])) * k - Math.sin(k * Math.PI) * 5
+        stack(x, y, [moving.c])
+      }
+      for (const p of pops) for (let k = 0; k < 3; k++) sprite(px, W, H, p.x, p.y - p.k * 2 - k * 3, HEX, { x: mix(p.c, 0xffffff, p.k / 14) })
+      // the three stacks on offer, on a tray at the bottom
+      rect(px, W, H, 0, H - 10, W, 9, 0x1a1636)
+      for (let k = 0; k < 3; k++) stack(Math.round(W * (0.08 + k * 0.32)), H - 6, (offer[k] as number[]).slice(0, 6))
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+      text(px, W, H, 1, 1, String(score), 0xf0e8ff)
+    },
+  }
+}
+
+// --- colour block jam ---------------------------------------------------------------
+
+const blockjam: Maker = (W, H, rng) => {
+  // coloured blocks slide across a board and out through the door of their colour
+  const COLORS = [0xe8463a, 0x3a8ae8, 0xf0c030, 0x4ac25a]
+  const gw = 5
+  const gh = 8
+  const cell = Math.max(3, Math.min(Math.floor((W - 4) / gw), Math.floor((H - 14) / gh)))
+  const bx = Math.round((W - gw * cell) / 2)
+  const by = Math.round((H - gh * cell) / 2) + 2
+  type Block = { x: number; y: number; w: number; h: number; c: number; px: number; py: number; out: number; dir: [number, number] }
+  type Door = { side: 0 | 1 | 2 | 3; a: number; n: number; c: number }
+  let blocks: Block[] = []
+  let doors: Door[] = []
+  let moving: Block | null = null
+  let tries = 0
+  let cleared = 0
+  let fx: Spark[] = []
+  let wait = 0
+  const occupied = (x: number, y: number, skip?: Block) => blocks.some(b => b !== skip && !b.out && x >= b.x && x < b.x + b.w && y >= b.y && y < b.y + b.h)
+  const reset = () => {
+    // a door of each colour on a wall: 0 left, 1 right, 2 top, 3 bottom
+    const sides = shuffle(rng, [0, 1, 2, 3]) as (0 | 1 | 2 | 3)[]
+    doors = COLORS.map((c, i) => {
+      const side = sides[i] as 0 | 1 | 2 | 3
+      const len = side < 2 ? gh : gw
+      const n = Math.min(len - 1, 3 + irand(rng, 2))
+      return { side, a: irand(rng, len - n + 1), n, c: i }
+    })
+    blocks = []
+    const shapes: [number, number][] = [[1, 1], [1, 2], [2, 1], [2, 2], [1, 3], [3, 1]]
+    for (let k = 0; k < 60 && blocks.length < 11; k++) {
+      const [w, h] = shapes[irand(rng, shapes.length)] as [number, number]
+      const x = irand(rng, gw - w + 1)
+      const y = irand(rng, gh - h + 1)
+      let free = true
+      for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) if (occupied(x + i, y + j)) free = false
+      if (free) blocks.push({ x, y, w, h, c: irand(rng, 4), px: x, py: y, out: 0, dir: [0, 0] })
+    }
+    tries = 0
+    wait = 15
+  }
+  reset()
+  // how far a block can slide one way before it hits something
+  const reach = (b: Block, dx: number, dy: number) => {
+    let n = 0
+    for (;;) {
+      const nx = b.x + dx * (n + 1)
+      const ny = b.y + dy * (n + 1)
+      if (nx < 0 || ny < 0 || nx + b.w > gw || ny + b.h > gh) return n
+      for (let i = 0; i < b.w; i++) for (let j = 0; j < b.h; j++) if (occupied(nx + i, ny + j, b)) return n
+      n++
+    }
+  }
+  // the door this block fits through from where it stands, and the way to it
+  const exitOf = (b: Block): [number, number] | null => {
+    for (const d of doors) {
+      if (d.c !== b.c) continue
+      const [dx, dy] = [[-1, 0], [1, 0], [0, -1], [0, 1]][d.side] as [number, number]
+      const along = d.side < 2 ? [b.y, b.h] : [b.x, b.w]
+      if ((along[0] as number) < d.a || (along[0] as number) + (along[1] as number) > d.a + d.n) continue
+      const dist = dx < 0 ? b.x : dx > 0 ? gw - b.x - b.w : dy < 0 ? b.y : gh - b.y - b.h
+      if (reach(b, dx, dy) >= dist) return [dx, dy]
+    }
+    return null
+  }
+
+  return {
+    step() {
+      fx = sparks(fx, 0.04)
+      for (const b of blocks) {
+        b.px += (b.x - b.px) * 0.35
+        b.py += (b.y - b.py) * 0.35
+        if (b.out) b.out++
+      }
+      blocks = blocks.filter(b => b.out < 14)
+      if (wait > 0) {
+        wait--
+        return
+      }
+      if (moving && (Math.abs(moving.px - moving.x) > 0.1 || Math.abs(moving.py - moving.y) > 0.1)) return
+      moving = null
+      if (!blocks.length) {
+        reset()
+        return
+      }
+      // a block that can leave, leaves; otherwise one slides somewhere to make room
+      const ready = blocks.filter(b => !b.out && exitOf(b))
+      if (ready.length) {
+        const b = ready[irand(rng, ready.length)] as Block
+        const [dx, dy] = exitOf(b) as [number, number]
+        b.out = 1
+        b.dir = [dx, dy]
+        b.x += dx * (gw + 2)
+        b.y += dy * (gh + 2)
+        cleared++
+        burst(fx, rng, bx + (b.px + b.w / 2) * cell, by + (b.py + b.h / 2) * cell, COLORS[b.c] as number, 8, 0.8)
+        wait = 8
+        return
+      }
+      // every slide of every block; the ones that line a block up with its door first
+      const live = blocks.filter(b => !b.out)
+      const moves: [Block, number, number, number][] = []
+      const good: [Block, number, number, number][] = []
+      for (const b of live)
+        for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]] as [number, number][])
+          for (let n = 1; n <= reach(b, dx, dy); n++) {
+            moves.push([b, dx, dy, n])
+            b.x += dx * n
+            b.y += dy * n
+            if (exitOf(b)) good.push([b, dx, dy, n])
+            b.x -= dx * n
+            b.y -= dy * n
+          }
+      if (!moves.length || ++tries > 40) {
+        reset()
+        return
+      }
+      const list = good.length ? good : moves
+      const [b, dx, dy, n] = list[irand(rng, list.length)] as [Block, number, number, number]
+      b.x += dx * n
+      b.y += dy * n
+      moving = b
+      wait = 3
+    },
+    draw(px) {
+      sky(px, W, H, 0x1e2a44, 0x10182a)
+      // the walls, with the coloured doors cut in them
+      slab(px, W, H, bx - 2, by - 2, gw * cell + 4, gh * cell + 4, 0xb8c0d0, 0x4a5468)
+      for (let y = 0; y < gh * cell; y++)
+        for (let x = 0; x < gw * cell; x++) px[(by + y) * W + bx + x] = (x % cell === 0 || y % cell === 0) ? 0x26304a : 0x2e3a58
+      for (const d of doors) {
+        const c = COLORS[d.c] as number
+        const s0 = d.a * cell
+        const s1 = (d.a + d.n) * cell
+        if (d.side === 0) rect(px, W, H, bx - 2, by + s0, 2, s1 - s0, c)
+        if (d.side === 1) rect(px, W, H, bx + gw * cell, by + s0, 2, s1 - s0, c)
+        if (d.side === 2) rect(px, W, H, bx + s0, by - 2, s1 - s0, 2, c)
+        if (d.side === 3) rect(px, W, H, bx + s0, by + gh * cell, s1 - s0, 2, c)
+      }
+      // the blocks: lit boxes; one leaving shrinks into its door
+      for (const b of blocks) {
+        const k = b.out ? 1 - b.out / 14 : 1
+        const w = b.w * cell * (b.out ? Math.max(0.2, k) : 1)
+        const h = b.h * cell * (b.out ? Math.max(0.2, k) : 1)
+        const x = bx + b.px * cell + (b.w * cell - w) / 2
+        const y = by + b.py * cell + (b.h * cell - h) / 2
+        const xa = Math.max(bx, x)
+        const ya = Math.max(by, y)
+        const xb = Math.min(bx + gw * cell, x + w)
+        const yb = Math.min(by + gh * cell, y + h)
+        if (xb - xa < 1 || yb - ya < 1) continue
+        slab(px, W, H, xa + 0.5, ya + 0.5, xb - xa - 1, yb - ya - 1, COLORS[b.c] as number, mix(COLORS[b.c] as number, 0x0a0a18, 0.55))
+      }
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+      text(px, W, H, 1, 1, String(cleared), 0xd8e0f0)
+    },
+  }
+}
+
 export const MOBILE = {
   flappy,
   game2048,
@@ -2669,5 +3182,8 @@ export const MOBILE = {
   doodle,
   slingshot,
   suika,
+  screwjam,
+  hexasort,
+  blockjam,
 }
 

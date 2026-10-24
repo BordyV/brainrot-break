@@ -16,4 +16,6 @@ export const FOOD: Locale['videos'] = {
   cottoncandy: { name: 'zucchero filato', captions: ['lo zucchero diventa una nuvola', 'ricordi del luna park', 'rosa o azzurro?', 'continua a crescere'], sounds: ['ronzio della macchina (suono originale)', 'suono originale - cotton.cloud', 'organetto del luna park'] },
   icecream: { name: 'torre di gelato', captions: ['ancora una pallina...', 'la pendenza è reale', 'quante prima che cada?', 'l’estate in una foto'], sounds: ['furgoncino dei gelati (suono originale)', 'suono originale - scoop.tower', 'pop estivo'] },
   watermelon: { name: 'elastici sull’anguria', captions: ['quanti elastici per farla scoppiare?', 'commenta la tua previsione', 'sta tremando...', 'scoppia!!!'], sounds: ['tensione (suono originale)', 'suono originale - band.pop', 'bum al rallentatore'] },
+  mochi: { name: 'battitura del mochi', captions: ['la sua mano entra tra un colpo e l’altro', 'va sempre più veloce', 'il ritmo è ipnotico', 'livello di fiducia: maestro del mochi'], sounds: ['bum. bum. bum. (suono originale)', 'suono originale - mochi.pounding', 'tamburi taiko'] },
+  tanghulu: { name: 'tanghulu', captions: ['aspetta lo scrocchio', 'lo zucchero diventa vetro', 'fragola o uva?', 'questo suono vive nella mia testa'], sounds: ['scrocchio di zucchero asmr', 'suono originale - glass.candy.fruit', 'atmosfera da mercato notturno'] },
 }

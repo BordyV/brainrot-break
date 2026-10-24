@@ -1,7 +1,7 @@
 import { dot, hsv, mix, rect, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, ellipse, irand, line, lit, slab, sparks, tint } from '../kit'
-import type { Spark } from '../kit'
+import { burst, clamp, collide, ellipse, irand, line, lit, ring, slab, sparks, tint, tones, wallCircle } from '../kit'
+import type { Ball, Spark } from '../kit'
 
 // Toys & desk toys: the things on a desk that keep moving.
 
@@ -239,8 +239,140 @@ const ringtoss: Maker = (W, H, rng) => {
   }
 }
 
+// --- battling tops ------------------------------------------------------------------
+
+const battletops: Maker = (W, H, rng) => {
+  // two tops in a bowl: they circle, clash in sparks, slow down; the last one spinning wins
+  const cx = W / 2
+  const cy = H * 0.5
+  const R = Math.min(W * 0.47, H * 0.3)
+  type Top = Ball & { spin: number; a: number; out: number; hue: number }
+  let tops: Top[] = []
+  let fx: Spark[] = []
+  let score = [0, 0]
+  let over = 0
+  let flash = 0
+  const reset = () => {
+    const r = Math.max(2.5, R * 0.3)
+    tops = [0, 1].map(i => {
+      const s = i ? 1 : -1
+      return { x: cx + s * R * 0.6, y: cy - s * R * 0.2, vx: -s * 0.2, vy: s * 0.9, r, c: 0, spin: 0.85 + rng() * 0.15, a: rng() * 6, out: 0, hue: i ? 0.58 : 0.02 }
+    })
+    over = 0
+  }
+  reset()
+
+  return {
+    step() {
+      fx = sparks(fx, 0)
+      if (flash > 0) flash--
+      for (const p of tops) {
+        p.a += p.spin * 0.9
+        if (p.out) {
+          // a top that stopped topples onto its side and slides to rest
+          p.out++
+          p.vx *= 0.9
+          p.vy *= 0.9
+          p.x += p.vx
+          p.y += p.vy
+          continue
+        }
+        // the bowl pulls toward the middle; the spin drives a slow orbit
+        const dx = p.x - cx
+        const dy = p.y - cy
+        const d = Math.hypot(dx, dy) || 1
+        p.vx += (-dx / R) * 0.05 + (-dy / d) * 0.035 * p.spin
+        p.vy += (-dy / R) * 0.05 + (dx / d) * 0.035 * p.spin
+        p.vx *= 0.985
+        p.vy *= 0.985
+        // a dying top wobbles
+        if (p.spin < 0.3) {
+          p.vx += (rng() - 0.5) * 0.12
+          p.vy += (rng() - 0.5) * 0.12
+        }
+        p.x += p.vx
+        p.y += p.vy
+        if (wallCircle(p, cx, cy, R - 1, 0.8)) p.spin -= 0.004
+        p.spin -= 0.0026
+      }
+      const [a, b] = tops as [Top, Top]
+      if (!a.out && !b.out && collide(a, b, 1.25)) {
+        const hit = Math.hypot(a.vx - b.vx, a.vy - b.vy)
+        if (hit > 0.3) {
+          // the clash: sparks at the contact, both lose spin, the slower one more
+          const mx = (a.x + b.x) / 2
+          const my = (a.y + b.y) / 2
+          burst(fx, rng, mx, my, 0xfff0a0, 6 + Math.round(hit * 4), 1 + hit * 0.6)
+          flash = 2
+          const loss = 0.02 + rng() * 0.05
+          a.spin -= loss * (a.spin < b.spin ? 1.4 : 0.8)
+          b.spin -= loss * (b.spin < a.spin ? 1.4 : 0.8)
+        }
+      }
+      for (const p of tops) if (!p.out && p.spin <= 0.06) p.out = 1
+      if (!over && tops.some(p => p.out)) {
+        over = 1
+        const loser = a.out ? 0 : 1
+        score[1 - loser] = (score[1 - loser] as number) + 1
+      }
+      if (over && ++over > 60) reset()
+    },
+    draw(px) {
+      // a dark stage, then the bowl: a dish in four tones, lit on its lower right inside
+      sky(px, W, H, 0x0e1020, 0x1a1830)
+      for (let y = 0; y < H; y++)
+        for (let x = 0; x < W; x++) {
+          const dx = x - cx
+          const dy = y - cy
+          const d = Math.hypot(dx, dy)
+          if (d > R + 1.5) continue
+          if (d > R - 0.5) {
+            px[y * W + x] = dy < 0 ? 0x8a94b0 : 0x4a5068
+            continue
+          }
+          const l = ((dx * 0.6 + dy * 0.8) / R) * (d / R)
+          px[y * W + x] = l > 0.35 ? 0x5a6890 : l > 0 ? 0x44507a : l > -0.35 ? 0x343e64 : 0x283050
+        }
+      // a ring painted on the bowl's floor
+      ring(px, W, H, cx, cy, R * 0.45, 0x4a5888)
+      for (const p of tops) {
+        const col = hsv(p.hue, 0.75, 0.95)
+        const [hi, , sh, deep] = tones(col)
+        if (p.out) {
+          // on its side: a flat ellipse, still
+          ellipse(px, W, H, p.x, p.y + 1, p.r + 1, p.r * 0.5, deep)
+          ellipse(px, W, H, p.x, p.y, p.r + 1, p.r * 0.5, col)
+          continue
+        }
+        // spinning: four coloured blades turning round a silver tip
+        const wob = p.spin < 0.3 ? Math.sin(p.a * 0.7) * (0.3 - p.spin) * 4 : 0
+        const x0 = p.x + wob
+        const n = Math.ceil(p.r)
+        for (let dy = -n; dy <= n; dy++)
+          for (let dx = -n; dx <= n; dx++) {
+            const d = Math.hypot(dx, dy)
+            if (d > p.r + 0.3) continue
+            const ang = Math.atan2(dy, dx) + p.a
+            const blade = Math.floor(((ang / (Math.PI * 2)) * 4 + 8) % 4)
+            const light = -(dx * 0.6 + dy * 0.8) / p.r
+            let c = blade % 2 ? col : 0xc8ccd8
+            c = light > 0.4 ? mix(c, hi, 0.6) : light < -0.4 ? mix(c, sh, 0.7) : c
+            if (d > p.r - 0.7) c = deep
+            if (d < 1) c = 0xf0f0f8
+            dot(px, W, H, x0 + dx, p.y + dy, c)
+          }
+      }
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.l > 6 ? 0xffffff : f.c)
+      if (flash) for (let i = 0; i < W * H; i++) px[i] = mix(px[i] as number, 0xffffff, 0.15)
+      text(px, W, H, 1, 1, String(score[0]), hsv(0.02, 0.6, 1))
+      text(px, W, H, W - 4, 1, String(score[1]), hsv(0.58, 0.6, 1))
+    },
+  }
+}
+
 export const TOYS = {
   slinky,
   drinkingbird,
   ringtoss,
+  battletops,
 }

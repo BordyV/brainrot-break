@@ -250,4 +250,30 @@ export const ANIMALS = {
       fr: ['thème de Mission Impossible', 'son original - squirrel.ninja', 'commentaire sportif'],
     },
   },
+  catlaser: {
+    name: { en: 'cat vs laser pointer', fr: 'chat contre pointeur laser' },
+    authors: ['@red.dot.hunter', '@pounce.mode', '@laser.cat.life'],
+    tags: ['#cat #laserpointer #catsoftiktok', '#zoomies #pounce', '#fyp #foryou'],
+    captions: {
+      en: ['he will never catch it. he will never stop.', 'the butt wiggle before the pounce', 'it went up the wall??', 'count the catches'],
+      fr: ['il ne l’attrapera jamais. il n’arrêtera jamais.', 'le petit trémoussement avant le bond', 'il est monté sur le mur ??', 'compte les prises'],
+    },
+    sounds: {
+      en: ['tiny paws on parquet', 'original sound - red.dot.hunter', 'mission impossible but a cat'],
+      fr: ['petites pattes sur le parquet', 'son original - red.dot.hunter', 'mission impossible version chat'],
+    },
+  },
+  salmon: {
+    name: { en: 'salmon run', fr: 'remontée des saumons' },
+    authors: ['@upstream.or.bust', '@salmon.leap', '@bear.at.the.falls'],
+    tags: ['#salmon #bear #nature', '#salmonrun #wildlife', '#fyp #foryou'],
+    captions: {
+      en: ['they jump the whole waterfall', 'the bear just stands there and waits', 'left: made it. right: lunch', 'never give up, like this salmon'],
+      fr: ['ils sautent toute la cascade', 'l’ours attend juste là-haut', 'à gauche : arrivés. à droite : repas', 'n’abandonne jamais, comme ce saumon'],
+    },
+    sounds: {
+      en: ['roaring waterfall', 'original sound - upstream.or.bust', 'nature documentary narration'],
+      fr: ['cascade qui gronde', 'son original - upstream.or.bust', 'voix de documentaire animalier'],
+    },
+  },
 } satisfies Record<string, Entry>

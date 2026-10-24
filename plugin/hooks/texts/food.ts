@@ -198,4 +198,30 @@ export const FOOD = {
       fr: ['tension (son original)', 'son original - band.pop', 'boum au ralenti'],
     },
   },
+  mochi: {
+    name: { en: 'mochi pounding', fr: 'pilage de mochi' },
+    authors: ['@mochi.pounding', '@rice.and.mallet', '@fast.hands.mochi'],
+    tags: ['#mochi #japan #streetfood', '#mochipounding #satisfying', '#fyp #foryou'],
+    captions: {
+      en: ['his hand is in there between every hit', 'it keeps getting faster', 'the rhythm is hypnotic', 'trust level: mochi maker'],
+      fr: ['sa main passe entre chaque coup', 'ça va de plus en plus vite', 'ce rythme est hypnotique', 'niveau de confiance : fabricant de mochi'],
+    },
+    sounds: {
+      en: ['thud. thud. thud. (original sound)', 'original sound - mochi.pounding', 'taiko drums'],
+      fr: ['boum. boum. boum. (son original)', 'son original - mochi.pounding', 'tambours taiko'],
+    },
+  },
+  tanghulu: {
+    name: { en: 'tanghulu', fr: 'tanghulu' },
+    authors: ['@glass.candy.fruit', '@sugar.shell', '@tanghulu.crunch'],
+    tags: ['#tanghulu #asmr #streetfood', '#candiedfruit #crunch', '#fyp #foryou'],
+    captions: {
+      en: ['wait for the crunch', 'the sugar turns to glass', 'strawberry or grape?', 'this sound lives in my head'],
+      fr: ['attends le croquant', 'le sucre devient du verre', 'fraise ou raisin ?', 'ce bruit vit dans ma tête'],
+    },
+    sounds: {
+      en: ['glass sugar crunch asmr', 'original sound - glass.candy.fruit', 'night market ambience'],
+      fr: ['croquant de sucre asmr', 'son original - glass.candy.fruit', 'ambiance de marché de nuit'],
+    },
+  },
 } satisfies Record<string, Entry>

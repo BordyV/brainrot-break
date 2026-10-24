@@ -18,4 +18,5 @@ export const MACHINES: Locale['videos'] = {
   robotarm: { name: 'braço robótico', captions: ['pega, gira, empilha', 'nunca cansa, nunca atrasa', 'a pilha é perfeita', 'automação faz brrr'], sounds: ['zumbido dos servos (som original)', 'som original - robot.arm', 'beat robótico'] },
   pinart: { name: 'pin art', captions: ['mão, coração, rosto', 'o brinquedo de mesa que todo mundo teve', 'empurra, puxa de volta', 'estranhamente satisfatório'], sounds: ['pinos deslizando (ASMR)', 'som original - pin.press', 'lofi calmo'] },
   warehouse: { name: 'robôs de armazém', captions: ['as prateleiras vêm até você', 'seu pedido, separado por robôs', 'eles nunca batem (quase)', 'logística é hipnotizante'], sounds: ['bipes de robô (som original)', 'som original - warehouse.bots', 'techno minimal'] },
+  metalcast: { name: 'fundição de metal', captions: ['do branco incandescente à prata em segundos', 'espera o de ouro', 'a pilha de lingotes cresce', 'o despejo é a melhor parte'], sounds: ['chiado do metal derretido', 'som original - molten.pour', 'tema épico de forja'] },
 }

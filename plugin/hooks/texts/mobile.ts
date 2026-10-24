@@ -276,4 +276,43 @@ export const MOBILE = {
       fr: ['pop fusion (son original)', 'son original - suika.merge', 'musique de jeu mignonne'],
     },
   },
+  screwjam: {
+    name: { en: 'screw jam', fr: 'casse-tête des vis' },
+    authors: ['@unscrew.it.all', '@screw.sort.master', '@plates.falling'],
+    tags: ['#screwpuzzle #mobilegame #satisfying', '#puzzle #sort', '#fyp #foryou'],
+    captions: {
+      en: ['the ad game, but it actually plays', 'one screw left on that plate…', 'mind the tray, it fills up fast', 'level 1 vs level 99'],
+      fr: ['le jeu des pubs, mais qui joue vraiment', 'plus qu’une vis sur cette plaque…', 'attention au plateau, il se remplit vite', 'niveau 1 vs niveau 99'],
+    },
+    sounds: {
+      en: ['screwdriver clicks', 'original sound - unscrew.it.all', 'puzzle game music'],
+      fr: ['clics de tournevis', 'son original - unscrew.it.all', 'musique de jeu de réflexion'],
+    },
+  },
+  hexasort: {
+    name: { en: 'hexa sort', fr: 'tri d’hexagones' },
+    authors: ['@hexa.stack', '@ten.of.a.colour', '@sort.the.hexes'],
+    tags: ['#hexasort #mobilegame #satisfying', '#stack #merge', '#fyp #foryou'],
+    captions: {
+      en: ['ten of a colour and they vanish', 'the chain reaction at the end', 'where would you place it?', 'satisfying sort, part 6'],
+      fr: ['dix de la même couleur et ils disparaissent', 'la réaction en chaîne à la fin', 'tu le poserais où ?', 'tri satisfaisant, partie 6'],
+    },
+    sounds: {
+      en: ['tiles clacking', 'original sound - hexa.stack', 'chill puzzle beat'],
+      fr: ['tuiles qui claquent', 'son original - hexa.stack', 'beat chill de puzzle'],
+    },
+  },
+  blockjam: {
+    name: { en: 'colour block jam', fr: 'blocs de couleur' },
+    authors: ['@block.jam.out', '@door.of.its.colour', '@slide.to.exit'],
+    tags: ['#blockjam #puzzle #mobilegame', '#colorblocks #satisfying', '#fyp #foryou'],
+    captions: {
+      en: ['every block to its own door', 'how many moves would you need?', 'the board empties so smoothly', 'this level took me a week'],
+      fr: ['chaque bloc vers sa porte', 'tu ferais ça en combien de coups ?', 'le plateau se vide si bien', 'ce niveau m’a pris une semaine'],
+    },
+    sounds: {
+      en: ['blocks sliding', 'original sound - block.jam.out', 'cozy game music'],
+      fr: ['blocs qui glissent', 'son original - block.jam.out', 'musique de jeu cosy'],
+    },
+  },
 } satisfies Record<string, Entry>

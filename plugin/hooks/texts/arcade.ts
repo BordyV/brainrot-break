@@ -354,4 +354,30 @@ export const ARCADE = {
       fr: ['zaps de bug', 'son original - frame.perfect', 'jingle de victoire 8 bits'],
     },
   },
+  rageclimb: {
+    name: { en: 'rage climb', fr: 'rage climb' },
+    authors: ['@jump.king.pain', '@one.more.climb', '@fell.to.the.start'],
+    tags: ['#ragegame #gaming #climb', '#jumpking #fall', '#fyp #foryou'],
+    captions: {
+      en: ['one bad jump and it’s all gone', 'the charge bar decides everything', 'he will reach the top. eventually.', 'the fall hurts to watch'],
+      fr: ['un mauvais saut et tout est perdu', 'la jauge décide de tout', 'il atteindra le sommet. un jour.', 'la chute fait mal à regarder'],
+    },
+    sounds: {
+      en: ['armor clank on landing', 'original sound - jump.king.pain', 'sad violin'],
+      fr: ['bruit d’armure à l’atterrissage', 'son original - jump.king.pain', 'violon triste'],
+    },
+  },
+  hexdodge: {
+    name: { en: 'closing hexagon', fr: 'hexagone qui se referme' },
+    authors: ['@closing.walls', '@hexagon.dodge', '@spin.and.survive'],
+    tags: ['#hexagon #reflexes #gaming', '#rhythmgame #hard', '#fyp #foryou'],
+    captions: {
+      en: ['how long would you last?', 'the world keeps spinning', 'one wrong lane and it’s over', 'my record is in the corner'],
+      fr: ['tu tiendrais combien de temps ?', 'le monde n’arrête pas de tourner', 'une mauvaise voie et c’est fini', 'mon record est dans le coin'],
+    },
+    sounds: {
+      en: ['chiptune at 180 bpm', 'original sound - closing.walls', 'begin. (voice)'],
+      fr: ['chiptune à 180 bpm', 'son original - closing.walls', 'begin. (voix)'],
+    },
+  },
 } satisfies Record<string, Entry>

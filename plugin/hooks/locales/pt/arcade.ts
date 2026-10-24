@@ -28,4 +28,6 @@ export const ARCADE: Locale['videos'] = {
   sokoban: { name: 'sokoban', captions: ['resolvido com o mínimo de movimentos', 'cada caixa no seu lugar', 'pensa antes de empurrar', 'fase completa, próxima'], sounds: ['caixa arrastando (som original)', 'som original - box.pusher', 'lofi de puzzle'] },
   solitaire: { name: 'vitória no paciência', captions: ['a melhor animação dos anos 90', 'ninguém esquece essa tela', 'cada carta quica', 'memórias da sala de informática'], sounds: ['cartas voando (som original)', 'som original - solitaire.win', 'nostalgia do Windows 95'] },
   speedrun: { name: 'speedrun', captions: ['parede é só uma sugestão', 'o fantasma cinza foi pelo caminho normal', 'novo recorde pessoal', 'clip no frame exato, toda vez'], sounds: ['zaps de glitch', 'som original - frame.perfect', 'jingle de vitória 8 bits'] },
+  rageclimb: { name: 'rage climb', captions: ['um pulo errado e tudo se perde', 'a barra de carga decide tudo', 'ele vai chegar ao topo. um dia.', 'a queda dói de ver'], sounds: ['barulho de armadura ao aterrissar', 'som original - jump.king.pain', 'violino triste'] },
+  hexdodge: { name: 'hexágono que fecha', captions: ['quanto tempo você aguentaria?', 'o mundo não para de girar', 'uma pista errada e acabou', 'meu recorde está no canto'], sounds: ['chiptune a 180 bpm', 'som original - closing.walls', 'begin. (voz)'] },
 }

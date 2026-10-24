@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, clamp, ellipse, irand, line, lit, litSprite, pick, ring, slab, sparks } from '../kit'
+import { burst, clamp, ellipse, irand, line, lit, litSprite, pick, ring, slab, sparks, textWidth, tint } from '../kit'
 import type { Spark } from '../kit'
 
 // Animals & pets: one animal, one funny thing, a loop.
@@ -1290,6 +1290,273 @@ const chat: Maker = (W, H, rng) => {
   }
 }
 
+// --- cat vs laser pointer -----------------------------------------------------------
+
+const catlaser: Maker = (W, H, rng) => {
+  // a red dot darts about the room; the cat stalks it, wiggles, pounces, and mostly misses
+  const floor = Math.round(H * 0.72)
+  const CAT = [
+    '..........o..o',
+    '..........oooo',
+    'o.........ooeon',
+    '.o.oodoodoooo..',
+    '..ooooooooowo..',
+    '..oodoodooowo..',
+    '..oooooooooo...',
+    '..o.o....o.o...',
+    '..o.o....o.o...',
+  ]
+  const CROUCH = [
+    '...............',
+    '...............',
+    '..........o..o.',
+    'o.........oooo.',
+    '.o........ooeon',
+    '..oodoodoooooo.',
+    '..ooooooooowo..',
+    '..oodoodooowo..',
+    '..oo.oo..oo.oo.',
+  ]
+  const fur = { o: 0xe8903a, d: 0xa8521a, e: 0x2a5a1a, n: 0xf08a9a, w: 0xfff0dc }
+  const flip = (rows: string[]) => rows.map(r => r.padEnd(15, '.').split('').reverse().join(''))
+  let dot0 = { x: W * 0.7, y: floor + 8 }
+  let target = { x: W * 0.3, y: floor + 8 }
+  let hold = 0
+  let cx = W * 0.3
+  let cy = 0
+  let vy = 0
+  let vx = 0
+  let face = 1
+  let state: 'stalk' | 'wiggle' | 'pounce' | 'land' = 'stalk'
+  let timer = 0
+  let catches = 0
+  let caught = 0
+  let t = 0
+  let fx: Spark[] = []
+  const newTarget = () => {
+    const wall = rng() < 0.25
+    target = wall ? { x: 3 + rng() * (W - 6), y: H * 0.22 + rng() * (floor - H * 0.3) } : { x: 3 + rng() * (W - 6), y: floor + 7 + rng() * (H - floor - 11) }
+    hold = 8 + irand(rng, 25)
+  }
+
+  return {
+    step() {
+      t++
+      fx = sparks(fx, 0.05)
+      // the dot: dashes to a spot, waits, dashes again; it flees a pounce
+      if (caught > 0) caught--
+      else if (hold > 0) hold--
+      else {
+        const dx = target.x - dot0.x
+        const dy = target.y - dot0.y
+        const d = Math.hypot(dx, dy)
+        if (d < 1.6) newTarget()
+        else {
+          dot0.x += (dx / d) * 1.6
+          dot0.y += (dy / d) * 1.6
+        }
+      }
+      const onFloor = dot0.y > floor
+      const dx = dot0.x - cx
+      if (state === 'stalk') {
+        face = dx > 0 ? 1 : -1
+        if (Math.abs(dx) > 9) cx += Math.sign(dx) * 0.7
+        else if (Math.abs(dx) < 5) cx -= Math.sign(dx) * 0.3
+        else if (hold > 0 && caught === 0) {
+          state = 'wiggle'
+          timer = 10 + irand(rng, 10)
+        }
+        // up the wall: a leap at it now and then
+        if (!onFloor && Math.abs(dx) < 4 && hold > 4 && rng() < 0.03) {
+          state = 'pounce'
+          vy = -2.6
+          vx = 0
+        }
+      } else if (state === 'wiggle') {
+        if (--timer <= 0) {
+          state = 'pounce'
+          vy = -1.6
+          vx = (dx - face * 4) / 20
+          // most of the time the dot slips away just before the paws land
+          if (rng() < 0.7) {
+            target = { x: clamp(dot0.x + (rng() < 0.5 ? -1 : 1) * (10 + rng() * 8), 3, W - 3), y: floor + 7 + rng() * (H - floor - 11) }
+            hold = 3
+          } else hold = Math.max(hold, 26)
+        }
+      } else if (state === 'pounce') {
+        cx = clamp(cx + vx, 4, W - 4)
+        cy += vy
+        vy += 0.16
+        if (cy >= 0) {
+          cy = 0
+          state = 'land'
+          timer = 12
+          if (Math.abs(dot0.x - cx - face * 4) < 3.5 && onFloor) {
+            catches++
+            caught = 20
+            burst(fx, rng, cx + face * 4, floor + 8, 0xffe080, 8, 0.7)
+          }
+        }
+      } else if (--timer <= 0) {
+        state = 'stalk'
+        if (caught) newTarget()
+      }
+    },
+    draw(px) {
+      // a living room: warm wall, a framed picture, a skirting board, a wooden floor
+      sky(px, W, H, 0x4a3a5a, 0x6a5068, floor)
+      rect(px, W, H, W * 0.55, H * 0.12, W * 0.32, H * 0.14, 0x3a2a3a)
+      rect(px, W, H, W * 0.55 + 1, H * 0.12 + 1, W * 0.32 - 2, H * 0.14 - 2, 0x5a8aa0)
+      rect(px, W, H, W * 0.55 + 1, H * 0.2, W * 0.32 - 2, H * 0.06 - 1, 0x4a7a4a)
+      rect(px, W, H, 0, floor - 2, W, 2, 0xd8c8b8)
+      for (let y = floor; y < H; y++) {
+        const plank = Math.floor((y - floor) / 3)
+        for (let x = 0; x < W; x++) {
+          const seam = (x + plank * 11) % 16 === 0 || (y - floor) % 3 === 2
+          px[y * W + x] = seam ? 0x5a3420 : mix(0x9a6038, 0x6a4026, (y - floor) / (H - floor))
+        }
+      }
+      // the cat's shadow, then the cat
+      ellipse(px, W, H, cx, floor + 10, 6 + cy * 0.2, 1, 0x4a2c18)
+      const rows = state === 'wiggle' || state === 'land' ? CROUCH : CAT
+      const wig = state === 'wiggle' ? (t % 4 < 2 ? 1 : 0) : 0
+      litSprite(px, W, H, Math.round(cx - 7 + wig), Math.round(floor + 1 + cy), face > 0 ? rows : flip(rows), fur)
+      // the dot: a hot red centre and a soft glow
+      if (caught === 0 || caught % 4 < 2) {
+        for (let k = 0; k < 9; k++) {
+          const [ox, oy] = [(k % 3) - 1, Math.floor(k / 3) - 1]
+          if (ox && oy) continue
+          tint(px, W, H, dot0.x + ox, dot0.y + oy, 0xff3030, 0.45)
+        }
+        dot(px, W, H, dot0.x, dot0.y, 0xffd0c0)
+      }
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+      text(px, W, H, 1, 1, String(catches), 0xf0e0d0)
+    },
+  }
+}
+
+// --- salmon run ---------------------------------------------------------------------
+
+const salmon: Maker = (W, H, rng) => {
+  // salmon leap up a waterfall; some make it, some fall back, and the bear at the top catches one now and then
+  const lip = Math.round(H * 0.38)
+  const pool = Math.round(H * 0.74)
+  const fallX0 = 2
+  const fallX1 = W - 2
+  const bearX = Math.round(W * 0.66)
+  type Fish = { x: number; y: number; vx: number; vy: number; up: number }
+  let fish: Fish[] = []
+  let fx: Spark[] = []
+  let made = 0
+  let caught = 0
+  let chomp = 0
+  let held = 0
+  let t = 0
+  const BEAR = [
+    '..bb....bb..',
+    '..bbbbbbbb..',
+    '.bbbbbbbbbb.',
+    '.bbebbbbebb.',
+    '.bbbbbbbbbb.',
+    '.bbbbmmbbbb.',
+    '..bbbnnbbb..',
+    '.bbbbbbbbbb.',
+    'bbbbbbbbbbbb',
+    'bbbbbbbbbbbb',
+  ]
+
+  return {
+    step() {
+      t++
+      fx = sparks(fx, 0.08)
+      if (chomp > 0) chomp--
+      if (held > 0) held--
+      if (rng() < 0.06 && fish.length < 5) {
+        const x = fallX0 + 4 + rng() * (fallX1 - fallX0 - 8)
+        fish.push({ x, y: pool + 2, vx: (rng() - 0.5) * 0.3, vy: -Math.sqrt(0.24 * (pool + 2 - lip) * (0.8 + rng() * 0.4)), up: 0 })
+        for (let k = 0; k < 4; k++) fx.push({ x, y: pool, vx: (rng() - 0.5) * 0.8, vy: -0.6 - rng() * 0.6, l: 8, c: 0xffffff })
+      }
+      for (const f of fish) {
+        if (f.up) {
+          // over the lip: it swims away upstream
+          f.x -= 0.6
+          f.up++
+          continue
+        }
+        f.x += f.vx
+        f.y += f.vy
+        f.vy += 0.12
+        // the bear's jaws, at the top of the fall
+        if (!held && chomp === 0 && Math.abs(f.x - (bearX + 1)) < 4 && Math.abs(f.y - (lip - 4)) < 3 && rng() < 0.6) {
+          chomp = 10
+          held = 40
+          caught++
+          f.up = 999
+          continue
+        }
+        if (f.vy > -0.3 && f.y < lip - 1) {
+          f.up = 1
+          f.y = lip - 2
+          made++
+        }
+        if (f.y > pool + 3) {
+          f.up = 999
+          for (let k = 0; k < 5; k++) fx.push({ x: f.x, y: pool, vx: (rng() - 0.5) * 1, vy: -0.5 - rng() * 0.8, l: 9, c: 0xd8f0ff })
+        }
+      }
+      fish = fish.filter(f => f.up < 40)
+    },
+    draw(px) {
+      // dusk sky, a dark pine ridge, the river up top, the falls, the pool, the rocks
+      sky(px, W, H, 0x5a7aa8, 0xa8c0d0, lip - 4)
+      for (let x = 0; x < W; x++) {
+        const ridge = Math.round(lip - 10 + Math.abs(((x * 7) % 10) - 5) * 0.8 + Math.sin(x * 0.5) * 1.5)
+        for (let y = Math.max(0, ridge); y < lip; y++) px[y * W + x] = 0x24402e
+      }
+      for (let y = lip - 3; y < lip; y++) for (let x = 0; x < W; x++) px[y * W + x] = y === lip - 3 ? 0x8ac8e8 : 0x4a90c0
+      for (let y = lip; y < pool; y++)
+        for (let x = 0; x < W; x++) {
+          if (x < fallX0 || x >= fallX1) {
+            px[y * W + x] = 0x3a3430
+            continue
+          }
+          // streaks running down the falls
+          const band = Math.floor((y - t * 1.6 + (x % 3) * 4 + (x % 5) * 3) / 5) % 3
+          px[y * W + x] = band === 0 ? 0xf0f8ff : band === 1 ? 0xb8dcf0 : 0x8ac0e0
+        }
+      for (let y = pool; y < H; y++)
+        for (let x = 0; x < W; x++) px[y * W + x] = y < pool + 2 ? (Math.floor((x + t * 0.5) / 3) % 2 ? 0xffffff : 0xd8eef8) : mix(0x2a6a9a, 0x123a5a, (y - pool) / (H - pool))
+      // the bear, standing in the river at the lip
+      litSprite(px, W, H, bearX - 5, lip - 13, BEAR, { b: 0x6a4026, e: 0x1a1008, m: 0x2a1a10, n: chomp > 0 ? 0xc04a4a : 0x4a2a18 })
+      rect(px, W, H, bearX - 5, lip - 3, 12, 3, 0x4a90c0)
+      if (held) {
+        // a salmon in its jaws, flapping
+        rect(px, W, H, bearX - 2, lip - 7 + (t % 4 < 2 ? 0 : 1), 7, 2, 0xe86a5a)
+        dot(px, W, H, bearX + 4, lip - 8, 0xe86a5a)
+      }
+      // the salmon: a silver-pink body pointing the way it moves, a darker back, a tail
+      for (const f of fish) {
+        if (f.up >= 999) continue
+        const sp = Math.hypot(f.vx || -0.6, f.up ? 0 : f.vy) || 1
+        const ux = (f.up ? -0.6 : f.vx) / sp
+        const uy = (f.up ? 0 : f.vy) / sp
+        for (let k = -3; k <= 3; k++) {
+          const x = f.x + ux * k
+          const y = f.y + uy * k
+          dot(px, W, H, x, y, k > 1 ? 0xf0a090 : 0xe86a5a)
+          dot(px, W, H, x - uy, y + ux, k === 3 ? 0xffffff : 0xa83a3a)
+        }
+        dot(px, W, H, f.x - ux * 4 - uy, f.y - uy * 4 + ux, 0xa83a3a)
+        dot(px, W, H, f.x - ux * 4 + uy, f.y - uy * 4 - ux, 0xa83a3a)
+      }
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+      text(px, W, H, 1, 1, String(made), 0xffffff)
+      text(px, W, H, W - textWidth(String(caught)) - 1, 1, String(caught), 0xf0c080)
+    },
+  }
+}
+
 export const ANIMALS = {
   chat,
   catglass,
@@ -1310,4 +1577,6 @@ export const ANIMALS = {
   octopus,
   bees,
   squirrel,
+  catlaser,
+  salmon,
 }

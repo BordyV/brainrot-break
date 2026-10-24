@@ -224,4 +224,17 @@ export const MACHINES = {
       fr: ['bips de robots (son original)', 'son original - warehouse.bots', 'techno minimale'],
     },
   },
+  metalcast: {
+    name: { en: 'metal casting', fr: 'coulée de métal' },
+    authors: ['@molten.pour', '@ingot.stack', '@backyard.foundry'],
+    tags: ['#metalcasting #satisfying #howitsmade', '#molten #foundry', '#fyp #foryou'],
+    captions: {
+      en: ['white-hot to silver in seconds', 'wait for the gold one', 'the ingot stack grows', 'the pour is the best part'],
+      fr: ['du blanc incandescent à l’argent en quelques secondes', 'attends celui en or', 'la pile de lingots grandit', 'la coulée, c’est le meilleur moment'],
+    },
+    sounds: {
+      en: ['molten metal hiss', 'original sound - molten.pour', 'epic forge theme'],
+      fr: ['sifflement du métal en fusion', 'son original - molten.pour', 'thème épique de forge'],
+    },
+  },
 } satisfies Record<string, Entry>

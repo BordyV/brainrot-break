@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, clamp, ellipse, hash, irand, line, lit, pick, ring, rot, shade, slab, sparks, tones } from '../kit'
+import { beam, burst, clamp, ellipse, hash, irand, line, lit, pick, ring, rot, shade, slab, sparks, tones } from '../kit'
 import type { Spark } from '../kit'
 
 // Food & cooking: a satisfying transformation or a growing pile.
@@ -1219,6 +1219,220 @@ const watermelon: Maker = (W, H, rng) => {
   }
 }
 
+// --- mochi pounding -----------------------------------------------------------------
+
+const mochi: Maker = (W, H, rng) => {
+  // a mallet pounds the rice dough in a wooden mortar; a hand turns it between blows, faster and faster
+  const mx = W / 2
+  const rim = Math.round(H * 0.62)
+  const tubW = Math.round(W * 0.78)
+  const doughY = rim - 1
+  const headW = Math.max(7, Math.round(W * 0.5))
+  const headH = Math.max(5, Math.round(H * 0.13))
+  const top = Math.round(H * 0.08)
+  let p = 0
+  let period = 26
+  let hits = 0
+  let squash = 0
+  let turn = 0
+  let t = 0
+  let fx: Spark[] = []
+  const wood = 0x9a5a2e
+
+  // the mallet's height: up, held, then a slam that speeds up as it falls
+  const fall = () => (p < 0.18 ? 1 - p / 0.18 : p < 0.62 ? 0 : ((p - 0.62) / 0.38) ** 2)
+  // the hand: in to fold the dough while the mallet is up, out before it falls
+  const reach = () => (p > 0.2 && p < 0.58 ? Math.sin(((p - 0.2) / 0.38) * Math.PI) : 0)
+
+  return {
+    step() {
+      t++
+      fx = sparks(fx, 0.03)
+      p += 1 / period
+      if (p >= 1) {
+        p -= 1
+        hits++
+        squash = 1
+        // a puff of rice flour where it lands
+        for (let k = 0; k < 6; k++) fx.push({ x: mx + (rng() - 0.5) * headW, y: doughY - 3, vx: (rng() - 0.5) * 0.8, vy: -0.3 - rng() * 0.4, l: 12 + irand(rng, 8), c: 0xf8f4ec })
+        // the rhythm tightens, then eases back
+        period = hits % 24 < 18 ? Math.max(9, period - 1) : Math.min(26, period + 3)
+      }
+      squash *= 0.8
+      if (reach() > 0.9) turn = (turn + 0.15) % 1
+    },
+    draw(px) {
+      // a warm shop: paper screens with their wooden grid, a dark floor
+      sky(px, W, H, 0x6a4a32, 0x4a3020)
+      for (let y = 0; y < rim; y++) for (let x = 0; x < W; x++) if (x % 8 === 3 || y % 10 === 6) px[y * W + x] = 0x3a2416
+      // a paper lantern's glow, top left
+      lit(px, W, H, W * 0.2, H * 0.2, 3, 4, 0xf05a3a)
+      rect(px, W, H, W * 0.2 - 1, H * 0.2 - 5, 3, 1, 0x2a1a10)
+      for (let y = Math.round(H * 0.7); y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = mix(0x5a3a24, 0x2e1c12, (y - H * 0.7) / (H * 0.3))
+      // the dough, squashed flat by a blow, a fold line that moves as the hand turns it
+      const s = squash
+      lit(px, W, H, mx, doughY - 3 + s * 1.5, tubW * 0.34 + s * 3, 4 - s * 1.8, 0xf6f0e4, 0xc8bca8)
+      const fold = Math.round(mx - tubW * 0.25 + turn * tubW * 0.5)
+      for (let k = -1; k <= 1; k++) dot(px, W, H, fold + k, doughY - 4 + s + Math.abs(k), 0xd8ccb8)
+      // the mortar: a wooden tub, rings of darker grain, lit from the left
+      const [hi, base, sh, deep] = tones(wood)
+      const x0 = Math.round(mx - tubW / 2)
+      for (let y = rim; y < H - 3; y++) {
+        const k = (y - rim) / (H - 3 - rim)
+        const inset = Math.round(k * k * 3)
+        for (let x = x0 + inset; x < x0 + tubW - inset; x++) {
+          const u = (x - x0) / tubW
+          let c = u < 0.15 ? hi : u < 0.6 ? base : u < 0.85 ? sh : deep
+          if (y === rim) c = 0xc88a52
+          if ((y - rim) % 5 === 3) c = mix(c, 0x3a1c0c, 0.35)
+          if (x === x0 + inset || x === x0 + tubW - inset - 1) c = 0x3a1a0a
+          px[y * W + x] = c
+        }
+      }
+      // the hand, wet, folding from the left
+      const r = reach()
+      if (r > 0) {
+        const hx = -3 + r * (mx - 2)
+        const hy = doughY - 5
+        line(px, W, H, -2, hy - 3, hx - 2, hy, 0xe0a882)
+        line(px, W, H, -2, hy - 2, hx - 2, hy + 1, 0xc08868)
+        lit(px, W, H, hx, hy, 2.5, 1.8, 0xf0b890, 0x8a5a3a)
+      }
+      // the mallet: a long handle up to the top right, a heavy head
+      const hy = Math.round(top + fall() * (doughY - 4 - headH - top))
+      const hx = Math.round(mx - headW / 2)
+      beam(px, W, H, mx + 1, hy + 1, W + 4, hy - H * 0.35, 0x9a6a3a)
+      // a barrel-shaped head, darker end grain, two iron bands
+      lit(px, W, H, mx, hy + headH / 2, headW / 2, headH / 2, 0xc08a52, 0x4a2410)
+      for (const k of [0.28, 0.72]) {
+        const bx = Math.round(hx + headW * k)
+        for (let y = hy + 1; y < hy + headH - 1; y++) dot(px, W, H, bx, y, y < hy + 2 ? 0x8a8a90 : 0x4a4a52)
+      }
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+      text(px, W, H, 1, 1, String(hits), 0xf0e0c0)
+    },
+  }
+}
+
+// --- tanghulu -----------------------------------------------------------------------
+
+const tanghulu: Maker = (W, H, rng) => {
+  // fruit on a skewer dips into hot sugar, turns, comes out glassy; the shell sets, then a bite cracks it
+  const potTop = Math.round(H * 0.72)
+  const cx = W / 2
+  const FRUITS = [
+    { c: 0xe0283a, r: 3.6, seeds: true },
+    { c: 0x7a2a8a, r: 2.8, seeds: false },
+    { c: 0xf08a20, r: 3.2, seeds: false },
+    { c: 0x5ab03a, r: 2.8, seeds: false },
+  ]
+  type Fruit = { c: number; r: number; seeds: boolean }
+  let fruits: Fruit[] = []
+  let y = 0
+  let coat = 0
+  let phase: 'down' | 'dip' | 'up' | 'set' | 'bite' = 'down'
+  let t = 0
+  let spin = 0
+  let bite = 0
+  let fx: Spark[] = []
+  let drips: Spark[] = []
+  const reset = () => {
+    const kind = irand(rng, FRUITS.length)
+    fruits = Array.from({ length: 4 }, (_, i) => FRUITS[i === 3 && rng() < 0.5 ? irand(rng, FRUITS.length) : kind] as Fruit)
+    y = -40
+    coat = 0
+    bite = 0
+    phase = 'down'
+    t = 0
+  }
+  reset()
+  const span = () => fruits.reduce((s, f) => s + f.r * 2 + 1, 0)
+
+  return {
+    step() {
+      t++
+      fx = sparks(fx, 0.12)
+      drips = sparks(drips, 0.12).filter(d => d.y < potTop)
+      const bottomAt = potTop + 4
+      if (phase === 'down') {
+        y += 1.4
+        if (y + span() >= bottomAt) {
+          phase = 'dip'
+          t = 0
+        }
+      } else if (phase === 'dip') {
+        spin += 0.25
+        if (t > 30) {
+          phase = 'up'
+          coat = 1
+        }
+      } else if (phase === 'up') {
+        y -= 1
+        if (rng() < 0.4) drips.push({ x: cx + (rng() - 0.5) * 4, y: y + span(), vx: 0, vy: 0.4, l: 30, c: 0xf0a020 })
+        if (y <= H * 0.12) {
+          phase = 'set'
+          t = 0
+        }
+      } else if (phase === 'set') {
+        if (t > 30) {
+          phase = 'bite'
+          t = 0
+        }
+      } else if (phase === 'bite') {
+        if (t === 8) {
+          bite = 1
+          for (let k = 0; k < 10; k++) fx.push({ x: cx + 2 + rng() * 3, y: y + 1 + rng() * 4, vx: 0.4 + rng() * 1.2, vy: -1 - rng(), l: 14 + irand(rng, 10), c: rng() < 0.6 ? 0xfff0c0 : 0xf0b040 })
+        }
+        if (t > 50) reset()
+      }
+    },
+    draw(px) {
+      // a night market: dark, warm lights, the stall's red cloth
+      sky(px, W, H, 0x1a1428, 0x3a1a24, potTop)
+      for (let k = 0; k < 5; k++) lit(px, W, H, 3 + k * 7, 4, 1.6, 1.6, k % 2 ? 0xffd070 : 0xff8a5a)
+      for (let yy = potTop; yy < H; yy++) for (let x = 0; x < W; x++) px[yy * W + x] = mix(0xa82a2a, 0x5a1414, (yy - potTop) / (H - potTop))
+      // the skewer and its fruit, glassy once coated
+      const len = span()
+      line(px, W, H, cx, y - 8, cx, y + len, 0xd8b078)
+      line(px, W, H, cx + 1, y - 8, cx + 1, y + len, 0xa88050)
+      let fy = y
+      for (const [i, f] of fruits.entries()) {
+        const fcy = fy + f.r
+        if (coat) ellipse(px, W, H, cx, fcy, f.r + 0.7, f.r + 0.7, mix(0xfff0d0, f.c, 0.45))
+        lit(px, W, H, cx, fcy, f.r, f.r, coat ? mix(f.c, 0xffd890, 0.15) : f.c, mix(f.c, 0x200810, coat ? 0.35 : 0.6))
+        if (f.seeds) for (let k = 0; k < 4; k++) dot(px, W, H, cx - 1 + (k % 2) * 2, fcy - 1 + Math.floor(k / 2) * 2, 0xf8e080)
+        if (i === 0 && f.seeds) {
+          dot(px, W, H, cx - 1, fy - 1, 0x3a9a3a)
+          dot(px, W, H, cx + 1, fy - 1, 0x3a9a3a)
+        }
+        // the shine of the sugar glass: it slides round while it turns in the pot
+        if (coat) {
+          const s = Math.round(Math.sin(spin) * 1)
+          dot(px, W, H, cx - f.r * 0.5 + s, fcy - f.r * 0.5, 0xffffff)
+          dot(px, W, H, cx - f.r * 0.5 + s + 1, fcy - f.r * 0.5, 0xfff8e0)
+          dot(px, W, H, cx + f.r * 0.6, fcy + f.r * 0.3, 0xfff0c0)
+        }
+        // the bite: a chunk gone from the top fruit, its flesh showing
+        if (bite && i === 0) {
+          disc(px, W, H, cx + f.r, fcy - 1, f.r * 0.8, 0x1a1428)
+          dot(px, W, H, cx + f.r * 0.3, fcy - 1, mix(f.c, 0xffffff, 0.5))
+          dot(px, W, H, cx + f.r * 0.3, fcy, mix(f.c, 0xffffff, 0.5))
+        }
+        fy += f.r * 2 + 1
+      }
+      // the pot of bubbling sugar, in front of the fruit while it dips
+      slab(px, W, H, 3, potTop - 2, W - 6, H - potTop + 2, 0x4a4a54, 0x14141a)
+      for (let x = 5; x < W - 5; x++) {
+        const bub = Math.sin(x * 1.3 + t * 0.4) > 0.8
+        px[(potTop - 2) * W + x] = bub ? 0xffe890 : 0xf0a020
+        px[(potTop - 1) * W + x] = 0xc87010
+      }
+      for (const d of drips) dot(px, W, H, d.x, d.y, d.c)
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+    },
+  }
+}
+
 export const FOOD = {
   pancakes,
   ramen,
@@ -1235,4 +1449,6 @@ export const FOOD = {
   cottoncandy,
   icecream,
   watermelon,
+  mochi,
+  tanghulu,
 }

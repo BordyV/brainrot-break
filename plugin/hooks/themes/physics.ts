@@ -1,6 +1,6 @@
 import { add, disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, burst, clamp, collide, hitSeg, irand, keepSpeed, line, lit, ring, shiny, shuffle, slab, sparks, textWidth, wallCircle } from '../kit'
+import { DIRS, beam, burst, clamp, collide, hitSeg, irand, keepSpeed, line, lit, ring, shiny, shuffle, slab, sparks, textWidth, wallCircle } from '../kit'
 import type { Ball, Spark } from '../kit'
 
 // Ball & marble physics: a few balls, simple rules, a tense ending.
@@ -1976,6 +1976,160 @@ const pendule: Maker = (W, H, rng) => {
   }
 }
 
+// --- sled on a drawn line -----------------------------------------------------------
+
+const linesled: Maker = (W, H, rng) => {
+  // a pen draws the track just ahead of a little sled; it rides slopes, bumps and jumps, and now and then wipes out
+  type Seg = [number, number, number, number]
+  let segs: Seg[] = []
+  let end = 0
+  let b: Ball = { x: 4, y: 0, vx: 0.6, vy: 0, r: 1.5, c: 0 }
+  let pen = 0
+  let camX = 0
+  let camY = 0
+  let crash = 0
+  let rider = { x: 0, y: 0, vx: 0, vy: 0 }
+  let best = 0
+  let t = 0
+  const build = () => {
+    segs = []
+    let x = -10
+    let y = 0
+    const to = (nx: number, ny: number) => {
+      segs.push([x, y, nx, ny])
+      x = nx
+      y = ny
+    }
+    to(24, 10)
+    while (x < 900) {
+      const r = rng()
+      if (r < 0.3) to(x + 20 + rng() * 16, y + 12 + rng() * 14)
+      else if (r < 0.5) {
+        to(x + 9, y - 3)
+        to(x + 9, y + 5)
+      } else if (r < 0.7) {
+        // a kicker, a gap, a landing that slopes the way the sled falls
+        to(x + 8, y - 4)
+        x += 7 + rng() * 5
+        y += 6
+        to(x + 16, y + 14)
+      } else if (r < 0.85) {
+        to(x + 12, y + 10)
+        to(x + 10, y - 2)
+      } else to(x + 16, y + 3)
+    }
+    end = x
+  }
+  const restart = () => {
+    build()
+    b = { x: 4, y: 3, vx: 0.6, vy: 0, r: 1.5, c: 0 }
+    pen = 30
+    camX = b.x - W * 0.35
+    camY = b.y - H * 0.45
+    crash = 0
+  }
+  restart()
+
+  return {
+    step() {
+      t++
+      if (crash) {
+        rider.x += rider.vx
+        rider.y += rider.vy
+        rider.vy += 0.1
+        if (++crash > 45) restart()
+      }
+      {
+        // gravity, then the track, in small steps so the sled never slips through it
+        const n = 4
+        for (let s = 0; s < n; s++) {
+          b.vy += 0.1 / n
+          const ox = b.vx
+          const oy = b.vy
+          b.x += b.vx / n
+          b.y += b.vy / n
+          for (const [x0, y0, x1, y1] of segs) {
+            if (Math.max(x0, x1) < b.x - 3 || Math.min(x0, x1) > b.x + 3) continue
+            if (hitSeg(b, x0, y0, x1, y1, 0, 0.999) && !crash && Math.hypot(b.vx - ox, b.vy - oy) > 1.7) {
+              crash = 1
+              rider = { x: b.x, y: b.y - 3, vx: ox * 0.8, vy: -1.2 }
+            }
+          }
+        }
+        b.vx *= 0.999
+        keepSpeed(b, 1, 3.2)
+      }
+      // falling through a gap is a wipe-out too
+      const under = segs.filter(([x0, , x1]) => b.x >= Math.min(x0, x1) && b.x <= Math.max(x0, x1))
+      if (!crash && under.length && under.every(([, y0, , y1]) => b.y > Math.max(y0, y1) + 20)) {
+        crash = 1
+        rider = { x: b.x, y: b.y - 3, vx: b.vx, vy: -1 }
+      }
+      pen = Math.max(pen + 0.4, b.x + 30)
+      best = Math.max(best, Math.floor(b.x / 8))
+      if (b.x > end - 10) restart()
+      camX += (b.x - W * 0.35 - camX) * 0.2
+      camY += (b.y - H * 0.45 - camY) * 0.15
+    },
+    draw(px) {
+      // graph paper, scrolling with the camera
+      for (let y = 0; y < H; y++)
+        for (let x = 0; x < W; x++) {
+          const gx = Math.floor(x + camX)
+          const gy = Math.floor(y + camY)
+          px[y * W + x] = ((gx % 8) + 8) % 8 === 0 || ((gy % 8) + 8) % 8 === 0 ? 0xd4dcec : 0xf4f1e8
+        }
+      // the ink, as far as the pen has drawn it
+      let tip: [number, number] | null = null
+      for (const [x0, y0, x1, y1] of segs) {
+        if (x0 > pen) continue
+        let xe = x1
+        let ye = y1
+        if (x1 > pen) {
+          const k = (pen - x0) / (x1 - x0)
+          xe = pen
+          ye = y0 + (y1 - y0) * k
+          tip = [xe, ye]
+        }
+        line(px, W, H, x0 - camX, y0 - camY, xe - camX, ye - camY, 0x1a2a6a)
+        line(px, W, H, x0 - camX, y0 - camY + 1, xe - camX, ye - camY + 1, 0x4a5a9a)
+      }
+      if (tip) {
+        // the pen: a slanted pencil, its point on the line
+        const [tx, ty] = [tip[0] - camX, tip[1] - camY]
+        beam(px, W, H, tx + 1, ty - 1, tx + 6, ty - 8, 0xf0c030)
+        dot(px, W, H, tx, ty, 0x2a2a2a)
+        dot(px, W, H, tx + 6, ty - 9, 0xf08aa0)
+      }
+      // the sled along its direction of travel, its rider sitting up on it
+      const sp = Math.hypot(b.vx, b.vy) || 1
+      const ux = b.vx / sp
+      const uy = b.vy / sp
+      const nx = uy
+      const ny = -ux
+      const sx = b.x - camX
+      const sy = b.y - camY
+      line(px, W, H, sx - ux * 3 - nx * 0.5, sy - uy * 3 - ny * 0.5, sx + ux * 3 - nx * 0.5, sy + uy * 3 - ny * 0.5, 0x8a4a1e)
+      dot(px, W, H, sx + ux * 3.5 + nx * 0.6, sy + uy * 3.5 + ny * 0.6, 0x8a4a1e)
+      if (!crash) {
+        line(px, W, H, sx + nx, sy + ny, sx + nx * 3 + ux * 0.5, sy + ny * 3 + uy * 0.5, 0x2a6ad0)
+        disc(px, W, H, sx + nx * 4.5 + ux, sy + ny * 4.5 + uy, 1.2, 0xf0c8a0)
+        dot(px, W, H, sx + nx * 4 - ux * 2, sy + ny * 4 - uy * 2, 0xe03030)
+        dot(px, W, H, sx + nx * 4 - ux * 3, sy + ny * 4 - uy * 3 + (t % 4 < 2 ? 0 : 1), 0xe03030)
+      } else {
+        // the rider, thrown clear, tumbling
+        const rx = rider.x - camX
+        const ry = rider.y - camY
+        const a = crash * 0.4
+        line(px, W, H, rx - Math.cos(a) * 2, ry - Math.sin(a) * 2, rx + Math.cos(a) * 2, ry + Math.sin(a) * 2, 0x2a6ad0)
+        disc(px, W, H, rx + Math.cos(a) * 3, ry + Math.sin(a) * 3, 1.2, 0xf0c8a0)
+      }
+      text(px, W, H, 1, 1, String(Math.floor(b.x / 8)), 0x1a2a6a)
+      text(px, W, H, W - textWidth(String(best)) - 1, 1, String(best), 0xa0a8c0)
+    },
+  }
+}
+
 export const PHYSICS = {
   billes,
   pendule,
@@ -1999,4 +2153,5 @@ export const PHYSICS = {
   skytrack,
   willit,
   rainbow,
+  linesled,
 }

@@ -289,4 +289,17 @@ export const COZY = {
       fr: ['tempête et vagues (ASMR)', 'son original - light.keeper', 'chant de marins (lent)'],
     },
   },
+  laundromat: {
+    name: { en: 'laundromat at night', fr: 'laverie de nuit' },
+    authors: ['@laundromat.at.2am', '@spin.cycle.calm', '@neon.and.dryers'],
+    tags: ['#laundromat #cozy #lofi', '#nightvibes #aesthetic', '#fyp #foryou'],
+    captions: {
+      en: ['the most relaxing place at 2am', 'wait for the spin cycle', 'pick a machine and watch it', 'romanticise your laundry'],
+      fr: ['l’endroit le plus apaisant à 2 h du matin', 'attends l’essorage', 'choisis une machine et regarde-la', 'romantise ta lessive'],
+    },
+    sounds: {
+      en: ['washing machine hum', 'original sound - laundromat.at.2am', 'lo-fi night beats'],
+      fr: ['ronron de machine à laver', 'son original - laundromat.at.2am', 'beats lo-fi de nuit'],
+    },
+  },
 } satisfies Record<string, Entry>

@@ -429,6 +429,23 @@ export type Kind =
   | 'bungee'
   | 'juggling'
   | 'wallofdeath'
+  | 'cupshuffle'
+  | 'catlaser'
+  | 'battletops'
+  | 'mochi'
+  | 'screwjam'
+  | 'tufting'
+  | 'linesled'
+  | 'hexasort'
+  | 'blockjam'
+  | 'salmon'
+  | 'rageclimb'
+  | 'hexdodge'
+  | 'scramble'
+  | 'bottleflip'
+  | 'metalcast'
+  | 'tanghulu'
+  | 'laundromat'
 
 export type Video = {
   id: string

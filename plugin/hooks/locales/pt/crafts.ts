@@ -14,4 +14,5 @@ export const CRAFTS: Locale['videos'] = {
   cardtower: { name: 'castelo de cartas', captions: ['não respira...', 'a última carta...', 'e aí o vento', 'paciência nível 100'], sounds: ['embaralhando cartas (ASMR)', 'som original - card.tower', 'música de tensão'] },
   jenga: { name: 'Jenga desabando', captions: ['qual bloco vai ser o último?', 'tá balançando...', 'LÁ VAI', 'caos da noite de jogos'], sounds: ['blocos de madeira (ASMR)', 'som original - jenga.pull', 'tambores de suspense'] },
   flipbook: { name: 'flipbook', captions: ['um desenho por página, depois folheia', 'a bola tá voltando…', 'todas as margens do meu caderno de matemática', '48 páginas pra 3 segundos de glória'], sounds: ['frrrrr das páginas', 'som original - margin.doodles', 'música de desenho pastelão'] },
+  tufting: { name: 'tufting de tapete', captions: ['espera virar', 'de costas não parece nada', 'a tosa é a melhor parte', 'o que eu faço depois?'], sounds: ['barulho da pistola de tufting', 'som original - tufting.gun.go', 'sessão lo-fi de ateliê'] },
 }

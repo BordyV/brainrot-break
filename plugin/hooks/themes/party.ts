@@ -1,6 +1,6 @@
 import { dot, hsv, mix, rect, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { burst, clamp, irand, line, lit, ring, slab, sparks, textWidth, tint, tones } from '../kit'
+import { burst, clamp, ellipse, irand, line, lit, ring, slab, sparks, textWidth, tint, tones } from '../kit'
 import type { Spark } from '../kit'
 
 // Party, board & fair games: chips, wheels, discs and pucks.
@@ -489,10 +489,266 @@ const hoops: Maker = (W, H, rng) => {
   }
 }
 
+// --- cup shuffle --------------------------------------------------------------------
+
+const cupshuffle: Maker = (W, H, rng) => {
+  // three cups, one ball: shown, shuffled faster and faster, a guess, then the reveal
+  const base = Math.round(H * 0.64)
+  const ch = Math.max(5, Math.round(H * 0.17))
+  const cw = Math.max(4, Math.round(W * 0.27))
+  const slotX = [W * 0.2, W * 0.5, W * 0.8]
+  let slot = [0, 1, 2]
+  let ball = 1
+  let phase: 'show' | 'shuffle' | 'guess' | 'reveal' = 'show'
+  let t = 0
+  let swaps = 0
+  let total = 0
+  let swap: { a: number; b: number; k: number; len: number } | null = null
+  let guess = 0
+  let wins = 0
+  let rounds = 0
+  let fx: Spark[] = []
+  const cup = tones(0xd8342e)
+  const reset = () => {
+    slot = [0, 1, 2]
+    ball = irand(rng, 3)
+    phase = 'show'
+    t = 0
+    swaps = 0
+    total = 7 + irand(rng, 6)
+    swap = null
+  }
+  reset()
+  // where a cup stands, and how high it is lifted
+  const at = (i: number): [number, number, number] => {
+    let x = slotX[slot[i] as number] as number
+    let y = base
+    let lift = 0
+    if (swap && (swap.a === i || swap.b === i)) {
+      const u = swap.k / swap.len
+      const e = u * u * (3 - 2 * u)
+      const from = slotX[slot[i] as number] as number
+      const to = slotX[slot[i === swap.a ? swap.b : swap.a] as number] as number
+      x = from + (to - from) * e
+      y += Math.sin(u * Math.PI) * (i === swap.a ? -3 : 2)
+    }
+    if (phase === 'show' && i === ball) lift = Math.sin(clamp(t / 30, 0, 1) * Math.PI) * ch * 0.8
+    if (phase === 'reveal') {
+      const up = Math.sin(clamp(t / 40, 0, 1) * Math.PI) * ch * 0.8
+      if (i === guess) lift = up
+      if (i === ball && guess !== ball) lift = Math.sin(clamp((t - 20) / 40, 0, 1) * Math.PI) * ch * 0.8
+    }
+    return [x, y, lift]
+  }
+
+  return {
+    step() {
+      t++
+      fx = sparks(fx, 0.06)
+      if (phase === 'show' && t > 36) {
+        phase = 'shuffle'
+        t = 0
+      } else if (phase === 'shuffle') {
+        if (!swap) {
+          if (swaps >= total) {
+            phase = 'guess'
+            t = 0
+            // the bot follows the ball, most of the time
+            guess = rng() < 0.7 ? ball : (ball + 1 + irand(rng, 2)) % 3
+            return
+          }
+          const a = irand(rng, 3)
+          const b = (a + 1 + irand(rng, 2)) % 3
+          swap = { a, b, k: 0, len: Math.max(4, Math.round(14 - swaps * 1.2)) }
+        }
+        swap.k++
+        if (swap.k >= swap.len) {
+          const s = slot[swap.a] as number
+          slot[swap.a] = slot[swap.b] as number
+          slot[swap.b] = s
+          swap = null
+          swaps++
+        }
+      } else if (phase === 'guess' && t > 24) {
+        phase = 'reveal'
+        t = 0
+        rounds++
+        if (guess === ball) wins++
+      } else if (phase === 'reveal') {
+        if (t === 12) {
+          const [x] = at(ball)
+          burst(fx, rng, x, base - 1, guess === ball ? 0xffd84a : 0xa0a0b0, guess === ball ? 12 : 5, 0.8)
+        }
+        if (t > 70) reset()
+      }
+    },
+    draw(px) {
+      sky(px, W, H, 0x1a3a2a, 0x24543a, base + 2)
+      // a soft spotlight on the felt
+      for (let y = 0; y < base + 2; y++) {
+        const k = Math.abs(y - H * 0.35) / H
+        for (let x = 0; x < W; x++) if (Math.abs(x - W / 2) < W * (0.55 - k)) px[y * W + x] = mix(px[y * W + x] as number, 0x3a7a52, 0.35)
+      }
+      // the table's edge and front
+      for (let y = base + 2; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = y === base + 2 ? 0xc89060 : y === base + 3 ? 0x8a5a34 : mix(0x6a4024, 0x3a2012, (y - base) / (H - base))
+      // the ball, visible when its cup is lifted
+      for (let i = 0; i < 3; i++) {
+        const [x, y] = at(i)
+        ellipse(px, W, H, x, y + 2, cw * 0.55, 0.8, 0x14301e)
+      }
+      const [bx] = at(ball)
+      lit(px, W, H, bx, base - 1.5, 2.2, 2.2, 0xffd040, 0x7a5208)
+      for (let i = 0; i < 3; i++) {
+        const [x, y, lift] = at(i)
+        // an upside-down cup: narrow top, wide rim, lit from the left
+        const top = Math.round(y - ch - lift)
+        for (let j = 0; j <= ch; j++) {
+          const yy = top + j
+          const half = (cw / 2) * (0.62 + 0.38 * (j / ch))
+          const xa = Math.round(x - half)
+          const xb = Math.round(x + half)
+          for (let xx = xa; xx <= xb; xx++) {
+            const u = (xx - xa) / Math.max(1, xb - xa)
+            let c = u < 0.18 ? cup[0] : u < 0.62 ? cup[1] : u < 0.86 ? cup[2] : cup[3]
+            if (j === 0) c = cup[2]
+            if (j >= ch - 1) c = mix(c, 0xffffff, 0.35)
+            if (xx === xa || xx === xb) c = 0x5a0e10
+            dot(px, W, H, xx, yy, c)
+          }
+        }
+      }
+      // the bot's pick: an arrow over a cup
+      if (phase === 'guess' || phase === 'reveal') {
+        const [x] = at(guess)
+        const ay = base - ch - 7 + (phase === 'guess' ? Math.round(Math.sin(t * 0.4)) : 0)
+        for (let k = 0; k < 3; k++) rect(px, W, H, x - 2 + k, ay + k, 5 - k * 2, 1, 0xffffff)
+      }
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+      text(px, W, H, 1, 1, `${wins}/${rounds}`, 0xe8f0e0)
+      if (phase === 'guess') text(px, W, H, W - 4, 1, '?', 0xffd84a)
+    },
+  }
+}
+
+// --- bottle flip --------------------------------------------------------------------
+
+const bottleflip: Maker = (W, H, rng) => {
+  // a half-full water bottle spins up and lands standing, on its cap now and then, or topples
+  const table = Math.round(H * 0.7)
+  const L = Math.max(8, Math.round(H * 0.27))
+  const R = Math.max(2, W * 0.11)
+  const startX = W * 0.28
+  const endX = W * 0.68
+  let phase: 'rest' | 'fly' | 'land' | 'fall' = 'rest'
+  let t = 0
+  let ang = 0
+  let x = startX
+  let y = table
+  let err = 0
+  let wins = 0
+  let tries = 0
+  let fx: Spark[] = []
+  let label = 0
+  const T = 24
+
+  return {
+    step() {
+      t++
+      fx = sparks(fx, 0.08)
+      if (phase === 'rest' && t > 18) {
+        phase = 'fly'
+        t = 0
+        tries++
+        label = rng()
+        // how far off a full turn it lands: small is a stand, about half a turn is the cap
+        const r = rng()
+        err = r < 0.5 ? (rng() - 0.5) * 0.5 : r < 0.6 ? Math.PI + (rng() - 0.5) * 0.3 : (rng() < 0.5 ? -1 : 1) * (0.6 + rng() * 0.8)
+      } else if (phase === 'fly') {
+        const u = t / T
+        x = startX + (endX - startX) * u
+        y = table - Math.sin(u * Math.PI) * H * 0.45
+        ang = (Math.PI * 2 + err) * u
+        if (t >= T) {
+          y = table
+          const off = Math.atan2(Math.sin(err), Math.cos(err))
+          if (Math.abs(off) < 0.35 || Math.abs(Math.abs(off) - Math.PI) < 0.2) {
+            phase = 'land'
+            wins++
+            burst(fx, rng, x, table - L, Math.abs(off) > 1 ? 0xffd040 : 0x8af08a, Math.abs(off) > 1 ? 18 : 10, 1)
+          } else phase = 'fall'
+          t = 0
+        }
+      } else if (phase === 'land') {
+        // it rocks and settles on its base (or its cap)
+        const off = Math.atan2(Math.sin(err), Math.cos(err))
+        const settle = Math.abs(off) > 1 ? Math.PI : 0
+        ang = settle + (off - settle) * Math.cos(t * 0.6) * Math.exp(-t * 0.12)
+        if (t > 40) {
+          phase = 'rest'
+          t = 0
+          ang = 0
+          x = startX
+        }
+      } else if (phase === 'fall') {
+        // past the tipping point: it drops onto its side and rolls a little
+        const side = Math.sin(err) > 0 ? 1 : -1
+        ang += (side * Math.PI * 0.5 - Math.atan2(Math.sin(ang), Math.cos(ang))) * 0.3
+        if (t > 6) x += side * Math.max(0, 0.6 - t * 0.02)
+        if (t > 40) {
+          phase = 'rest'
+          t = 0
+          ang = 0
+          x = startX
+        }
+      }
+    },
+    draw(px) {
+      // a bedroom wall, a poster, the desk
+      sky(px, W, H, 0x3a4a6a, 0x5a6a8a, table)
+      rect(px, W, H, W * 0.6, H * 0.12, W * 0.3, H * 0.2, 0xd8b04a)
+      rect(px, W, H, W * 0.6 + 1, H * 0.12 + 1, W * 0.3 - 2, H * 0.2 - 2, 0xe86a4a)
+      for (let yy = table; yy < H; yy++) for (let xx = 0; xx < W; xx++) px[yy * W + xx] = yy === table ? 0xd8a870 : yy === table + 1 ? 0xb08050 : mix(0x8a5a34, 0x4a2c18, (yy - table) / (H - table))
+      // the bottle, drawn by turning each pixel back into the bottle's own frame
+      const c = Math.cos(ang)
+      const s = Math.sin(ang)
+      // the pivot is the base's centre when standing; while flying, the middle
+      const mid = phase === 'fly' ? L / 2 : 0
+      const lying = phase === 'fall' ? Math.abs(Math.sin(ang)) * (R - 0.5) : 0
+      const bx = x
+      // on its cap, the base is up in the air, a bottle's length above the desk
+      const by = phase === 'fly' ? y - L / 2 : phase === 'land' && c < 0 ? table - L : y - lying
+      const lab = hsv(label, 0.7, 0.85)
+      const reach = L + 2
+      for (let yy = Math.floor(by - reach); yy <= by + reach; yy++)
+        for (let xx = Math.floor(bx - reach); xx <= bx + reach; xx++) {
+          const dx = xx + 0.5 - bx
+          const dy = yy + 0.5 - by
+          // uu runs from the base (0) to the cap (L), v across
+          const v = dx * c + dy * s
+          const uu = -dy * c + dx * s + mid
+          if (uu < 0 || uu > L) continue
+          const w = uu > L * 0.82 ? R * 0.45 : uu > L * 0.68 ? R * (0.45 + (0.82 - uu / L) * 4) : R
+          if (Math.abs(v) > w) continue
+          let col: number
+          if (uu > L - 1.5) col = 0x2a6ad0
+          else if (uu > L * 0.3 && uu < L * 0.52) col = Math.abs(v) < w - 1 ? lab : mix(lab, 0x200a28, 0.3)
+          else if (uu < L * 0.42) col = mix(0x5aa8e8, 0x2a6ab0, (v + R) / (2 * R))
+          else col = mix(px[yy * W + xx] ?? 0, 0xd8f0ff, 0.45)
+          if (v < -w + 1) col = mix(col, 0xffffff, 0.45)
+          dot(px, W, H, xx, yy, col)
+        }
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+      text(px, W, H, 1, 1, `${wins}/${tries}`, 0xf0f0ff)
+    },
+  }
+}
+
 export const PARTY = {
   plinko,
   prizewheel,
   connect4,
   airhockey,
   hoops,
+  cupshuffle,
+  bottleflip,
 }

@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { DIRS, beam, burst, clamp, ellipse, irand, line, lit, pick, poly, slab, sparks } from '../kit'
+import { DIRS, beam, burst, clamp, ellipse, irand, line, lit, pick, poly, slab, sparks, tones } from '../kit'
 import type { Spark } from '../kit'
 
 // Machines & how it's made: input, process, output, again.
@@ -1242,6 +1242,131 @@ const warehouse: Maker = (W, H, rng) => {
   }
 }
 
+// --- metal casting ------------------------------------------------------------------
+
+const metalcast: Maker = (W, H, rng) => {
+  // a crucible tips molten metal into a mould; it cools from white-hot to red to its own colour, and the ingot joins the stack
+  const METALS = [0xc8ccd8, 0xf0c040, 0xd88a5a]
+  const floor = Math.round(H * 0.78)
+  const mx = Math.round(W * 0.42)
+  const mw = Math.max(10, Math.round(W * 0.48))
+  const md = Math.max(4, Math.round(H * 0.12))
+  const potX = W * 0.36
+  const potY = H * 0.24
+  let phase: 'tilt' | 'pour' | 'back' | 'cool' | 'out' = 'tilt'
+  let t = 0
+  let tilt = 0
+  let fill = 0
+  let heat = 1
+  let metal = 0
+  let stack: number[] = []
+  let slide = 0
+  let fx: Spark[] = []
+  const glow = (h: number, c: number) => (h > 0.75 ? mix(0xfff0b0, 0xffffff, (h - 0.75) * 2) : h > 0.45 ? mix(0xf07020, 0xffd060, (h - 0.45) / 0.3) : h > 0.15 ? mix(c, 0xd03018, (h - 0.15) / 0.3) : c)
+
+  return {
+    step() {
+      t++
+      fx = sparks(fx, 0.09)
+      if (phase === 'tilt') {
+        tilt = Math.min(1, tilt + 0.05)
+        if (tilt >= 1) {
+          phase = 'pour'
+          t = 0
+        }
+      } else if (phase === 'pour') {
+        fill = Math.min(1, fill + 0.012)
+        if (rng() < 0.6) fx.push({ x: mx + (rng() - 0.5) * 2, y: floor - md * fill - 1, vx: (rng() - 0.5) * 1.4, vy: -0.6 - rng() * 0.8, l: 6 + irand(rng, 8), c: rng() < 0.5 ? 0xffe080 : 0xff8a2a })
+        if (fill >= 1) {
+          phase = 'back'
+          t = 0
+        }
+      } else if (phase === 'back') {
+        tilt = Math.max(0, tilt - 0.05)
+        if (tilt <= 0) {
+          phase = 'cool'
+          t = 0
+        }
+      } else if (phase === 'cool') {
+        heat = Math.max(0, heat - 0.008)
+        if (heat <= 0 && t > 20) {
+          phase = 'out'
+          t = 0
+          slide = 0
+        }
+      } else if (phase === 'out') {
+        // knocked out of the mould, the ingot slides onto the stack
+        slide = Math.min(1, slide + 0.05)
+        if (slide >= 1) {
+          stack.push(METALS[metal] as number)
+          if (stack.length > 6) stack = []
+          metal = (metal + 1) % METALS.length
+          fill = 0
+          heat = 1
+          phase = 'tilt'
+          t = 0
+        }
+      }
+    },
+    draw(px) {
+      // a dark foundry, a warm glow from the furnace, a sand floor
+      sky(px, W, H, 0x1a1218, 0x3a2420, floor)
+      for (let y = floor; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = y === floor ? 0x8a6a4a : mix(0x6a5038, 0x3a2a1e, (y - floor) / (H - floor))
+      const hot = phase === 'pour' || (phase === 'tilt' && tilt > 0.5) ? 1 : heat
+      if (hot > 0.3) for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const d = Math.hypot(x - mx, (y - floor) * 1.4)
+        if (d < 14) px[y * W + x] = mix(px[y * W + x] as number, 0xff6a20, (1 - d / 14) * 0.35 * hot)
+      }
+      // the stack of finished ingots, on the right
+      for (const [i, c] of stack.entries()) {
+        const sx = W - 9 + (i % 2)
+        const sy = floor - 3 - i * 3
+        slab(px, W, H, sx, sy, 8, 3, c, mix(c, 0x100810, 0.6))
+        rect(px, W, H, sx + 1, sy, 5, 1, mix(c, 0xffffff, 0.6))
+      }
+      // the mould: a steel block with a cavity
+      const x0 = mx - mw / 2
+      slab(px, W, H, x0 - 2, floor - md - 2, mw + 4, md + 2, 0x5a5a68, 0x1e1e26)
+      rect(px, W, H, x0, floor - md, mw, md, 0x14141a)
+      // the metal in it: glowing while hot, its own colour once cold
+      const c = METALS[metal] as number
+      const lvl = Math.round(md * fill)
+      const ix = phase === 'out' ? slide * (W - 9 - x0) : 0
+      const iy = phase === 'out' ? -Math.sin(slide * Math.PI) * 6 - slide * (stack.length * 3 + 3 - md) : 0
+      if (lvl > 0) {
+        const col = glow(phase === 'out' ? 0 : heat, c)
+        const [hi, , sh] = tones(col)
+        for (let y = 0; y < lvl; y++)
+          for (let x = 0; x < mw; x++) {
+            const top = y === lvl - 1
+            const shade = heat < 0.15 ? (top ? hi : x > mw - 3 ? sh : col) : top ? mix(col, 0xffffff, 0.3) : col
+            dot(px, W, H, x0 + x + ix, floor - 1 - y + iy, shade)
+          }
+      }
+      // the crucible on its tongs, tipping over the mould
+      const a = tilt * 1.6
+      const pcx = potX + Math.sin(a) * 2
+      const pcy = potY + tilt * 2
+      const pts: [number, number][] = [[-4, -4], [4, -4], [3, 4], [-3, 4]].map(([px0, py0]) => [pcx + px0 * Math.cos(a) - py0 * Math.sin(a), pcy + px0 * Math.sin(a) + py0 * Math.cos(a)])
+      poly(px, W, H, pts, 0x6a6a74)
+      line(px, W, H, (pts[0] as [number, number])[0], (pts[0] as [number, number])[1], (pts[1] as [number, number])[0], (pts[1] as [number, number])[1], 0xffe080)
+      beam(px, W, H, pcx - 4, pcy, -2, pcy - 8, 0x7a7a88)
+      // the stream of molten metal
+      if (phase === 'pour') {
+        const lip = pts[1] as [number, number]
+        for (let y = Math.round(lip[1]); y < floor - lvl; y++) {
+          const wob = Math.sin(y * 0.7 + t) * 0.4
+          dot(px, W, H, mx + wob, y, 0xfff0b0)
+          dot(px, W, H, mx + 1 + wob, y, 0xffa040)
+        }
+        line(px, W, H, lip[0], lip[1], mx, lip[1] + 1, 0xfff0b0)
+      }
+      for (const f of fx) dot(px, W, H, f.x, f.y, f.c)
+      text(px, W, H, 1, 1, String(stack.length), 0xf0d0a0)
+    },
+  }
+}
+
 export const MACHINES = {
   claw,
   vending,
@@ -1260,5 +1385,6 @@ export const MACHINES = {
   robotarm,
   pinart,
   warehouse,
+  metalcast,
 }
 

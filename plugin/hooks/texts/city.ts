@@ -224,4 +224,17 @@ export const CITY = {
       fr: ['boum et grondement (son original)', 'son original - implosion.cam', 'orchestre au ralenti'],
     },
   },
+  scramble: {
+    name: { en: 'scramble crossing', fr: 'passage piéton en diagonale' },
+    authors: ['@scramble.crossing', '@every.way.at.once', '@walk.signal.on'],
+    tags: ['#tokyo #citylife #timelapse', '#crossing #crowd', '#fyp #foryou'],
+    captions: {
+      en: ['the moment every light turns red', 'nobody ever bumps into anyone', 'find the umbrella', 'the busiest crossing in the world'],
+      fr: ['le moment où tous les feux passent au rouge', 'personne ne se cogne jamais', 'trouve le parapluie', 'le passage piéton le plus fréquenté du monde'],
+    },
+    sounds: {
+      en: ['crossing chime', 'original sound - scramble.crossing', 'city pop'],
+      fr: ['carillon du passage piéton', 'son original - scramble.crossing', 'city pop'],
+    },
+  },
 } satisfies Record<string, Entry>

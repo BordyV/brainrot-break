@@ -208,6 +208,12 @@ export const EXTRA_THEMES: Record<string, Theme[]> = {
   dambreak: ['destruction'],
   droneshow: ['robots'],
   speedrun: ['memes'],
+  // the third list
+  battletops: ['versus'],
+  screwjam: ['puzzles'],
+  hexasort: ['puzzles'],
+  blockjam: ['puzzles'],
+  salmon: ['nature'],
 }
 
 /** A video's themes: its home theme first, then any others. */

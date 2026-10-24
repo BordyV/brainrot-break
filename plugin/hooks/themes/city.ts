@@ -1241,6 +1241,128 @@ const cyber: Maker = (W, H, rng) => {
   }
 }
 
+// --- scramble crossing --------------------------------------------------------------
+
+const scramble: Maker = (W, H, rng) => {
+  // a crossing seen from above: cars take turns, then every light goes red and the crowd crosses every way at once
+  const cx = W / 2
+  const cy = H / 2
+  const half = Math.max(5, Math.round(W * 0.24))
+  const x0 = cx - half
+  const x1 = cx + half
+  const y0 = cy - half
+  const y1 = cy + half
+  // the four corners where people wait
+  const corner = (k: number): [number, number] => [k % 2 ? x1 : x0 - 5, k < 2 ? y0 - 5 : y1]
+  type Ped = { x: number; y: number; tx: number; ty: number; c: number; at: number; v: number; brolly: boolean }
+  type Car = { x: number; y: number; dx: number; dy: number; c: number }
+  let peds: Ped[] = []
+  let cars: Car[] = []
+  let phase = 0
+  let t = 0
+  const PHASES = [100, 100, 150]
+  const spot = (k: number): [number, number] => {
+    const [bx, by] = corner(k)
+    return [bx + rng() * 4, by + rng() * 4]
+  }
+  for (let i = 0; i < 84; i++) {
+    const k = irand(rng, 4)
+    const [x, y] = spot(k)
+    peds.push({ x, y, tx: x, ty: y, c: rng() < 0.4 ? pick(rng, [0x1a1a24, 0xe8e8e8, 0x8a7a6a]) : hsv(rng(), 0.6, 0.85), at: k, v: 0.25 + rng() * 0.2, brolly: rng() < 0.15 })
+  }
+
+  return {
+    step() {
+      t++
+      if (t >= (PHASES[phase] as number)) {
+        t = 0
+        phase = (phase + 1) % 3
+        if (phase === 2)
+          // the scramble: everyone picks another corner, the diagonal one too
+          for (const p of peds) {
+            if (rng() < 0.15) continue
+            const k = (p.at + 1 + irand(rng, 3)) % 4
+            ;[p.tx, p.ty] = spot(k)
+            p.at = k
+          }
+      }
+      // cars: phase 0 north-south, phase 1 east-west; they stop at the line otherwise
+      if (phase < 2 && t % 9 === 0 && rng() < 0.7) {
+        const lane = rng() < 0.5
+        const c = pick(rng, [0xe8e8f0, 0x2a2a34, 0xd83a3a, 0x3a6ad8, 0xf0c030, 0x8a8a98])
+        if (phase === 0) cars.push(lane ? { x: cx + 2, y: -6, dx: 0, dy: 1, c } : { x: cx - 5, y: H + 6, dx: 0, dy: -1, c })
+        else cars.push(lane ? { x: -6, y: cy + 2, dx: 1, dy: 0, c } : { x: W + 6, y: cy - 5, dx: -1, dy: 0, c })
+      }
+      for (const car of cars) {
+        const go = phase === (car.dx ? 1 : 0) && t < (PHASES[phase] as number) - 15
+        // how far the car is from its stop line, before the crossing; one past it always clears the box
+        const len = 5
+        const gap = car.dy > 0 ? y0 - 5 - len - car.y : car.dy < 0 ? car.y - (y1 + 5) : car.dx > 0 ? x0 - 5 - len - car.x : car.x - (x1 + 5)
+        const blocked = cars.some(o => o !== car && o.dx === car.dx && o.dy === car.dy && (o.x - car.x) * car.dx + (o.y - car.y) * car.dy > 0 && (o.x - car.x) * car.dx + (o.y - car.y) * car.dy < 7 && Math.abs((o.x - car.x) * car.dy) + Math.abs((o.y - car.y) * car.dx) < 2)
+        if (blocked || (!go && gap >= 0 && gap < 1)) continue
+        car.x += car.dx * 0.9
+        car.y += car.dy * 0.9
+      }
+      cars = cars.filter(c => c.x > -10 && c.x < W + 10 && c.y > -10 && c.y < H + 10)
+      for (const p of peds) {
+        const dx = p.tx - p.x
+        const dy = p.ty - p.y
+        const d = Math.hypot(dx, dy)
+        if (d > 0.3) {
+          p.x += (dx / d) * Math.min(d, p.v) + (rng() - 0.5) * 0.1
+          p.y += (dy / d) * Math.min(d, p.v) + (rng() - 0.5) * 0.1
+        }
+      }
+    },
+    draw(px) {
+      // rooftops in the corners, pavements, the asphalt cross
+      for (let y = 0; y < H; y++)
+        for (let x = 0; x < W; x++) {
+          const road = (x >= x0 && x < x1) || (y >= y0 && y < y1)
+          const pave = x >= x0 - 5 && x < x1 + 5 && y >= y0 - 5 && y < y1 + 5
+          const far = Math.min(Math.abs(x - cx), Math.abs(y - cy))
+          px[y * W + x] = road ? 0x34343e : pave || far < half + 5 ? 0x8a8478 : (Math.floor(x / 6) + Math.floor(y / 7)) % 2 ? 0x2a2a3a : 0x3a3448
+        }
+      // zebra crossings on the four sides, and the two diagonals of the scramble
+      for (let k = 0; k < 2 * half; k += 2) {
+        rect(px, W, H, x0 + k, y0 - 4, 1, 3, 0xd8d8d8)
+        rect(px, W, H, x0 + k, y1 + 1, 1, 3, 0xd8d8d8)
+        rect(px, W, H, x0 - 4, y0 + k, 3, 1, 0xd8d8d8)
+        rect(px, W, H, x1 + 1, y0 + k, 3, 1, 0xd8d8d8)
+      }
+      for (let k = 0; k < 2 * half; k += 3) {
+        dot(px, W, H, x0 + k, y0 + k, 0x9a9aa0)
+        dot(px, W, H, x1 - 1 - k, y0 + k, 0x9a9aa0)
+      }
+      // the cars, from above: body, windscreen, roof
+      for (const car of cars) {
+        const w = car.dx ? 5 : 3
+        const h = car.dx ? 3 : 5
+        slab(px, W, H, car.x, car.y, w, h, car.c)
+        const wx = car.dx > 0 ? car.x + 3 : car.dx < 0 ? car.x + 1 : car.x
+        const wy = car.dy > 0 ? car.y + 3 : car.dy < 0 ? car.y + 1 : car.y
+        rect(px, W, H, wx, wy, car.dx ? 1 : 3, car.dx ? 3 : 1, 0x6ab0d8)
+      }
+      // the crowd: a dark head over a coloured coat, a few umbrellas
+      for (const p of peds) {
+        if (p.brolly) {
+          disc(px, W, H, p.x, p.y, 1.2, p.c)
+          dot(px, W, H, p.x - 1, p.y - 1, mix(p.c, 0xffffff, 0.4))
+          continue
+        }
+        dot(px, W, H, p.x, p.y + 1, p.c)
+        dot(px, W, H, p.x, p.y, 0x1a1410)
+      }
+      // the walk signal and its countdown
+      const walk = phase === 2
+      const left = Math.ceil(((PHASES[phase] as number) - t) / 15)
+      rect(px, W, H, 1, 1, 3, 5, 0x101010)
+      dot(px, W, H, 2, walk ? 4 : 2, walk ? 0x5af07a : 0xf04a3a)
+      text(px, W, H, 6, 1, String(left), walk ? 0x8af0a0 : 0xf08a7a)
+    },
+  }
+}
+
 export const CITY = {
   cyber,
   traffic,
@@ -1259,4 +1381,5 @@ export const CITY = {
   nighthighway,
   coaster,
   demolition,
+  scramble,
 }

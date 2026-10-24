@@ -172,4 +172,17 @@ export const CRAFTS = {
       fr: ['frrrrrt des pages', 'son original - margin.doodles', 'musique de dessin animé burlesque'],
     },
   },
+  tufting: {
+    name: { en: 'rug tufting', fr: 'tufting de tapis' },
+    authors: ['@tufting.gun.go', '@rug.reveal', '@yarn.and.frame'],
+    tags: ['#tufting #rugmaking #diy', '#rugtufting #satisfying', '#fyp #foryou'],
+    captions: {
+      en: ['wait for the flip', 'from the back it looks like nothing', 'the shearing is the best part', 'what should i tuft next?'],
+      fr: ['attends qu’on le retourne', 'de dos, ça ne ressemble à rien', 'la tonte, c’est le meilleur moment', 'je tufte quoi après ?'],
+    },
+    sounds: {
+      en: ['tufting gun rattle', 'original sound - tufting.gun.go', 'lo-fi craft session'],
+      fr: ['crépitement du pistolet à tufting', 'son original - tufting.gun.go', 'session lo-fi d’atelier'],
+    },
+  },
 } satisfies Record<string, Entry>

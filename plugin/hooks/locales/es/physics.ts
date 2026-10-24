@@ -23,4 +23,5 @@ export const PHYSICS: Locale['videos'] = {
   skytrack: { name: 'pista en el cielo', captions: ['un carril mal y se acabó', '¿hasta dónde rodará?', 'los huecos son cada vez peores', 'nostalgia de juegos de móvil'], sounds: ['drop EDM (sonido original)', 'sonido original - rolling.sky', 'carrera synthwave'] },
   willit: { name: '¿lo conseguirá?', captions: ['¿lo conseguirá? comenta antes del final', 'pausa... ahora adivina', 'directo al vaso', 'dije que no y me equivoqué'], sounds: ['suspense (sonido original)', 'sonido original - will.it.go', 'scratch de vinilo'] },
   rainbow: { name: 'bola arcoíris', captions: ['más rápida en cada rebote', 'espera a que se vuelva loca', 'la estela del final...', 'speedrun de un cuadrado'], sounds: ['acelerando (sonido original)', 'sonido original - rainbow.trail', 'remix nightcore'] },
+  linesled: { name: 'trineo sobre una línea', captions: ['el lápiz siempre va un paso por delante', 'ese salto fue demasiado…', '¿hasta dónde llega esta vez?', 'la física no estuvo de acuerdo'], sounds: ['lápiz rascando el papel', 'sonido original - draw.the.track', 'música clásica acelerada'] },
 }

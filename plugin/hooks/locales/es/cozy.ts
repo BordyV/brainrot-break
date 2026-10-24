@@ -23,4 +23,5 @@ export const COZY: Locale['videos'] = {
   ferris: { name: 'noria', captions: ['anochecer en la feria', 'las luces se persiguen', 'arriba de la noria, arriba del mundo', 'noches de verano'], sounds: ['música de feria (sonido original)', 'sonido original - dusk.wheel', 'sintetizador nostálgico'] },
   sailing: { name: 'navegar', captions: ['deja que decida el viento', 'gaviotas, sol, olas', 'fuera de la oficina', 'navegación lenta'], sounds: ['brisa marina (sonido original)', 'sonido original - sail.away', 'yacht rock'] },
   lighthouse: { name: 'faro', captions: ['el farero nunca duerme', 'noche de tormenta, luz firme', 'mira cómo barre el haz', 'acogedor visto desde lejos'], sounds: ['tormenta y olas (ASMR)', 'sonido original - light.keeper', 'canción marinera (lenta)'] },
+  laundromat: { name: 'lavandería de noche', captions: ['el lugar más relajante a las 2 de la mañana', 'espera el centrifugado', 'elige una máquina y mírala', 'romantiza tu colada'], sounds: ['zumbido de lavadora', 'sonido original - laundromat.at.2am', 'beats lo-fi nocturnos'] },
 }

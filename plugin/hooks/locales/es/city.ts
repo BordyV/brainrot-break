@@ -18,4 +18,5 @@ export const CITY: Locale['videos'] = {
   nighthighway: { name: 'autopista de noche', captions: ['blancas que vienen, rojas que van', 'vibras de larga exposición', 'playlist de conducción nocturna activada', 'autopista a las 3 de la mañana'], sounds: ['Nightcall (synthwave)', 'sonido original - long.exposure', 'mezcla outrun'] },
   coaster: { name: 'montaña rusa', captions: ['clic... clic... clic... BAJADA', 'manos arriba en el looping', 'solo primera fila', 'temporada de parques de atracciones'], sounds: ['gritos (sonido original)', 'sonido original - coaster.pov', 'música de parque de atracciones'] },
   demolition: { name: 'demolición de edificio', captions: ['3... 2... 1...', 'se pliega sobre sí mismo', 'caos controlado', '¡la nube de polvo!'], sounds: ['bum y estruendo (sonido original)', 'sonido original - implosion.cam', 'orquesta a cámara lenta'] },
+  scramble: { name: 'cruce en diagonal', captions: ['el momento en que todos los semáforos se ponen en rojo', 'nadie choca con nadie', 'encuentra el paraguas', 'el cruce más concurrido del mundo'], sounds: ['melodía del cruce peatonal', 'sonido original - scramble.crossing', 'city pop'] },
 }

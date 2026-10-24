@@ -68,4 +68,30 @@ export const PARTY = {
       fr: ['swish et la sirène', 'son original - swish.machine', 'beat d’arcade survolté'],
     },
   },
+  cupshuffle: {
+    name: { en: 'cup shuffle', fr: 'bonneteau' },
+    authors: ['@follow.the.ball', '@three.cups.one.ball', '@shell.game.pro'],
+    tags: ['#cupshuffle #shellgame #followtheball', '#eyetest #guess', '#fyp #foryou'],
+    captions: {
+      en: ['which cup? comment before the reveal', 'i lost it at swap 4', 'only 1% follow the ball', 'the bot is never wrong… right?'],
+      fr: ['quel gobelet ? commente avant la révélation', 'je l’ai perdue au 4e échange', 'seuls 1 % suivent la balle', 'le bot ne se trompe jamais… si ?'],
+    },
+    sounds: {
+      en: ['cups sliding on felt', 'original sound - follow.the.ball', 'suspense drumroll'],
+      fr: ['gobelets qui glissent sur le tapis', 'son original - follow.the.ball', 'roulement de tambour'],
+    },
+  },
+  bottleflip: {
+    name: { en: 'bottle flip', fr: 'bottle flip' },
+    authors: ['@flip.and.stick', '@half.full.bottle', '@landed.it'],
+    tags: ['#bottleflip #trickshot #satisfying', '#landed #challenge', '#fyp #foryou'],
+    captions: {
+      en: ['it’s all in the wrist', 'wait for the cap landing', 'count the landings', 'flip it like it’s 2016'],
+      fr: ['tout est dans le poignet', 'attends l’atterrissage sur le bouchon', 'compte les réussites', 'flippe comme en 2016'],
+    },
+    sounds: {
+      en: ['bottle thud (original sound)', 'original sound - flip.and.stick', 'classroom cheers'],
+      fr: ['bruit sourd de bouteille (son original)', 'son original - flip.and.stick', 'cris de la classe'],
+    },
+  },
 } satisfies Record<string, Entry>

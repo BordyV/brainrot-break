@@ -18,4 +18,5 @@ export const MACHINES: Locale['videos'] = {
   robotarm: { name: 'Roboterarm', captions: ['greifen, schwenken, stapeln', 'nie müde, nie zu spät', 'der Stapel ist perfekt', 'Automatisierung macht brrr'], sounds: ['Servosurren (Originalton)', 'Originalton - robot.arm', 'Roboter-Beat'] },
   pinart: { name: 'Nagelbild', captions: ['Hand, Herz, Gesicht', 'das Schreibtischspielzeug, das jeder hatte', 'durchdrücken, zurückziehen', 'seltsam befriedigend'], sounds: ['gleitende Stifte (ASMR)', 'Originalton - pin.press', 'ruhiges Lo-Fi'] },
   warehouse: { name: 'Lagerroboter', captions: ['die Regale kommen zu dir', 'deine Bestellung, von Robotern gepickt', 'sie stoßen nie zusammen (fast)', 'Logistik ist faszinierend'], sounds: ['Roboter-Pieptöne (Originalton)', 'Originalton - warehouse.bots', 'Minimal Techno'] },
+  metalcast: { name: 'Metallguss', captions: ['von weißglühend zu Silber in Sekunden', 'warte auf den goldenen', 'der Barrenstapel wächst', 'das Gießen ist das Beste'], sounds: ['Zischen von flüssigem Metall', 'Originalton - molten.pour', 'epische Schmiedemusik'] },
 }

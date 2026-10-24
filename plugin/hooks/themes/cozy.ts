@@ -1,6 +1,6 @@
 import { add, disc, dot, hsv, mix, rect, scale, sky, text } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, ellipse, hash, irand, line, lit, litSprite, pick, ring, shuffle, slab } from '../kit'
+import { clamp, ellipse, hash, irand, line, lit, litSprite, pick, ring, shuffle, slab, tint } from '../kit'
 
 // Cozy & lo-fi: slow, steady motion to rest the eyes while Claude thinks.
 
@@ -1363,6 +1363,123 @@ const vitre: Maker = (W, H, rng) => {
   }
 }
 
+// --- laundromat at night ------------------------------------------------------------
+
+const laundromat: Maker = (W, H, rng) => {
+  // a laundromat at night: dryers over washers, laundry tumbling behind the portholes, a neon glow
+  const top = Math.round(H * 0.16)
+  const rowH = Math.round((H * 0.9 - top) / 2)
+  const colW = Math.floor(W / 2)
+  const r = Math.max(3, Math.min(colW * 0.3, (rowH - 12.5) / 2))
+  type Piece = { a: number; x: number; y: number; vy: number; fall: boolean; c: number }
+  type Machine = { x: number; y: number; wash: boolean; w: number; dir: number; time: number; pieces: Piece[]; spin: number }
+  const machines: Machine[] = []
+  for (let row = 0; row < 2; row++)
+    for (let col = 0; col < 2; col++) {
+      const x = col * colW + colW / 2
+      // the porthole sits under the control panel
+      const y = top + row * rowH + 9 + r
+      const hue = rng()
+      machines.push({
+        x,
+        y,
+        wash: row === 1,
+        w: 0.12 + rng() * 0.05,
+        dir: 1,
+        time: 20 + irand(rng, 40),
+        spin: 0,
+        pieces: Array.from({ length: 8 }, (_, k) => ({ a: (k / 8) * Math.PI * 2, x: 0, y: 0, vy: 0, fall: false, c: hsv(hue + k * 0.13, 0.55, 0.85) })),
+      })
+    }
+  let t = 0
+
+  return {
+    step() {
+      t++
+      for (const m of machines) {
+        if (t % 15 === 0) m.time--
+        if (m.time <= 0) {
+          m.time = 30 + irand(rng, 30)
+          m.spin = 45
+        }
+        if (m.wash && t % 60 === 0) m.dir = -m.dir
+        if (m.spin > 0) m.spin--
+        const w = m.spin > 0 ? 0.6 : m.w * m.dir
+        const R = r - 1.2
+        for (const p of m.pieces) {
+          if (!p.fall) {
+            // carried round by the drum, then dropped from near the top
+            p.a += w
+            p.x = Math.cos(p.a) * R
+            p.y = Math.sin(p.a) * R
+            if (m.spin === 0 && Math.sin(p.a) < -0.75 && rng() < 0.2) {
+              p.fall = true
+              p.vy = 0
+            }
+          } else {
+            p.vy += 0.12
+            p.y += p.vy
+            if (p.x * p.x + p.y * p.y >= R * R && p.y > 0) {
+              p.fall = false
+              p.a = Math.atan2(p.y, p.x)
+            }
+          }
+        }
+      }
+    },
+    draw(px) {
+      // the wall with its neon tube, the machines, a tiled floor that catches the light
+      sky(px, W, H, 0x1a1830, 0x2a2440)
+      for (let x = 2; x < W - 2; x++) {
+        const y = Math.round(top * 0.5 + Math.sin(x * 0.5) * 1.5)
+        dot(px, W, H, x, y, 0xff6ad0)
+        tint(px, W, H, x, y - 1, 0xff6ad0, 0.35)
+        tint(px, W, H, x, y + 1, 0xff6ad0, 0.35)
+      }
+      const floor = Math.round(top + rowH * 2)
+      for (let y = floor; y < H; y++) for (let x = 0; x < W; x++) px[y * W + x] = (Math.floor(x / 4) + Math.floor((y - floor) / 3)) % 2 ? 0x3a3a52 : 0x4a4a64
+      for (const m of machines) {
+        const x0 = Math.round(m.x - colW / 2 + 1)
+        const y0 = Math.round(m.y - 9 - r + 1)
+        slab(px, W, H, x0, y0, colW - 2, rowH - 2, m.wash ? 0xf4f4fa : 0xe0e4ee, 0x5a5a6a)
+        // the panel: a dial and the red countdown
+        rect(px, W, H, x0 + 1, y0 + 1, colW - 4, 6, 0x3a3a48)
+        lit(px, W, H, x0 + 3, y0 + 4, 1.2, 1.2, 0xc0c0c8)
+        text(px, W, H, x0 + colW - 11, y0 + 2, String(Math.min(99, m.time)).padStart(2, '0'), 0xff4a3a)
+        // the porthole: steel ring, the drum's dark inside, water in the washers
+        const R = r
+        for (let dy = -Math.ceil(R + 1); dy <= R + 1; dy++)
+          for (let dx = -Math.ceil(R + 1); dx <= R + 1; dx++) {
+            const d = Math.hypot(dx, dy)
+            if (d > R + 1) continue
+            let c: number
+            if (d > R) c = dx + dy < 0 ? 0xf0f0f8 : 0x7a7a8a
+            else if (m.wash && dy > R * 0.2 + Math.sin(dx * 0.8 + t * 0.3) * 0.6) c = 0x3a6ab0
+            else c = 0x1a1a28
+            dot(px, W, H, m.x + dx, m.y + dy, c)
+          }
+        // the laundry: blurred into a ring on the spin, tumbling otherwise
+        for (const p of m.pieces) {
+          if (m.spin > 0) {
+            for (let k = 0; k < 3; k++) {
+              const a = p.a - k * 0.3
+              dot(px, W, H, m.x + Math.cos(a) * (R - 1.2), m.y + Math.sin(a) * (R - 1.2), mix(p.c, 0x1a1a28, k * 0.3))
+            }
+            continue
+          }
+          rect(px, W, H, m.x + p.x - 1, m.y + p.y - 0.5, 2, 2, p.c)
+          dot(px, W, H, m.x + p.x - 1, m.y + p.y - 0.5, mix(p.c, 0xffffff, 0.4))
+        }
+        // glass: a sheen on the upper left, foam on the water line
+        dot(px, W, H, m.x - R * 0.5, m.y - R * 0.6, 0xffffff)
+        dot(px, W, H, m.x - R * 0.6, m.y - R * 0.4, 0xc8d8f0)
+      }
+      // the neon's pink reflected on the floor tiles
+      for (let x = 0; x < W; x++) tint(px, W, H, x, floor, 0xff6ad0, 0.3)
+    },
+  }
+}
+
 export const COZY = {
   lava,
   feux,
@@ -1386,4 +1503,5 @@ export const COZY = {
   ferris,
   sailing,
   lighthouse,
+  laundromat,
 }

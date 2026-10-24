@@ -1,6 +1,6 @@
 import { disc, dot, hsv, mix, rect, scale, sky, sprite, text } from '../draw'
 import type { Maker } from '../draw'
-import { clamp, ellipse, hash, line, lit, pick, shuffle, slab, tint, tones } from '../kit'
+import { clamp, ellipse, hash, irand, line, lit, pick, shuffle, slab, tint, tones } from '../kit'
 
 // Crafts & makers: watching something get built, piece by piece.
 
@@ -947,6 +947,140 @@ const flipbook: Maker = (W, H) => {
   }
 }
 
+// --- rug tufting --------------------------------------------------------------------
+
+const tufting: Maker = (W, H, rng) => {
+  // a tufting gun fills a pattern colour by colour, then the rug is flipped and sheared to show it
+  const x0 = 3
+  const y0 = Math.round(H * 0.14)
+  const cw = W - 6
+  const ch = Math.round(H * 0.74)
+  const PATTERNS: ((u: number, v: number) => number)[] = [
+    // a smiley
+    (u, v) => {
+      const d = Math.hypot(u - 0.5, (v - 0.5) * 1.4)
+      if (d > 0.42) return 0
+      if (d > 0.36) return 2
+      if (Math.hypot(u - 0.36, (v - 0.4) * 1.4) < 0.06 || Math.hypot(u - 0.64, (v - 0.4) * 1.4) < 0.06) return 2
+      if (d > 0.18 && d < 0.25 && v > 0.52) return 2
+      return 1
+    },
+    // a mushroom
+    (u, v) => {
+      if (v < 0.5 && Math.hypot(u - 0.5, (v - 0.48) * 1.2) < 0.42) return Math.hypot(u - 0.35, v - 0.3) < 0.08 || Math.hypot(u - 0.66, v - 0.36) < 0.07 ? 3 : 1
+      if (v >= 0.5 && v < 0.82 && Math.abs(u - 0.5) < 0.14) return 3
+      return 0
+    },
+    // a checkerboard
+    (u, v) => ((Math.floor(u * 4) + Math.floor(v * 6)) % 2 ? 1 : 2),
+    // a heart
+    (u, v) => {
+      const x = (u - 0.5) * 2.4
+      const y = (0.45 - v) * 2.8
+      return (x * x + y * y - 1) ** 3 - x * x * y * y * y < 0 ? 1 : 0
+    },
+  ]
+  let pal: number[] = []
+  let design: Uint8Array = new Uint8Array(cw * ch)
+  let done = new Uint8Array(cw * ch)
+  let order: number[] = []
+  let k = 0
+  let phase: 'tuft' | 'flip' | 'shear' | 'show' = 'tuft'
+  let t = 0
+  let shear = 0
+  const reset = () => {
+    const f = PATTERNS[irand(rng, PATTERNS.length)] as (u: number, v: number) => number
+    const h = rng()
+    pal = [hsv(h + 0.5, 0.15, 0.92), hsv(h, 0.7, 0.95), hsv(h + 0.08, 0.6, 0.35), hsv(h + 0.33, 0.1, 0.98)]
+    design = new Uint8Array(cw * ch)
+    for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) design[y * cw + x] = f((x + 0.5) / cw, (y + 0.5) / ch)
+    done = new Uint8Array(cw * ch)
+    // colour by colour, each in rows that snake back and forth
+    order = []
+    for (const c of [1, 2, 3, 0])
+      for (let y = 0; y < ch; y++)
+        for (let i = 0; i < cw; i++) {
+          const x = y % 2 ? cw - 1 - i : i
+          if (design[y * cw + x] === c) order.push(y * cw + x)
+        }
+    k = 0
+    phase = 'tuft'
+    t = 0
+    shear = 0
+  }
+  reset()
+
+  return {
+    step() {
+      t++
+      if (phase === 'tuft') {
+        for (let n = 0; n < 5 && k < order.length; n++) done[order[k++] as number] = 1
+        if (k >= order.length) {
+          phase = 'flip'
+          t = 0
+        }
+      } else if (phase === 'flip' && t > 30) {
+        phase = 'shear'
+        t = 0
+      } else if (phase === 'shear') {
+        shear += 0.6
+        if (shear > ch + 4) {
+          phase = 'show'
+          t = 0
+        }
+      } else if (phase === 'show' && t > 50) reset()
+    },
+    draw(px) {
+      // a workshop wall, the wooden frame, the stretched cloth with the pattern drawn on it
+      sky(px, W, H, 0x3a3a48, 0x24242e)
+      slab(px, W, H, x0 - 3, y0 - 3, cw + 6, ch + 6, 0xc08a52, 0x4a2a12)
+      // the flip: the rug narrows to a line and widens again, mirrored
+      const squeeze = phase === 'flip' ? Math.abs(Math.cos((t / 30) * Math.PI)) : 1
+      const front = phase !== 'tuft' && !(phase === 'flip' && t < 15)
+      for (let y = 0; y < ch; y++)
+        for (let x = 0; x < cw; x++) {
+          const sx = (x - cw / 2) / Math.max(0.05, squeeze) + cw / 2
+          const X = Math.floor(sx)
+          if (X < 0 || X >= cw) {
+            px[(y0 + y) * W + x0 + x] = 0x2a2a34
+            continue
+          }
+          const i = y * cw + (front ? cw - 1 - X : X)
+          const c = pal[design[i] as number] as number
+          let col: number
+          if (!done[i]) {
+            // bare cloth, the marker outline where colours meet
+            const edge = (X > 0 && design[i] !== design[i - (front ? -1 : 1)]) || (y > 0 && design[i] !== design[i - cw])
+            col = edge ? 0x3a3a8a : 0xe8e4d8
+          } else if (!front) col = mix(c, 0x000000, y % 2 ? 0.12 : 0.28)
+          else {
+            // the face: fluffy and uneven until the shears pass, crisp after
+            const sheared = phase === 'show' || (phase === 'shear' && y < shear)
+            col = sheared ? (y % 2 ? c : mix(c, 0xffffff, 0.12)) : mix(c, 0xffffff, hash(x, y, 7) < 0.3 ? 0.25 : 0.05)
+          }
+          px[(y0 + y) * W + x0 + x] = col
+        }
+      // the gun on its yarn while tufting; the shears on their pass
+      if (phase === 'tuft' && k < order.length) {
+        const i = order[k] as number
+        const gx = x0 + (i % cw)
+        const gy = y0 + Math.floor(i / cw)
+        const yarn = pal[design[i] as number] as number
+        line(px, W, H, gx, gy - 4, W - 2, -1, yarn)
+        slab(px, W, H, gx - 2, gy - 5, 5, 5, 0xd8d8e0, 0x3a3a48)
+        rect(px, W, H, gx - 1, gy - 4, 3, 1, 0xf0c030)
+        dot(px, W, H, gx, gy, 0x202028)
+      }
+      if (phase === 'shear') {
+        const sy = y0 + Math.min(ch - 1, Math.round(shear))
+        slab(px, W, H, x0 - 2, sy - 2, 6, 4, 0x5a6a7a, 0x1a2028)
+        rect(px, W, H, x0 + 4, sy - 1, cw - 4, 1, 0xf0f0f0)
+        for (let x = x0; x < x0 + cw; x += 3) dot(px, W, H, x + (t % 3), sy + 1, 0xffffff)
+      }
+    },
+  }
+}
+
 export const CRAFTS = {
   brickbuild,
   pixeldraw,
@@ -961,5 +1095,6 @@ export const CRAFTS = {
   cardtower,
   jenga,
   flipbook,
+  tufting,
 }
 

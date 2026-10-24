@@ -16,4 +16,6 @@ export const FOOD: Locale['videos'] = {
   cottoncandy: { name: 'Zuckerwatte', captions: ['Zucker wird zur Wolke', 'Jahrmarkterinnerungen', 'rosa oder blau?', 'sie wird immer größer'], sounds: ['Maschinensurren (Originalton)', 'Originalton - cotton.cloud', 'Jahrmarktsorgel'] },
   icecream: { name: 'Eisturm', captions: ['noch eine Kugel...', 'die Schieflage ist echt', 'wie viele, bevor er fällt?', 'Sommer in einem Bild'], sounds: ['Eiswagen (Originalton)', 'Originalton - scoop.tower', 'Sommer-Pop'] },
   watermelon: { name: 'Gummis um die Wassermelone', captions: ['wie viele Gummis, bis sie platzt?', 'kommentier deinen Tipp', 'sie zittert...', 'sie platzt!!!'], sounds: ['Spannung (Originalton)', 'Originalton - band.pop', 'Zeitlupen-Bumm'] },
+  mochi: { name: 'Mochi stampfen', captions: ['seine Hand ist zwischen jedem Schlag drin', 'es wird immer schneller', 'der Rhythmus ist hypnotisch', 'Vertrauensstufe: Mochi-Meister'], sounds: ['bumm. bumm. bumm. (Originalton)', 'Originalton - mochi.pounding', 'Taiko-Trommeln'] },
+  tanghulu: { name: 'Tanghulu', captions: ['warte auf das Knacken', 'der Zucker wird zu Glas', 'Erdbeere oder Traube?', 'dieses Geräusch lebt in meinem Kopf'], sounds: ['Zuckerknacken ASMR', 'Originalton - glass.candy.fruit', 'Nachtmarkt-Atmosphäre'] },
 }

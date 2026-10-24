@@ -42,4 +42,17 @@ export const TOYS = {
       fr: ['bulles bloup bloup', 'son original - press.the.button', 'générique de dessin animé des années 90'],
     },
   },
+  battletops: {
+    name: { en: 'battling tops', fr: 'toupies de combat' },
+    authors: ['@let.it.rip.arena', '@spin.till.the.end', '@last.top.spinning'],
+    tags: ['#spinningtop #battle #toys', '#arena #clash', '#fyp #foryou'],
+    captions: {
+      en: ['red or blue? pick now', 'the wobble means it’s over', 'that clash was loud', 'the last one spinning wins'],
+      fr: ['rouge ou bleue ? choisis maintenant', 'quand elle vacille, c’est fini', 'ce choc était violent', 'la dernière qui tourne gagne'],
+    },
+    sounds: {
+      en: ['metal on metal clash', 'original sound - let.it.rip.arena', 'anime battle theme'],
+      fr: ['choc de métal contre métal', 'son original - let.it.rip.arena', 'thème de combat d’anime'],
+    },
+  },
 } satisfies Record<string, Entry>

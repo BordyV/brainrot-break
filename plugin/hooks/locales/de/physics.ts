@@ -23,4 +23,5 @@ export const PHYSICS: Locale['videos'] = {
   skytrack: { name: 'Himmelsbahn', captions: ['eine falsche Spur und vorbei', 'wie weit rollt er?', 'die Lücken werden gemeiner', 'Handyspiel-Nostalgie'], sounds: ['EDM-Drop (Originalton)', 'Originalton - rolling.sky', 'Synthwave-Lauf'] },
   willit: { name: 'schafft er es', captions: ['schafft er es? kommentier vor dem Ende', 'Standbild... jetzt raten', 'nur Becher', 'ich hab nein gesagt und lag falsch'], sounds: ['Spannung (Originalton)', 'Originalton - will.it.go', 'Plattenkratzer'] },
   rainbow: { name: 'Regenbogenball', captions: ['bei jedem Abprall schneller', 'warte, bis er durchdreht', 'die Spur am Ende...', 'Speedrun eines Quadrats'], sounds: ['wird schneller (Originalton)', 'Originalton - rainbow.trail', 'Nightcore-Remix'] },
+  linesled: { name: 'Schlitten auf gezeichneter Linie', captions: ['der Stift ist immer einen Schritt voraus', 'der Sprung war zu groß…', 'wie weit kommt er diesmal?', 'die Physik war anderer Meinung'], sounds: ['Bleistift kratzt auf Papier', 'Originalton - draw.the.track', 'klassische Musik, beschleunigt'] },
 }

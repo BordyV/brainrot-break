@@ -14,4 +14,5 @@ export const CRAFTS: Locale['videos'] = {
   cardtower: { name: 'Kartenhaus', captions: ['nicht atmen...', 'die letzte Karte...', 'und dann der Wind', 'Geduldslevel 100'], sounds: ['Kartenmischen (ASMR)', 'Originalton - card.tower', 'Spannungsmusik'] },
   jenga: { name: 'Jenga-Einsturz', captions: ['welcher Block wird der letzte sein?', 'er wackelt...', 'BAUM FÄLLT', 'Chaos am Spieleabend'], sounds: ['Holzklötze (ASMR)', 'Originalton - jenga.pull', 'Spannungstrommeln'] },
   flipbook: { name: 'Daumenkino', captions: ['ein Bild pro Seite, dann blättern', 'der Ball kommt wieder runter…', 'alle Ränder meines Matheheftes', '48 Seiten für 3 Sekunden Ruhm'], sounds: ['Brrrrrt der Seiten', 'Originalton - margin.doodles', 'Slapstick-Cartoonmusik'] },
+  tufting: { name: 'Teppich-Tufting', captions: ['warte, bis er umgedreht wird', 'von hinten sieht es nach nichts aus', 'das Scheren ist das Beste', 'was soll ich als Nächstes tuften?'], sounds: ['Rattern der Tufting-Pistole', 'Originalton - tufting.gun.go', 'Lo-Fi-Werkstattsession'] },
 }
