@@ -26,6 +26,9 @@ import { FLUIDS } from './fluids'
 import { IDLE } from './idle'
 import { OCEAN } from './ocean'
 import { INSECTS } from './insects'
+import { SKY } from './sky'
+import { FARM } from './farm'
+import { TOYS } from './toys'
 
 // The texts of the videos in hooks/themes/, one file per theme.
 
@@ -58,4 +61,7 @@ export const THEME_TEXTS = {
   ...IDLE,
   ...OCEAN,
   ...INSECTS,
+  ...SKY,
+  ...FARM,
+  ...TOYS,
 }

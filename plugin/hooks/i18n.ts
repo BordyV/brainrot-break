@@ -89,6 +89,9 @@ const SOURCE_COMMENTS: { handles: string[]; generic: Record<SourceLang, string[]
     idle: { en: ['number go up', 'I’d play this for 400 hours', 'the economy is booming'], fr: ['le nombre monte', 'j’y jouerais 400 heures', 'l’économie est en plein boom'] },
     ocean: { en: ['the ocean is scary and I love it', 'I can hear the waves', 'we know more about space than this'], fr: ['l’océan fait peur et j’adore', 'j’entends les vagues', 'on connaît mieux l’espace que ça'] },
     insects: { en: ['tiny but mighty', 'the little legs!!', 'nature documentary at 2 a.m.'], fr: ['petit mais costaud', 'les petites pattes !!', 'documentaire animalier à 2 h du mat'] },
+    sky: { en: ['the sky is the limit', 'I want to fly', 'up up and away'], fr: ['le ciel est la limite', 'je veux voler', 'et hop, dans les airs'] },
+    farm: { en: ['farm life is the best life', 'I can smell the hay', 'cottagecore unlocked'], fr: ['la vie à la ferme, la meilleure', 'je sens le foin', 'cottagecore débloqué'] },
+    toys: { en: ['I had this as a kid!', 'where can I buy one', 'my desk needs this'], fr: ['j’avais ça petit !', 'où est-ce qu’on achète ça', 'il faut ça sur mon bureau'] },
   },
 }
 
@@ -123,6 +126,9 @@ const SOURCE_THEME_NAMES: Record<SourceLang, Record<Theme, string>> = {
     idle: 'idle & strategy',
     ocean: 'ocean',
     insects: 'insects',
+    sky: 'sky & flight',
+    farm: 'farm & garden',
+    toys: 'toys',
   },
   fr: {
     satisfying: 'satisfaisant',
@@ -153,6 +159,9 @@ const SOURCE_THEME_NAMES: Record<SourceLang, Record<Theme, string>> = {
     idle: 'idle et stratégie',
     ocean: 'océan',
     insects: 'insectes',
+    sky: 'ciel et vol',
+    farm: 'ferme et jardin',
+    toys: 'jouets',
   },
 }
 

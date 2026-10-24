@@ -398,6 +398,15 @@ export type Kind =
   | 'mosquito'
   | 'flywindow'
   | 'antmill'
+  | 'paperplane'
+  | 'droneshow'
+  | 'seagull'
+  | 'combine'
+  | 'sheepdog'
+  | 'flytrap'
+  | 'slinky'
+  | 'drinkingbird'
+  | 'ringtoss'
 
 export type Video = {
   id: string

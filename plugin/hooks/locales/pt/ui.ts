@@ -97,6 +97,9 @@ export const themes: Locale['themes'] = {
   idle: 'idle e estratégia',
   ocean: 'oceano',
   insects: 'insetos',
+  sky: 'céu e voo',
+  farm: 'fazenda e jardim',
+  toys: 'brinquedos',
 }
 
 export const comments: Locale['comments'] = {
@@ -147,5 +150,8 @@ export const comments: Locale['comments'] = {
     idle: ['número sobe', 'eu jogaria isso por 400 horas', 'a economia tá bombando'],
     ocean: ['o oceano dá medo e eu amo', 'dá pra ouvir as ondas', 'a gente conhece mais o espaço que isso'],
     insects: ['pequeno mas poderoso', 'as perninhas!!', 'documentário de natureza às 2 da manhã'],
+    sky: ['o céu é o limite', 'eu quero voar', 'pra cima e avante'],
+    farm: ['vida na fazenda é a melhor', 'dá pra sentir o cheiro do feno', 'cottagecore desbloqueado'],
+    toys: ['eu tinha isso quando criança!', 'onde compra', 'minha mesa precisa disso'],
   },
 }

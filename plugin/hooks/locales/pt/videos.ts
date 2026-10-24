@@ -6,6 +6,7 @@ import { COZY } from './cozy'
 import { CRAFTS } from './crafts'
 import { DESTRUCTION } from './destruction'
 import { DEV } from './dev'
+import { FARM } from './farm'
 import { FLUIDS } from './fluids'
 import { FOOD } from './food'
 import { GENERATIVE } from './generative'
@@ -24,8 +25,10 @@ import { SATISFYING } from './satisfying'
 import { SCIENCE } from './science'
 import { SEASONS } from './seasons'
 import { SIMULATIONS } from './simulations'
+import { SKY } from './sky'
 import { SPACE } from './space'
 import { SPORTS } from './sports'
+import { TOYS } from './toys'
 import { VERSUS } from './versus'
 
 // Every video's texts in this language, gathered from one file per theme.
@@ -38,6 +41,7 @@ export const VIDEOS: Locale['videos'] = {
   ...CRAFTS,
   ...DESTRUCTION,
   ...DEV,
+  ...FARM,
   ...FLUIDS,
   ...FOOD,
   ...GENERATIVE,
@@ -56,7 +60,9 @@ export const VIDEOS: Locale['videos'] = {
   ...SCIENCE,
   ...SEASONS,
   ...SIMULATIONS,
+  ...SKY,
   ...SPACE,
   ...SPORTS,
+  ...TOYS,
   ...VERSUS,
 }
