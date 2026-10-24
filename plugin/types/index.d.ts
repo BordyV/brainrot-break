@@ -354,6 +354,15 @@ export type Kind =
   | 'feedfeed'
   | 'ballerina'
   | 'elefantino'
+  | 'sudoku'
+  | 'slide15'
+  | 'flow'
+  | 'pipeturn'
+  | 'jigsaw'
+  | 'icepuzzle'
+  | 'mirrors'
+  | 'arrows'
+  | 'triplematch'
 
 export type Video = {
   id: string
