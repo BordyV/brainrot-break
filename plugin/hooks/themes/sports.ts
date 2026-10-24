@@ -168,13 +168,22 @@ const bowling: Maker = (W, H, rng) => {
   let t = 0
   let hook = 0
   let downs = 0
+  // the lane and its two gutters, one each side
+  const lw = W * 0.7
+  const left = cx - lw / 2
+  const right = cx + lw / 2
+  let gutter = 0
 
   function setup() {
     pins = []
     const top = H * 0.18
     for (let r = 0; r < 4; r++) for (let k = 0; k <= r; k++) pins.push({ x: cx + (k - r / 2) * 3, y: top + (3 - r) * 3, vx: 0, vy: 0, down: false })
     ball = { x: cx + W * 0.25, y: H - 6, vx: -0.05, vy: -0.75 }
-    hook = 0.006 + rng() * 0.006
+    // most balls hook into the pocket; now and then one hooks too hard, or not at all, and finds a gutter
+    const r = rng()
+    hook = r < 0.08 ? 0.03 : r < 0.14 ? 0 : 0.006 + rng() * 0.006
+    if (r >= 0.08 && r < 0.14) ball.vx = 0.12
+    gutter = 0
     t = 0
   }
   setup()
@@ -187,9 +196,15 @@ const bowling: Maker = (W, H, rng) => {
         return
       }
       if (t > 20) {
-        ball.vx -= hook
+        if (!gutter) ball.vx -= hook
         ball.x += ball.vx
         ball.y += ball.vy
+        // off the edge of the lane: it drops into the gutter and runs down it, past every pin
+        if (!gutter && (ball.x < left || ball.x > right)) {
+          gutter = ball.x < left ? -1 : 1
+          ball.vx = 0
+          ball.x = gutter < 0 ? left - 1.5 : right + 1.5
+        }
       }
       for (const p of pins) {
         const d = Math.hypot(p.x - ball.x, p.y - ball.y)
@@ -215,11 +230,13 @@ const bowling: Maker = (W, H, rng) => {
     },
     draw(px) {
       px.fill(0x1a1420)
-      const lw = W * 0.7
       for (let y = 0; y < H; y++) {
-        rect(px, W, H, cx - lw / 2, y, lw, 1, (Math.floor(y / 2) % 2) ? 0xe0b070 : 0xd8a868)
-        dot(px, W, H, cx - lw / 2 - 1, y, 0x2a2a30)
-        dot(px, W, H, cx + lw / 2, y, 0x2a2a30)
+        rect(px, W, H, left, y, lw, 1, (Math.floor(y / 2) % 2) ? 0xe0b070 : 0xd8a868)
+        // the gutters: rounded channels, lit on their far wall
+        rect(px, W, H, left - 3, y, 3, 1, 0x3a3a46)
+        dot(px, W, H, left - 3, y, 0x5a5a68)
+        rect(px, W, H, right, y, 3, 1, 0x3a3a46)
+        dot(px, W, H, right + 2, y, 0x5a5a68)
       }
       for (let k = -2; k <= 2; k++) dot(px, W, H, cx + k * 3, H * 0.6, 0x8a5a2a)
       for (const p of pins) {
@@ -232,7 +249,8 @@ const bowling: Maker = (W, H, rng) => {
           dot(px, W, H, p.x, p.y - 1, 0xe03a3a)
         }
       }
-      lit(px, W, H, ball.x, ball.y, 1.8, 1.8, 0x3a3ac8)
+      // in the gutter it sits lower, half hidden in the channel
+      lit(px, W, H, ball.x, ball.y, gutter ? 1.4 : 1.8, gutter ? 1.4 : 1.8, gutter ? 0x2a2a9a : 0x3a3ac8)
       dot(px, W, H, ball.x - 0.5, ball.y - 0.5, 0x8a8aff)
       if (downs === 10 && t > 90 && t % 10 < 6) text(px, W, H, W / 2 - 1, H * 0.45, 'x', 0xffe040)
       text(px, W, H, 1, 1, String(downs), 0xffffff)
