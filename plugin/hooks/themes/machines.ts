@@ -670,7 +670,9 @@ const printer3d: Maker = (W, H, rng) => {
       if (hold === 0) {
         const hw = widthAt(layer)
         const y = bed - 1 - layer
-        rect(px, W, H, cx - hw, y, nx + hw + 1, 1, mix(col, 0xffffff, 0.3))
+        // the fresh filament runs from the edge the nozzle set off from, to the nozzle
+        if (dir > 0) rect(px, W, H, cx - hw, y, nx + hw + 1, 1, mix(col, 0xffffff, 0.3))
+        else rect(px, W, H, cx + nx, y, hw - nx + 1, 1, mix(col, 0xffffff, 0.3))
         rect(px, W, H, 2, y - 6, W - 4, 1, 0x8a8e98)
         slab(px, W, H, cx + nx - 2, y - 6, 5, 4, 0xd0d0d8)
         rect(px, W, H, cx + nx - 0.5, y - 2, 1, 1, 0xff8a20)

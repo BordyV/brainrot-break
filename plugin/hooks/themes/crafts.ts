@@ -699,12 +699,13 @@ const cardtower: Maker = (W, H, rng) => {
     for (let l = 0; l < levels; l++) {
       const n = levels - l
       const y = floor - l * ch
+      // as by hand: every leaning pair of the storey first, then the flat cards that floor the next
+      const at = (i: number) => W / 2 + (i - (n - 1) / 2) * 6
       for (let i = 0; i < n; i++) {
-        const cx = W / 2 + (i - (n - 1) / 2) * 6
-        plan.push({ x0: cx - 3, y0: y, x1: cx - 1, y1: y - ch })
-        plan.push({ x0: cx + 1, y0: y - ch, x1: cx + 3, y1: y })
-        if (i < n - 1 && l < levels - 1) plan.push({ x0: cx, y0: y - ch, x1: cx + 6, y1: y - ch })
+        plan.push({ x0: at(i) - 3, y0: y, x1: at(i) - 1, y1: y - ch })
+        plan.push({ x0: at(i) + 1, y0: y - ch, x1: at(i) + 3, y1: y })
       }
+      if (l < levels - 1) for (let i = 0; i < n - 1; i++) plan.push({ x0: at(i), y0: y - ch, x1: at(i) + 6, y1: y - ch })
     }
     cards = []
     placed = 0
