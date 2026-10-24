@@ -503,7 +503,12 @@ test('ticking a theme brings every video that has it, from whichever home', asyn
   const ui = await $.ui.mount({ plugin: 'brainrot-break', surface: 'terminal', component: 'Pane', requestId: 'brainrot-break', props: PANE })
   const kind = async () => kindOf((await ui.find({ type: 'Text', text: /^@/ }))?.text) ?? ''
   const rows = async () => ((await ui.find({ key: 'menu' }))?.props.props as { rows: MenuRow[] }).rows
-  const choose = async (act: string) => ui.pointer({ type: 'down', x: 1, y: (await rows()).findIndex(r => r.act === act), button: 'left', in: 'menu' })
+  // the menu shows the rows that fit: scroll it to the row before clicking it, down then back up
+  const choose = async (act: string) => {
+    for (let i = 0; i < 20 && !(await rows()).some(r => r.act === act); i++) await ui.press({ key: 'next' })
+    for (let i = 0; i < 20 && !(await rows()).some(r => r.act === act); i++) await ui.press({ key: 'prev' })
+    await ui.pointer({ type: 'down', x: 1, y: (await rows()).findIndex(r => r.act === act), button: 'left', in: 'menu' })
+  }
 
   // the open menu covers the caption: read the author first
   const kept = THEME_OF[await kind()] as string
