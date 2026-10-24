@@ -2,6 +2,13 @@
 
 The project follows [Semantic Versioning](https://semver.org/) and [Conventional Commits](https://www.conventionalcommits.org/).
 
+## 1.5.0
+
+- 96 new videos, from 358 to 454, and nine new themes, from 24 to 33: water and sand, idle and strategy games, the ocean, insects, the sky, the farm, toys, fantasy, and party and fairground games. The puzzles, simulations, destruction and robots themes get new videos too, among them a cup shuffle, a cat chasing a laser pointer, battling tops, mochi pounding, a screw puzzle, rug tufting, a salmon run, a rage climb, a scramble crossing, metal casting, a shooting gallery and a recycling plant.
+- The theme menu lists the themes in alphabetical order.
+- Videos are more believable: the water in the tilting glass stays level, the water Pythagoras fills the tanks underneath, the pendulums have lengths that match their swing, and the whale, the clownfish, the dog, the raccoon, the seagull and the planes go head first. Bowling balls can end up in the gutter, the dung beetle stays on screen after its ball rolls away, the basketball rims meet their backboards, and no one floats above the ground.
+- 2048: numbers of two digits now read on their tiles.
+
 ## 1.4.0
 
 - Every video is redrawn with light and shading: one light from the upper left, three or four tones per material, outlines and layered backgrounds, so objects have volume instead of flat fills. The simulations are unchanged, and the classic arcade screens and the memes keep their known looks.
