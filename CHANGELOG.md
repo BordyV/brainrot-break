@@ -2,6 +2,11 @@
 
 The project follows [Semantic Versioning](https://semver.org/) and [Conventional Commits](https://www.conventionalcommits.org/).
 
+## 1.5.2
+
+- When the window is too narrow for the pane, the feed's line by the prompt (or the feed itself on the desktop app) now shows above what other mods draw there, instead of hiding it.
+- The tests allow 30 s each, so they no longer time out on slower machines.
+
 ## 1.5.1
 
 - 2048: numbers of three and four digits now read on their tiles, wrapped onto two rows (12 over 8, 20 over 48).
