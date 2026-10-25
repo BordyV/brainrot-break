@@ -6,6 +6,8 @@
 [![Terminal and desktop app](https://img.shields.io/badge/runs%20in-terminal%20%7C%20desktop%20app-d97757)](#notes)
 [![6 languages](https://img.shields.io/badge/languages-6-blue)](#commands)
 [![License: MIT](https://img.shields.io/github/license/BordyV/brainrot-break)](LICENSE)
+[![reach](https://raw.githubusercontent.com/karanb192/awesome-claude-code-mods/main/badges/BordyV--brainrot-break--brainrot-break-reach.svg)](https://mods.aidojo.si/mods/BordyV--brainrot-break--brainrot-break/)
+[![validates](https://raw.githubusercontent.com/karanb192/awesome-claude-code-mods/main/badges/BordyV--brainrot-break--brainrot-break-validates.svg)](https://mods.aidojo.si/mods/BordyV--brainrot-break--brainrot-break/)
 
 **A feed of pixel art mini-videos to scroll while Claude thinks.**
 
