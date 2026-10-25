@@ -1,5 +1,5 @@
-import { expect, mock, test } from 'claude-code/testing'
-import type { Engine, TestBody } from 'claude-code/testing'
+import { expect, mock, test as engineTest } from 'claude-code/testing'
+import type { Engine, TestBody, TestOptions } from 'claude-code/testing'
 
 import { COMMENTS, LABELS, LANGS, MISSING, STRINGS, THEME_NAMES } from '../hooks/i18n'
 import { META } from '../hooks/register'
@@ -22,13 +22,20 @@ declare function setTimeout(fn: () => void, ms: number): unknown
 const brainrot = ($: Engine, args: string) =>
   $.command.run({ command: 'brainrot', args, origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 120 } })
 
+// Loading the mod and its hundreds of videos takes about a second here, and
+// several on a slower machine: the engine's 5 s default is too tight.
+function test(name: string, ...rest: [TestBody] | [TestOptions, TestBody]) {
+  const [options, body] = rest.length === 1 ? [{}, rest[0]] : rest
+  engineTest(name, { timeoutMs: 30000, ...options }, body)
+}
+
 const KIND_COUNT = Object.keys(META).length
 
 const kindOf = (author: string | undefined) =>
   Object.entries(META).find(([, m]) => author !== undefined && m.authors.includes(author))?.[0]
 
 // It scrolls through every video once: give it the time that takes.
-test('likes, scrolls, and shows every kind once before any repeats', { timeoutMs: 20000 }, async ($, on) => {
+test('likes, scrolls, and shows every kind once before any repeats', { timeoutMs: 60000 }, async ($, on) => {
   mock.clock(on)
   mock.store(on)
   on('ui.open', () => ({ value: { isPlaced: true as const } }))
@@ -557,4 +564,27 @@ test('on the desktop, the wheel goes back up to the previous video', async ($, o
   await wheel(-1)
   expect(await author()).toBe(first)
   await desktop.unmount()
+})
+
+test('in the band, the feed draws above what the others draw there, never instead', async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  // too narrow for the pane: it stays open undrawn, and the feed falls back to the band
+  on('ui.open', () => ({ value: { isPlaced: false as const, reason: 'too narrow' } }))
+  on('ui.close', () => ({ value: undefined }))
+  // what another plugin, or the engine, draws in the band
+  on('ui.render', { component: 'AbovePrompt' }, ($, e) => {
+    const { Text } = $.ui.resolve(e)
+    return <Text>beneath</Text>
+  })
+  await brainrot($, '')
+
+  const band = { hasSurvey: false, isWorking: true, maxRows: 30, bodyColumns: 80, scroll: { offset: 0, bodyRows: 30 }, view: {} }
+  for (const surface of ['terminal', 'desktop'] as const) {
+    const site = await $.ui.mount({ plugin: 'brainrot-break', surface, component: 'AbovePrompt', props: band })
+    expect(await site.find({ type: 'Text', text: 'beneath' })).toBeDefined()
+    if (surface === 'terminal') expect(await site.find({ type: 'Text', text: /narrow/ })).toBeDefined()
+    else expect(await site.find({ type: 'Svg' })).toBeDefined()
+    await site.unmount()
+  }
 })

@@ -1408,8 +1408,27 @@ export const register: Register = (on, options) => {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey || (await read($, modeAtom)) !== 'band') return next(e)
-    if (e.surface === 'terminal') return narrowNotice($, $.ui.resolve(e), e.props.bodyColumns)
-    if (e.surface === 'desktop') return desktopTree($, $.ui.resolve(e), e.requestId, e.props.bodyColumns, e.props.scroll.bodyRows)
+    // The band is shared: ours goes above what the others draw there, never instead.
+    if (e.surface === 'terminal') {
+      const els = $.ui.resolve(e)
+      const { Box } = els
+      return (
+        <Box flexDirection="column">
+          {narrowNotice($, els, e.props.bodyColumns)}
+          {await next(e)}
+        </Box>
+      )
+    }
+    if (e.surface === 'desktop') {
+      const els = $.ui.resolve(e)
+      const { Box } = els
+      return (
+        <Box flexDirection="column">
+          {await desktopTree($, els, e.requestId, e.props.bodyColumns, e.props.scroll.bodyRows)}
+          {await next(e)}
+        </Box>
+      )
+    }
     return next(e)
   })
 }
